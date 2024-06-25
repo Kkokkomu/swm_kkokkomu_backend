@@ -1,5 +1,7 @@
 package com.kkokkomu.short_news.controller;
 
+import com.kkokkomu.short_news.exception.CommonException;
+import com.kkokkomu.short_news.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,5 +16,10 @@ public class TestController {
     @GetMapping("")
     public String helloController(){
         return "hello, world!";
+    }
+
+    @GetMapping("/error")
+    public String errorController(){
+        throw new CommonException(ErrorCode.INVALID_PARAMETER);
     }
 }
