@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.controller;
 
+import com.kkokkomu.short_news.dto.common.ResponseDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/test")
 public class TestController {
     @GetMapping("")
-    public String helloController(){
-        return "hello, world!";
+    public ResponseDto<?> helloController(){
+        return ResponseDto.ok("hello, world!");
     }
 
     @GetMapping("/error")
