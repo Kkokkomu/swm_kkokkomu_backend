@@ -1,4 +1,4 @@
-package com.kkokkomu.short_news;
+package com.kkokkomu.short_news.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
