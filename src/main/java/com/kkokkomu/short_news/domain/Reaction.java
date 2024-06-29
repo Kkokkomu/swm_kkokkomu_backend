@@ -3,6 +3,8 @@ package com.kkokkomu.short_news.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,8 +22,8 @@ public class Reaction {
     @JoinColumn(name = "news_id", nullable = false)
     private News news;
 
-    @Column(name = "like", nullable = false)
-    private boolean like;
+    @Column(name = "great", nullable = false)
+    private boolean great;
 
     @Column(name = "hate", nullable = false)
     private boolean hate;
@@ -32,13 +34,17 @@ public class Reaction {
     @Column(name = "surprise", nullable = false)
     private boolean surprise;
 
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
     @Builder
-    public Reaction(User user, News news, boolean like, boolean hate, boolean expect, boolean surprise) {
+    public Reaction(User user, News news, boolean great, boolean hate, boolean expect, boolean surprise) {
         this.user = user;
         this.news = news;
-        this.like = like;
+        this.great = great;
         this.hate = hate;
         this.expect = expect;
         this.surprise = surprise;
+        this.createdAt = LocalDateTime.now();
     }
 }

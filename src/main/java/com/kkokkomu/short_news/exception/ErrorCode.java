@@ -24,6 +24,7 @@ public enum ErrorCode {
     PASSWORD_SAME("40013", HttpStatus.BAD_REQUEST, "기존 비밀번호와 동일합니다."),
     INVALID_LOGIN("40014", HttpStatus.BAD_REQUEST, "로그인 정보가 올바르지 않습니다."),
     INVALID_OAUTH2_PROVIDER("40015", HttpStatus.BAD_REQUEST, "유효하지 않은 OAuth2 제공자입니다."),
+    DUPLICATED_REACTION("40016", HttpStatus.BAD_REQUEST, "이미 같은 감정표현을 했습니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
@@ -45,12 +46,16 @@ public enum ErrorCode {
     NOT_FOUND_USER("40400", HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
     NOT_FOUND_END_POINT("40401", HttpStatus.NOT_FOUND, "존재하지 않는 엔드포인트입니다."),
     NOT_FOUND_RESOURCE("40402", HttpStatus.NOT_FOUND, "요청한 데이터를 찾을 수 없습니다."),
+    NOT_FOUND_NEWS("40403", HttpStatus.NOT_FOUND, "해당 뉴스가 존재하지 않습니다."),
+    NOT_FOUND_REACTION("40404", HttpStatus.NOT_FOUND, "해당 감정표현이 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),
 
     // Server, File Up/DownLoad Error
-    SERVER_ERROR("50000", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다.");
+    SERVER_ERROR("50000", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
+    SHORTFORM_PROCESSING_ERROR("50001", HttpStatus.INTERNAL_SERVER_ERROR, "동영상 업로드 중 에러가 발생했습니다."),
+    YOUTUBE_UPLOAD_FAIL_ERROR("50002", HttpStatus.INTERNAL_SERVER_ERROR, "유튜브 업로드에 실패했습니다.");
 
     private final String code;
     private final HttpStatus httpStatus;
