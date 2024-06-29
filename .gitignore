@@ -6,7 +6,8 @@ build/
 !**/src/test/**/build/
 
 #application.xx
-src/main/resources/*.yml
+src/main/resources/*
+src/main/resources/youtube/*
 
 ### STS ###
 .apt_generated
