@@ -54,8 +54,10 @@ public class NewsService {
     } // 숏폼 업로드
 
     public List<NewsWithReactionDto> readShortForm(Long userId, int page, int size) {
+        log.info("Service read short form");
+
         // 일단 size 맞춰서 뉴스 아무거나
-        Sort sort = Sort.by(Sort.Direction.DESC, "created_at");
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         List<News> news = newsRepository.findAll(PageRequest.of(page, size, sort)).getContent();
 
         //뉴스 리스트에서 뉴스 정보, 감정표현 개수 뽑아내기
