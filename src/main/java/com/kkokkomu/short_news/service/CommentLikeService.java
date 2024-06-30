@@ -47,13 +47,18 @@ public class CommentLikeService {
         return CommentLikeDto.fromEntity(commentLike);
     } // 댓글 좋아요 추가
 
-//    public String deleteCommentLike(CreateCommentLikeDto createCommentLikeDto) {
-//        log.info("service: deleteCommentLike");
-//        User user = userRepository.findByUuid(createCommentLikeDto.userId())
-//                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-//        Comment comment = commentRepository.findById(createCommentLikeDto.commentId())
-//                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
-//
-//        CommentLike commentLike = commentLikeRepository.findByCommentAndUser(comment, user)
-//    }
+    public String deleteCommentLike(CreateCommentLikeDto createCommentLikeDto) {
+        log.info("service: deleteCommentLike");
+        User user = userRepository.findByUuid(createCommentLikeDto.userId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Comment comment = commentRepository.findById(createCommentLikeDto.commentId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+
+        CommentLike commentLike = commentLikeRepository.findByCommentAndUser(comment, user)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT_LIKE));
+
+        commentLikeRepository.delete(commentLike);
+
+        return "success";
+    }
 }

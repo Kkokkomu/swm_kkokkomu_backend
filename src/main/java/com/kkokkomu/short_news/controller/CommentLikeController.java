@@ -23,5 +23,11 @@ public class CommentLikeController {
     public ResponseDto<?> addCommentLike(@RequestBody CreateCommentLikeDto createCommentLikeDto) {
         log.info("controller addCommentLike");
         return ResponseDto.ok(commentLikeService.addCommentLike(createCommentLikeDto));
-    }
+    } // 댓글 좋아요 생성
+
+    @PostMapping("/delete")
+    public ResponseDto<?> deleteCommentLike(@RequestBody CreateCommentLikeDto createCommentLikeDto) {
+        log.info("controller deleteCommentLike");
+        return ResponseDto.ok(commentLikeService.deleteCommentLike(createCommentLikeDto));
+    } // 댓글 좋아요 삭제
 }
