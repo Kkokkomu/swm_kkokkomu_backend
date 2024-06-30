@@ -25,6 +25,7 @@ public enum ErrorCode {
     INVALID_LOGIN("40014", HttpStatus.BAD_REQUEST, "로그인 정보가 올바르지 않습니다."),
     INVALID_OAUTH2_PROVIDER("40015", HttpStatus.BAD_REQUEST, "유효하지 않은 OAuth2 제공자입니다."),
     DUPLICATED_REACTION("40016", HttpStatus.BAD_REQUEST, "이미 같은 감정표현을 했습니다."),
+    DUPLICATED_COMMENT_LIKE("40016", HttpStatus.BAD_REQUEST, "댓글에 이미 좋아요를 했습니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
@@ -48,6 +49,7 @@ public enum ErrorCode {
     NOT_FOUND_RESOURCE("40402", HttpStatus.NOT_FOUND, "요청한 데이터를 찾을 수 없습니다."),
     NOT_FOUND_NEWS("40403", HttpStatus.NOT_FOUND, "해당 뉴스가 존재하지 않습니다."),
     NOT_FOUND_REACTION("40404", HttpStatus.NOT_FOUND, "해당 감정표현이 존재하지 않습니다."),
+    NOT_FOUND_COMMENT("40405", HttpStatus.NOT_FOUND, "해당 댓글이 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),

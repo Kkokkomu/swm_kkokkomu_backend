@@ -22,5 +22,5 @@ public class CommentController {
     public ResponseDto<?> addComment(@RequestBody CreateCommentDto commentDto) {
         log.info("Add comment {}", commentDto);
         return ResponseDto.ok(commentService.saveComment(commentDto));
-    }
+    } // 댓글 작성
 }
