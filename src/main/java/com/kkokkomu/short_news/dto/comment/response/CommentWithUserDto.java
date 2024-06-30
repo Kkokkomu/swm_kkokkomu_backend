@@ -3,7 +3,8 @@ package com.kkokkomu.short_news.dto.comment.response;
 import lombok.Builder;
 
 @Builder
-public record CommentWithUserAll(
+public record CommentWithUserDto(
+        Long commentId,
         String userProfileImg,
         Long userId,
         String createdAt,
