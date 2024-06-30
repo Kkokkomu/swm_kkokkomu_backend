@@ -3,7 +3,7 @@ package com.kkokkomu.short_news.service;
 import com.kkokkomu.short_news.domain.News;
 import com.kkokkomu.short_news.domain.Reaction;
 import com.kkokkomu.short_news.domain.User;
-import com.kkokkomu.short_news.dto.reaction.request.PostReactionDto;
+import com.kkokkomu.short_news.dto.reaction.request.CreateReactionDto;
 import com.kkokkomu.short_news.dto.reaction.response.ReactionDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
@@ -22,7 +22,7 @@ public class ReactionService {
     private final UserRepository userRepository;
     private final NewsRepository newsRepository;
 
-    public ReactionDto reaction(PostReactionDto postReactionDto) {
+    public ReactionDto reaction(CreateReactionDto postReactionDto) {
         User user = userRepository.findByUuid(postReactionDto.userId())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         News news = newsRepository.findById(postReactionDto.newsId())
@@ -48,7 +48,7 @@ public class ReactionService {
         return ReactionDto.fromEntity(reaction);
     } // 감정표현 생성
 
-    public String deleteReaction(PostReactionDto postReactionDto) {
+    public String deleteReaction(CreateReactionDto postReactionDto) {
         User user = userRepository.findByUuid(postReactionDto.userId())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         News news = newsRepository.findById(postReactionDto.newsId())

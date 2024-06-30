@@ -39,5 +39,6 @@ public class Comment {
         this.news = news;
         this.content = content;
         this.createdAt = LocalDateTime.now();
+        this.editedAt = LocalDateTime.now();
     }
 }
