@@ -1,9 +1,8 @@
 package com.kkokkomu.short_news.dto.reaction.request;
 
-import lombok.Builder;
 import lombok.NonNull;
 
-public record PostReactionDto(
+public record CreateReactionDto(
         @NonNull
         String userId,
         @NonNull

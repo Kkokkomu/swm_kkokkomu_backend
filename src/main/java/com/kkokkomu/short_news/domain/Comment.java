@@ -39,5 +39,11 @@ public class Comment {
         this.news = news;
         this.content = content;
         this.createdAt = LocalDateTime.now();
+        this.editedAt = LocalDateTime.now();
+    }
+
+    public void updateComment(String comment) {
+        this.content = comment;
+        this.editedAt = LocalDateTime.now();
     }
 }

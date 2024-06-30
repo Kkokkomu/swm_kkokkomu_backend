@@ -2,6 +2,8 @@ package com.kkokkomu.short_news.service;
 
 import com.kkokkomu.short_news.domain.News;
 import com.kkokkomu.short_news.domain.Reaction;
+import com.kkokkomu.short_news.dto.common.PageInfoDto;
+import com.kkokkomu.short_news.dto.common.PagingResponseDto;
 import com.kkokkomu.short_news.dto.reaction.response.ReactionCntDto;
 import com.kkokkomu.short_news.dto.news.response.NewsDto;
 import com.kkokkomu.short_news.dto.news.response.NewsWithReactionDto;
@@ -10,6 +12,7 @@ import com.kkokkomu.short_news.repository.ReactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -53,10 +56,14 @@ public class NewsService {
         return NewsDto.fromEntity(news);
     } // 숏폼 업로드
 
-    public List<NewsWithReactionDto> readShortForm(Long userId, int page, int size) {
+    public PagingResponseDto readShortForm(Long userId, int page, int size) {
+        log.info("Service read short form");
+
         // 일단 size 맞춰서 뉴스 아무거나
-        Sort sort = Sort.by(Sort.Direction.DESC, "created_at");
-        List<News> news = newsRepository.findAll(PageRequest.of(page, size, sort)).getContent();
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Page<News> newsPage = newsRepository.findAll(PageRequest.of(page, size, sort));
+
+        List<News> news = newsPage.getContent();
 
         //뉴스 리스트에서 뉴스 정보, 감정표현 개수 뽑아내기
         List<NewsWithReactionDto> newsWithReactionDtos = new ArrayList<>();
@@ -91,7 +98,9 @@ public class NewsService {
             newsWithReactionDtos.add(newsWithReactionDto);
         }
 
-        return newsWithReactionDtos;
+        PageInfoDto pageInfoDto = PageInfoDto.fromPageInfo(newsPage);
+
+        return PagingResponseDto.fromEntityAndPageInfo(newsWithReactionDtos, pageInfoDto);
     }
 
 }

@@ -1,7 +1,7 @@
 package com.kkokkomu.short_news.controller;
 
 import com.kkokkomu.short_news.dto.common.ResponseDto;
-import com.kkokkomu.short_news.dto.reaction.request.PostReactionDto;
+import com.kkokkomu.short_news.dto.reaction.request.CreateReactionDto;
 import com.kkokkomu.short_news.service.ReactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +15,12 @@ public class ReactionController {
     private final ReactionService reactionService;
 
     @PostMapping("")
-    public ResponseDto<?> createReaction(@RequestBody PostReactionDto postReactionDto) {
+    public ResponseDto<?> createReaction(@RequestBody CreateReactionDto postReactionDto) {
         return ResponseDto.ok(reactionService.reaction(postReactionDto));
     }
 
     @PostMapping("/delete")
-    public ResponseDto<?> deleteReaction(@RequestBody PostReactionDto postReactionDto) {
+    public ResponseDto<?> deleteReaction(@RequestBody CreateReactionDto postReactionDto) {
         return ResponseDto.ok(reactionService.deleteReaction(postReactionDto));
     }
 }
