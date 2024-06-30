@@ -36,4 +36,9 @@ public class CommentController {
         return ResponseDto.ok(commentService.updateComment(commentDto));
     } // 댓글 수정
 
+    @DeleteMapping("")
+    public ResponseDto<?> deleteComment(@RequestParam Long comment) {
+        log.info("Delete comment {}", comment);
+        return ResponseDto.ok(commentService.deleteComment(comment));
+    }
 }

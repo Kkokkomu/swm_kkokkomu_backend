@@ -92,4 +92,12 @@ public class CommentService {
 
         return CommentDto.fromEntity(comment);
     }// 댓글 수정
+
+    public String deleteComment(Long commentId) {
+        log.info("deleteComment");
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+        commentRepository.delete(comment);
+        return "success";
+    }
 }
