@@ -63,6 +63,7 @@ public class NewsService {
         return NewsDto.fromEntity(news);
     } // 숏폼 업로드
 
+    @Transactional
     public PagingResponseDto readShortForm(String userId, int page, int size) {
         log.info("Service read short form");
 
