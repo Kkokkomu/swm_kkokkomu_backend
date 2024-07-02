@@ -2,13 +2,19 @@ package com.kkokkomu.short_news.service;
 
 import com.kkokkomu.short_news.domain.News;
 import com.kkokkomu.short_news.domain.Reaction;
+import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.dto.common.PageInfoDto;
 import com.kkokkomu.short_news.dto.common.PagingResponseDto;
+import com.kkokkomu.short_news.dto.news.response.NewsDtoWithId;
 import com.kkokkomu.short_news.dto.reaction.response.ReactionCntDto;
 import com.kkokkomu.short_news.dto.news.response.NewsDto;
 import com.kkokkomu.short_news.dto.news.response.NewsWithReactionDto;
+import com.kkokkomu.short_news.dto.reaction.response.ReactionWithUser;
+import com.kkokkomu.short_news.exception.CommonException;
+import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.repository.NewsRepository;
 import com.kkokkomu.short_news.repository.ReactionRepository;
+import com.kkokkomu.short_news.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +34,7 @@ public class NewsService {
     private final NewsRepository newsRepository;
     private final S3Service s3Service;
     private final ReactionRepository reactionRepository;
+    private final UserRepository userRepository;
 //    private final YoutubeService youtubeService;
 
     @Transactional // 있어야 Dynamic Update도 돼고, 다른 db간의 롤백도 보장
@@ -56,7 +63,7 @@ public class NewsService {
         return NewsDto.fromEntity(news);
     } // 숏폼 업로드
 
-    public PagingResponseDto readShortForm(Long userId, int page, int size) {
+    public PagingResponseDto readShortForm(String userId, int page, int size) {
         log.info("Service read short form");
 
         // 일단 size 맞춰서 뉴스 아무거나
@@ -69,17 +76,26 @@ public class NewsService {
         List<NewsWithReactionDto> newsWithReactionDtos = new ArrayList<>();
         for (News newsEntity : news) {
             // 뉴스 정보 뽑기
-            NewsDto newsDto = NewsDto.fromEntity(newsEntity);
+            NewsDtoWithId newsDto = NewsDtoWithId.fromEntity(newsEntity);
 
             // 감점표현 정보 뽑기
             List<Reaction> reactions = reactionRepository.findAllByNewsId(newsEntity.getId());
 
             Long great = 0L, hate = 0L, expect = 0L, surprise = 0L;
+            Boolean isGreat = null, isHate = null, isExpect = null, isSurprise = null;
             for (Reaction reaction : reactions) {
                 if(reaction.isGreat()) great++;
                 else if(reaction.isHate()) hate++;
                 else if(reaction.isExpect()) expect++;
                 else if(reaction.isSurprise()) surprise++;
+
+                // 해당 뉴스에 유저가 이미 좋아요를 눌렀는지 체크
+                if (reaction.getUser().getUuid() == userId){
+                    if(reaction.isGreat()) isGreat = true;
+                    else if(reaction.isHate()) isHate = true;
+                    else if(reaction.isExpect()) isExpect = true;
+                    else if(reaction.isSurprise()) isSurprise = true;
+                }
             }
 
             ReactionCntDto reactionCntDto = ReactionCntDto.builder()
@@ -89,10 +105,18 @@ public class NewsService {
                     .surprise(surprise)
                     .build();
 
+            ReactionWithUser reactionWithUser = ReactionWithUser.builder()
+                    .great(isGreat)
+                    .hate(isHate)
+                    .expect(isExpect)
+                    .surprise(isSurprise)
+                    .build();
+
             // 뉴스 정보, 감정표현 개수 합치기
             NewsWithReactionDto newsWithReactionDto = NewsWithReactionDto.builder()
                     .shortForm(newsDto)
                     .reaction(reactionCntDto)
+                    .reactionWithUser(reactionWithUser)
                     .build();
 
             newsWithReactionDtos.add(newsWithReactionDto);

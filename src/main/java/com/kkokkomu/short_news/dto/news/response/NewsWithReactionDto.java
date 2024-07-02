@@ -1,15 +1,13 @@
 package com.kkokkomu.short_news.dto.news.response;
 
 import com.kkokkomu.short_news.dto.reaction.response.ReactionCntDto;
+import com.kkokkomu.short_news.dto.reaction.response.ReactionWithUser;
 import lombok.Builder;
 
+@Builder
 public record NewsWithReactionDto(
-        NewsDto shortForm,
-        ReactionCntDto reaction
+        NewsDtoWithId shortForm,
+        ReactionCntDto reaction,
+        ReactionWithUser reactionWithUser
 ) {
-    @Builder
-    public NewsWithReactionDto(NewsDto shortForm, ReactionCntDto reaction) {
-        this.shortForm = shortForm;
-        this.reaction = reaction;
-    }
 }

@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface ReactionRepository extends JpaRepository<Reaction, Long> {
     List<Reaction> findAllByNewsId(Long newsId);
 
+    List<Reaction> findAllByUserAndNewsId(User user, Long newsId);
+
     Boolean existsByUserAndNewsAndGreatAndHateAndExpectAndSurprise(User user, News news, Boolean great, Boolean hate, Boolean expect, Boolean surprise);
 
     Optional<Reaction> findByUserAndNewsAndGreatAndHateAndExpectAndSurprise(User user, News news, Boolean great, Boolean hate, Boolean expect, Boolean surprise);

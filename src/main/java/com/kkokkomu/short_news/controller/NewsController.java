@@ -22,7 +22,7 @@ public class NewsController {
     }
 
     @GetMapping("")
-    public ResponseDto<?> getShortNews(@RequestParam Long userId,
+    public ResponseDto<?> getShortNews(@RequestParam String userId,
                                        @RequestParam int page,
                                        @RequestParam int size) {
         log.info("get shortNews page");
