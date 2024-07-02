@@ -63,9 +63,11 @@ public class NewsService {
         return NewsDto.fromEntity(news);
     } // 숏폼 업로드
 
-    @Transactional
     public PagingResponseDto readShortForm(String userId, int page, int size) {
         log.info("Service read short form");
+
+        User user = userRepository.findByUuid(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 
         // 일단 size 맞춰서 뉴스 아무거나
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
@@ -83,20 +85,11 @@ public class NewsService {
             List<Reaction> reactions = reactionRepository.findAllByNewsId(newsEntity.getId());
 
             Long great = 0L, hate = 0L, expect = 0L, surprise = 0L;
-            Boolean isGreat = null, isHate = null, isExpect = null, isSurprise = null;
             for (Reaction reaction : reactions) {
                 if(reaction.isGreat()) great++;
                 else if(reaction.isHate()) hate++;
                 else if(reaction.isExpect()) expect++;
                 else if(reaction.isSurprise()) surprise++;
-
-                // 해당 뉴스에 유저가 이미 좋아요를 눌렀는지 체크
-                if (reaction.getUser().getUuid() == userId){
-                    if(reaction.isGreat()) isGreat = true;
-                    else if(reaction.isHate()) isHate = true;
-                    else if(reaction.isExpect()) isExpect = true;
-                    else if(reaction.isSurprise()) isSurprise = true;
-                }
             }
 
             ReactionCntDto reactionCntDto = ReactionCntDto.builder()
@@ -106,6 +99,17 @@ public class NewsService {
                     .surprise(surprise)
                     .build();
 
+            // 해당 뉴스에 유저가 이미 좋아요를 눌렀는지 체크
+            List<Reaction> reactionsWithUser = reactionRepository.findAllByUserAndNewsId(user, newsEntity.getId());
+
+            Boolean isGreat = false, isHate = false, isExpect = false, isSurprise = false;
+
+            for(Reaction reaction : reactionsWithUser) {
+                if(reaction.isGreat()) isGreat = true;
+                else if(reaction.isHate()) isHate = true;
+                else if(reaction.isExpect()) isExpect = true;
+                else if(reaction.isSurprise()) isSurprise = true;
+            }
             ReactionWithUser reactionWithUser = ReactionWithUser.builder()
                     .great(isGreat)
                     .hate(isHate)
