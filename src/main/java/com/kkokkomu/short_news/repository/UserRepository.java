@@ -1,6 +1,7 @@
 package com.kkokkomu.short_news.repository;
 
 import com.kkokkomu.short_news.domain.User;
+import com.kkokkomu.short_news.type.ELoginProvider;
 import com.kkokkomu.short_news.type.EUserRole;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE User u SET u.refreshToken = :refreshToken, u.isLogin = :loginStatus WHERE u.id = :id")
     void updateRefreshTokenAndLoginStatus(Long id, String refreshToken, boolean loginStatus);
+
+    @Query("SELECT u FROM User u WHERE u.id = :id AND u.loginProvider = :loginProvider")
+    Optional<User> findByIdAndELoginProvider(Long id, ELoginProvider loginProvider);
 }

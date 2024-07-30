@@ -2,6 +2,7 @@ package com.kkokkomu.short_news.service;
 
 import com.kkokkomu.short_news.constant.Constant;
 import com.kkokkomu.short_news.domain.User;
+import com.kkokkomu.short_news.dto.auth.request.SocialRegisterRequestDto;
 import com.kkokkomu.short_news.dto.auth.response.AccessTokenDto;
 import com.kkokkomu.short_news.dto.auth.response.JwtTokenDto;
 import com.kkokkomu.short_news.exception.CommonException;
@@ -13,6 +14,7 @@ import com.kkokkomu.short_news.type.EUserRole;
 import com.kkokkomu.short_news.util.JwtUtil;
 import com.kkokkomu.short_news.util.OAuth2Util;
 import com.kkokkomu.short_news.util.PasswordUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,6 +30,29 @@ public class AuthService {
     private final OAuth2Util oAuth2Util;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Transactional
+    public JwtTokenDto socialRegister(String accessToken, SocialRegisterRequestDto socialRegisterRequestDto) {  // 소셜 로그인 후 회원 등록 및 토큰 발급
+        String token = refineToken(accessToken);    // poppin access token
+
+        Long userId = jwtUtil.getUserIdFromToken(token);    // 토큰으로부터 id 추출
+
+        // 소셜 회원가입 시, id와 provider로 유저 정보를 찾음
+        User user = userRepository.findByIdAndELoginProvider(userId, socialRegisterRequestDto.provider())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+
+        // 닉네임과 생년월일을 등록 -> 소셜 회원가입 완료 / User Role = USER
+        user.register(
+                socialRegisterRequestDto.nickname(),
+                socialRegisterRequestDto.sex(),
+                socialRegisterRequestDto.birthday()
+        );
+
+        final JwtTokenDto jwtTokenDto = jwtUtil.generateToken(user.getId(), user.getRole());
+        user.updateRefreshToken(jwtTokenDto.refreshToken());
+
+        return jwtTokenDto;
+    }
 
     public Object authSocialLogin(String token, String provider) {
         String accessToken = refineToken(token);

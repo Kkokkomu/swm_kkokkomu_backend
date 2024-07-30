@@ -15,8 +15,8 @@ public class Constant {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final Long MEMBER_INFO_RETENTION_PERIOD = 30L;
     public static final List<String> NO_NEED_AUTH_URLS = List.of(
-            "/auth/login/kakao",
-            "/auth/login/google",
-            "/auth/login/apple"
+            "/oauth2/login/kakao",
+            "/oauth2/login/google",
+            "/oauth2/login/apple"
     );
 }
