@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.domain;
 
+import com.kkokkomu.short_news.oauth2.OAuth2UserInfo;
 import com.kkokkomu.short_news.type.ELoginProvider;
 import com.kkokkomu.short_news.type.EUserRole;
 import jakarta.persistence.*;
@@ -109,5 +110,20 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         this.editedAt = LocalDateTime.now(); // 업데이트 시 변경 시간 갱신
+    }
+
+    public static User toGuestEntity(OAuth2UserInfo oAuth2UserInfo, String encodedPassword, ELoginProvider loginProvider) {
+        return User.builder()
+                .email(oAuth2UserInfo.email())
+                .password(encodedPassword)
+                .loginProvider(loginProvider)
+                .role(EUserRole.GUEST)
+                .privacyPolicyYn(true)
+                .serviceTermsYn(true)
+                .alarmYn(false)
+                .alarmNewContentYn(false)
+                .alarmReplyYn(false)
+                .alarmAdYn(false)
+                .build();
     }
 }
