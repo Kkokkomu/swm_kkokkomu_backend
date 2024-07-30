@@ -7,26 +7,21 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "comment", indexes = {
-        @Index(name = "idx_user_id", columnList = "user_id"),
-        @Index(name = "idx_news_id", columnList = "news_id")
-})
-public class Comment {
+@Table(name = "event")
+public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Primary key
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Foreign key to User entity
+    @Column(name = "title", nullable = false)
+    private String title; // 이벤트 제목
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "news_id", nullable = false)
-    private News news; // Foreign key to News entity
+    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
+    private String content; // 이벤트 본문
 
-    @Column(name = "content", nullable = false)
-    private String content; // 댓글 내용
+    @Column(name = "logo_image", columnDefinition = "TEXT")
+    private String logoImage; // 로고 이미지 URL
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt; // 생성 일자
@@ -34,16 +29,11 @@ public class Comment {
     @Column(name = "edited_at")
     private LocalDateTime editedAt; // 수정 일자
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Comment parent; // 부모 댓글
-
     @Builder
-    public Comment(User user, News news, String content, Comment parent) {
-        this.user = user;
-        this.news = news;
+    public Event(String title, String content, String logoImage) {
+        this.title = title;
         this.content = content;
-        this.parent = parent;
+        this.logoImage = logoImage;
         this.createdAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 설정
         this.editedAt = LocalDateTime.now(); // 초기값을 현재 시간으로 설정
     }

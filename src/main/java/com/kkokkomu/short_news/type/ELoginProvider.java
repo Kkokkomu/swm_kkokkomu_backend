@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 public enum ELoginProvider {
     GOOGLE("GOOGLE"),
     KAKAO("KAKAO"),
-    NAVER("NAVER"),
     APPLE("APPLE"),
     DEFAULT("DEFAULT");
 

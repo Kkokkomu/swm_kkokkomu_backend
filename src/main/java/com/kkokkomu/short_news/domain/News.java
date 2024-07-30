@@ -1,8 +1,8 @@
 package com.kkokkomu.short_news.domain;
 
+import com.kkokkomu.short_news.type.ECategory;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -10,36 +10,58 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "news")
 public class News {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // Primary key
 
-    @Column(name = "shortform_url", nullable = true)
-    private String shortformUrl;
+    @Column(name = "shortform_url", nullable = false)
+    private String shortformUrl; // 숏폼 URL
 
     @Column(name = "youtube_url", nullable = false)
-    private String youtubeUrl;
+    private String youtubeUrl; // YouTube URL
 
     @Column(name = "instagram_url", nullable = false)
-    private String instagramUrl;
+    private String instagramUrl; // Instagram URL
 
-    @Column(name = "related_url", nullable = false)
-    private String relatedUrl;
+    @Column(name = "thumbnail", columnDefinition = "TEXT", nullable = false)
+    private String thumbnail; // 썸네일 이미지 링크
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "view_cnt", nullable = false)
+    private int viewCnt; // 조회수
+
+    @Column(name = "summary", nullable = false)
+    private String summary; // 요약 스크립트
+
+    @Column(name = "shared_cnt", nullable = false)
+    private int sharedCnt; // 공유수
+
+    @Column(name = "category", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ECategory category; // 카테고리
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt; // 생성 일자
+
+    @Column(name = "edited_at")
+    private LocalDateTime editedAt; // 변경 일자
 
     @Builder
-    public News(String shortformUrl, String youtubeUrl, String instagramUrl, String relatedUrl) {
+    public News(String shortformUrl, String youtubeUrl, String instagramUrl, String thumbnail, String summary, ECategory category) {
         this.shortformUrl = shortformUrl;
         this.youtubeUrl = youtubeUrl;
         this.instagramUrl = instagramUrl;
-        this.relatedUrl = relatedUrl;
-        this.createdAt = LocalDateTime.now();
+        this.thumbnail = thumbnail;
+        this.viewCnt = 0;
+        this.summary = summary;
+        this.sharedCnt = 0;
+        this.category = category;
+        this.createdAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 설정
+        this.editedAt = LocalDateTime.now(); // 초기값을 현재 시간으로 설정
     }
 
-    public void updateShrotFormUrl(String shortformUrl, String youtubeUrl) {
-        this.shortformUrl = shortformUrl;
-        this.youtubeUrl = youtubeUrl;
+    @PreUpdate
+    protected void onUpdate() {
+        this.editedAt = LocalDateTime.now(); // 업데이트 시 변경 시간 갱신
     }
 }

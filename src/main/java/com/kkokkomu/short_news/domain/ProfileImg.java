@@ -7,11 +7,10 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "comment", indexes = {
-        @Index(name = "idx_user_id", columnList = "user_id"),
-        @Index(name = "idx_news_id", columnList = "news_id")
+@Table(name = "profile_img", indexes = {
+        @Index(name = "idx_user_id", columnList = "user_id")
 })
-public class Comment {
+public class ProfileImg {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,29 +20,23 @@ public class Comment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user; // Foreign key to User entity
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "news_id", nullable = false)
-    private News news; // Foreign key to News entity
+    @Column(name = "img_url", columnDefinition = "TEXT", nullable = false)
+    private String imgUrl; // S3 URL
 
-    @Column(name = "content", nullable = false)
-    private String content; // 댓글 내용
+    @Column(name = "resize_url", columnDefinition = "TEXT")
+    private String resizeUrl; // S3 Resizing Image URL
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt; // 생성 일자
+    private LocalDateTime createdAt; // 생성 일자, 객체 생성 시 자동 설정
 
     @Column(name = "edited_at")
-    private LocalDateTime editedAt; // 수정 일자
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Comment parent; // 부모 댓글
+    private LocalDateTime editedAt; // 변경 일자
 
     @Builder
-    public Comment(User user, News news, String content, Comment parent) {
+    public ProfileImg(User user, String imgUrl, String resizeUrl) {
         this.user = user;
-        this.news = news;
-        this.content = content;
-        this.parent = parent;
+        this.imgUrl = imgUrl;
+        this.resizeUrl = resizeUrl;
         this.createdAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 설정
         this.editedAt = LocalDateTime.now(); // 초기값을 현재 시간으로 설정
     }

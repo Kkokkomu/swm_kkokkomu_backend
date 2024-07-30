@@ -30,11 +30,6 @@ public record ResponseDto<T>(@JsonIgnore HttpStatus httpStatus,
     }
 
     //실패시
-//    public static ResponseDto<Object> fail(final HandlerMethodValidationException e) { //실패한 경우
-//
-//        return new ResponseDto<>(HttpStatus.BAD_REQUEST, false, null, new ExceptionDto(ErrorCode.INVALID_PARAMETER));
-//    }
-
     public static ResponseDto<Object> fail(final CommonException e) { //실패한 경우
         return new ResponseDto<>(e.getErrorCode().getHttpStatus(), false, null, new ExceptionDto(e.getErrorCode()));
     }
