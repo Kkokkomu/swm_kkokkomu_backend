@@ -1,4 +1,4 @@
-name: Deploy to AWS EC2
+name: Test Server Deploy to AWS EC2
 
 # 이 워크플로는 main 브랜치에 push되거나 pull request가 있을 때 실행됩니다.
 on:
