@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 import java.security.Key;
 import java.util.Date;
 
+//
 @Component
 public class JwtUtil implements InitializingBean {
     @Value("${jwt.secret}")
