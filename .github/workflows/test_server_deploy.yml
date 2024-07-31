@@ -49,8 +49,8 @@ jobs:
       # 스프링 부트 어플리케이션 docker 이미지 빌드 및 푸시
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/shortdari .
-          docker push ${{ secrets.DOCKER_USERNAME }}/shortdari
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/kkm-test .
+          docker push ${{ secrets.DOCKER_USERNAME }}/kkm-test
       # EC2 인스턴스에 배포
       - name: Deploy to AWS EC2
         uses: appleboy/ssh-action@master  # EC2 인스턴스에 SSH로 접근
@@ -60,7 +60,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}  # SSH 접속에 필요한 비밀 키
           script: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker pull ${{ secrets.DOCKER_USERNAME }}/shortdari:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest
             docker stop web || true
             docker rm web || true
             docker run -d --name web --network my_network -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/kkm:latest
