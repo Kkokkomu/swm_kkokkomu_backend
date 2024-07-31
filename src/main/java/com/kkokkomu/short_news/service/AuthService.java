@@ -54,9 +54,9 @@ public class AuthService {
         return jwtTokenDto;
     }
 
-    public Object authSocialLogin(String token, String provider) {
+    public Object authSocialLogin(String token, ELoginProvider provider) {
         String accessToken = refineToken(token);
-        String loginProvider = provider.toUpperCase();
+        String loginProvider = provider.toString();
         log.info("loginProvider : " + loginProvider);
         OAuth2UserInfo oAuth2UserInfoDto = getOAuth2UserInfo(loginProvider, accessToken);
         return processUserLogin(oAuth2UserInfoDto, ELoginProvider.valueOf(loginProvider));
