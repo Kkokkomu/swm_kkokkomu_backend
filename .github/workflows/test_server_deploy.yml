@@ -63,4 +63,4 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest
             docker stop web || true
             docker rm web || true
-            docker run -d --name web --network my_network -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/kkm:latest
+            docker run -d --name web --network my_network -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest
