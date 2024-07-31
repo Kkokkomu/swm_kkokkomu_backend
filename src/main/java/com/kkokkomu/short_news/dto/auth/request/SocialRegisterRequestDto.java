@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
-
+//f
 public record SocialRegisterRequestDto(
         @NotNull ELoginProvider provider,
 
