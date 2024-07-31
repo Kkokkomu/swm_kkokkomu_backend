@@ -1,9 +1,13 @@
 package com.kkokkomu.short_news.domain;
 
+import com.kkokkomu.short_news.oauth2.OAuth2UserInfo;
 import com.kkokkomu.short_news.type.ELoginProvider;
+import com.kkokkomu.short_news.type.ESex;
 import com.kkokkomu.short_news.type.EUserRole;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,10 +30,11 @@ public class User {
     private String nickname; // 닉네임
 
     @Column(name = "birthday")
-    private LocalDateTime birthday; // 생일
+    private LocalDate birthday; // 생일
 
     @Column(name = "sex")
-    private Boolean sex; // 성별
+    @Enumerated(EnumType.STRING)
+    private ESex sex; // 성별
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
@@ -82,7 +87,7 @@ public class User {
     private LocalDateTime editedAt; // 변경 일자
 
     @Builder
-    public User(String email, String password, String nickname, LocalDateTime birthday, Boolean sex, EUserRole role, ELoginProvider loginProvider, Boolean isLogin, String refreshToken, LocalDateTime bannedStartAt, LocalDateTime bannedEndAt, LocalDateTime deletedAt, Boolean isDeleted, Boolean privacyPolicyYn, Boolean serviceTermsYn, Boolean alarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn, Boolean alarmAdYn) {
+    public User(String email, String password, String nickname, LocalDate birthday, ESex sex, EUserRole role, ELoginProvider loginProvider, Boolean isLogin, String refreshToken, LocalDateTime bannedStartAt, LocalDateTime bannedEndAt, LocalDateTime deletedAt, Boolean isDeleted, Boolean privacyPolicyYn, Boolean serviceTermsYn, Boolean alarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn, Boolean alarmAdYn) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
@@ -90,12 +95,12 @@ public class User {
         this.sex = sex;
         this.role = role;
         this.loginProvider = loginProvider;
-        this.isLogin = isLogin;
-        this.refreshToken = refreshToken;
-        this.bannedStartAt = bannedStartAt;
-        this.bannedEndAt = bannedEndAt;
-        this.deletedAt = deletedAt;
-        this.isDeleted = isDeleted;
+        this.isLogin = false;
+        this.refreshToken = null;
+        this.bannedStartAt = null;
+        this.bannedEndAt = null;
+        this.deletedAt = null;
+        this.isDeleted = null;
         this.privacyPolicyYn = privacyPolicyYn;
         this.serviceTermsYn = serviceTermsYn;
         this.alarmYn = alarmYn;
@@ -109,5 +114,31 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         this.editedAt = LocalDateTime.now(); // 업데이트 시 변경 시간 갱신
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public static User toGuestEntity(OAuth2UserInfo oAuth2UserInfo, String encodedPassword, ELoginProvider loginProvider) {
+        return User.builder()
+                .email(oAuth2UserInfo.email())
+                .password(encodedPassword)
+                .loginProvider(loginProvider)
+                .role(EUserRole.GUEST)
+                .privacyPolicyYn(true)
+                .serviceTermsYn(true)
+                .alarmYn(false)
+                .alarmNewContentYn(false)
+                .alarmReplyYn(false)
+                .alarmAdYn(false)
+                .build();
+    }
+
+    public void register(String nickname, ESex sex, LocalDate birthday) {
+        this.nickname = nickname;
+        this.sex = sex;
+        this.birthday = birthday;
+        this.role = EUserRole.USER;
     }
 }
