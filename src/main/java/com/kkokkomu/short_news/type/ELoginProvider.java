@@ -6,8 +6,7 @@ import lombok.RequiredArgsConstructor;
 public enum ELoginProvider {
     GOOGLE("GOOGLE"),
     KAKAO("KAKAO"),
-    APPLE("APPLE"),
-    DEFAULT("DEFAULT");
+    APPLE("APPLE");
 
     private final String loginProvider;
 }
