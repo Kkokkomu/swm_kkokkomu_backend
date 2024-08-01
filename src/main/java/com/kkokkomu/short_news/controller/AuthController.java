@@ -45,7 +45,7 @@ public class AuthController {
                             schema = @Schema(implementation = AccessTokenDto.class))),
     })
     @PostMapping("/login/{provider}")
-    public ResponseDto<?> authSocialLogin(@PathVariable ELoginProvider provider,
+    public ResponseDto<?> authSocialLogin(@PathVariable String provider,
                                           @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String accessToken) {
         log.info("accessToken : " + accessToken);
         return ResponseDto.ok(authService.authSocialLogin(accessToken, provider));
