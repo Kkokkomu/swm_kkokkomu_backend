@@ -1,6 +1,7 @@
 package com.kkokkomu.short_news.service;
 
 import com.kkokkomu.short_news.constant.Constant;
+import com.kkokkomu.short_news.domain.ShareEvent;
 import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.dto.auth.request.SocialRegisterRequestDto;
 import com.kkokkomu.short_news.dto.auth.response.AccessTokenDto;
@@ -8,6 +9,7 @@ import com.kkokkomu.short_news.dto.auth.response.JwtTokenDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.oauth2.OAuth2UserInfo;
+import com.kkokkomu.short_news.repository.ShareEventRepository;
 import com.kkokkomu.short_news.repository.UserRepository;
 import com.kkokkomu.short_news.type.ELoginProvider;
 import com.kkokkomu.short_news.type.EUserRole;
@@ -27,6 +29,8 @@ import java.util.Optional;
 @Slf4j
 public class AuthService {
     private final UserRepository userRepository;
+    private final ShareEventRepository shareEventRepository;
+
     private final OAuth2Util oAuth2Util;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -48,6 +52,12 @@ public class AuthService {
                 socialRegisterRequestDto.birthday()
         );
 
+        // 공유 이벤트 참여
+        ShareEvent shareEvent = shareEventRepository.findByRecommandCode(socialRegisterRequestDto.recommandCode());
+
+        shareEvent.updateParticipantingCnt();
+
+        // 엑세스, 리프레시 토큰 생성
         final JwtTokenDto jwtTokenDto = jwtUtil.generateToken(user.getId(), user.getRole());
         user.updateRefreshToken(jwtTokenDto.refreshToken());
 

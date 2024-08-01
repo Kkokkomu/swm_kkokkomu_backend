@@ -18,6 +18,8 @@ public record SocialRegisterRequestDto(
 
         @NotNull ESex sex,
 
-        @NotNull LocalDate birthday
+        @NotNull LocalDate birthday,
+
+        String recommandCode
 ) {
 }
