@@ -21,7 +21,7 @@ public class Constant {
 
             //스웨거
             "/swagger-ui/*",
-            "/v3/api-docs/swagger-config/*",
+            "/v3/*",
 
             //소셜로그인
             "/oauth2/login/kakao",
