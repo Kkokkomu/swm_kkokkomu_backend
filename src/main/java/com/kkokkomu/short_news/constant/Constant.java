@@ -20,7 +20,7 @@ public class Constant {
             "/test/error",
 
             //스웨거
-            "/swagger-ui",
+            "/swagger-ui/*",
 
             //소셜로그인
             "/oauth2/login/kakao",
