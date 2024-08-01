@@ -26,4 +26,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.id = :id AND u.loginProvider = :loginProvider")
     Optional<User> findByIdAndELoginProvider(Long id, ELoginProvider loginProvider);
+
+    @Query("SELECT u FROM User u WHERE u.id = :id AND u.isLogin = :isLogin AND u.refreshToken IS NOT NULL")
+    Optional<User> findByIdAndIsLoginAndRefreshTokenNotNull(Long id, boolean isLogin);
 }
