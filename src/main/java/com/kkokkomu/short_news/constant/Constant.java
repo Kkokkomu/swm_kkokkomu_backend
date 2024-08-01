@@ -20,8 +20,12 @@ public class Constant {
             "/test/error",
 
             //스웨거
-            "/swagger-ui/*",
-            "/v3/*",
+            "/swagger",
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/api-docs",
+            "/api-docs/**",
+            "/v3/api-docs/**",
 
             //소셜로그인
             "/oauth2/login/kakao",
