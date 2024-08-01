@@ -19,6 +19,9 @@ public class Constant {
             "/test",
             "/test/error",
 
+            //스웨거
+            "/swagger-ui/index.html",
+
             //소셜로그인
             "/oauth2/login/kakao",
             "/oauth2/login/google",
