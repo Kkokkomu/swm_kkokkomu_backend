@@ -39,10 +39,10 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 완료, access token과 refresh token 반환",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = JwtTokenDto.class))),
+                            schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "201", description = "회원가입 필요, access token만 반환",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = AccessTokenDto.class))),
+                            schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping("/login/{provider}")
     public ResponseDto<?> authSocialLogin(@PathVariable String provider,
