@@ -7,7 +7,8 @@ import lombok.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user_favorite_keyword", indexes = {
-        @Index(name = "idx_user_id", columnList = "user_id")
+        @Index(name = "idx_user_id", columnList = "user_id"),
+        @Index(name = "idx_keyword_id", columnList = "keyword_id")
 })
 public class UserKeyword {
 

@@ -8,7 +8,10 @@ public enum ECategory {
     ECONOMY("ECONOMY"),
     SOCIAL("SOCIAL"),
     ENTERTAIN("ENTERTAIN"),
-    SPORTS("SPORTS");
+    SPORTS("SPORTS"),
+    LIVING("LIVING"),
+    WOLRD("WORLD"),
+    IT("IT");
 
     private final String category;
 }
