@@ -50,4 +50,11 @@ public class AuthController {
         log.info("accessToken : " + accessToken);
         return ResponseDto.ok(authService.authSocialLogin(accessToken, provider));
     }
+
+    @Operation(summary = "토큰 재발급")
+    @PostMapping("/refresh")
+    public ResponseDto<JwtTokenDto> refresh(
+            @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String refreshToken){
+        return ResponseDto.ok(authService.refresh(refreshToken));
+    }
 }

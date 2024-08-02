@@ -71,6 +71,20 @@ public class AuthService {
         return jwtTokenDto;
     }
 
+    @Transactional
+    public JwtTokenDto refresh(String refreshToken) {
+        String token = refineToken(refreshToken);
+        Long userId = jwtUtil.getUserIdFromToken(token);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        if (!user.getRefreshToken().equals(token)) {
+            throw new CommonException(ErrorCode.INVALID_TOKEN_ERROR);
+        }
+        JwtTokenDto jwtToken = jwtUtil.generateToken(userId, user.getRole());
+        user.updateRefreshToken(jwtToken.refreshToken());
+        return jwtToken;
+    }
+
     public Object authSocialLogin(String token, String provider) {
         String accessToken = refineToken(token);
         String loginProvider = provider.toUpperCase();
