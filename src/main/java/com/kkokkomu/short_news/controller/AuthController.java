@@ -13,10 +13,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "로그인/회원가입")
@@ -56,5 +60,17 @@ public class AuthController {
     public ResponseDto<JwtTokenDto> refresh(
             @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String refreshToken){
         return ResponseDto.ok(authService.refresh(refreshToken));
+    }
+
+    @Operation(summary = "로그아웃")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "로그아웃 성공",
+//                content = @Content(mediaType = "application/json",
+//                    schema = @Schema(implementation = ResponseDto.class)))
+//    })
+    @PostMapping("/logout")
+    public ResponseDto<String> logout() {
+
+        return ResponseDto.ok("");
     }
 }

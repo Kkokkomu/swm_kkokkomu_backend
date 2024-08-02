@@ -2,7 +2,7 @@ package com.kkokkomu.short_news.service;
 
 import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.domain.UserCategory;
-import com.kkokkomu.short_news.dto.User.request.UpdateUserCategoryDto;
+import com.kkokkomu.short_news.dto.user.request.UpdateUserCategoryDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.repository.UserCategoryRepository;

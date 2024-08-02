@@ -1,6 +1,6 @@
 package com.kkokkomu.short_news.controller;
 
-import com.kkokkomu.short_news.dto.User.request.UpdateUserCategoryDto;
+import com.kkokkomu.short_news.dto.user.request.UpdateUserCategoryDto;
 import com.kkokkomu.short_news.dto.common.ResponseDto;
 import com.kkokkomu.short_news.service.UserCategoryService;
 import io.swagger.v3.oas.annotations.Operation;
