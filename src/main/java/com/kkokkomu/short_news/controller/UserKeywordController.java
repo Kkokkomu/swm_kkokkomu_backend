@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "유저 키워드")
 @Slf4j
 @RequiredArgsConstructor
@@ -39,5 +41,12 @@ public class UserKeywordController {
     public ResponseDto<String> deleteUserKeyword(@RequestParam("id") Long id) {
         log.info("delete user keyword : {}", id);
         return ResponseDto.ok(userKeywordService.deleteUserKeyword(id));
+    }
+
+    @Operation(summary = "유저 키워드 목록 조회")
+    @GetMapping("/list")
+    public ResponseDto<List<UserKeywordDto>> readUserKeywords(@UserId Long userId) {
+        log.info("read user keywords");
+        return ResponseDto.ok(userKeywordService.getUserKeywords(userId));
     }
 }

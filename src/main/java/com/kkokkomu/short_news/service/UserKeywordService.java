@@ -14,6 +14,9 @@ import com.kkokkomu.short_news.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -75,4 +78,13 @@ public class UserKeywordService {
         userKeywordRepository.deleteById(userKeywordId);
         return "success";
     } // 유저 키워드 삭제
+
+    @Transactional
+    public List<UserKeywordDto> getUserKeywords(Long userId) {
+        log.info("getUserKeywords start");
+
+        List<UserKeyword> userKeywords = userKeywordRepository.findAllByUserId(userId);
+
+        return UserKeywordDto.ofList(userKeywords);
+    }
 }
