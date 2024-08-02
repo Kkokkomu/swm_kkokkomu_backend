@@ -23,7 +23,7 @@ public class UserKeywordService {
     private final UserKeywordRepository userKeywordRepository;
     private final KeywordRepository keywordRepository;
 
-    private final KeywordService keywordService;
+    private final KeywordService keywordService; // 이벤트 핸들링 필요
 
     public UserKeywordDto createUserKeyword(Long userId, CreateUserKeywordDto createUserKeywordDto) {
         log.info("createUserKeyword start");
@@ -65,4 +65,14 @@ public class UserKeywordService {
 
         return UserKeywordDto.of(userKeyword);
     } // 유저 키워드 생성 (기존 키워드 등록)
+
+    public String deleteUserKeyword(Long userKeywordId) {
+        log.info("deleteUserKeyword start");
+
+        userKeywordRepository.findById(userKeywordId)
+                        .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER_KEYWORD));
+
+        userKeywordRepository.deleteById(userKeywordId);
+        return "success";
+    } // 유저 키워드 삭제
 }

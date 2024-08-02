@@ -50,6 +50,7 @@ public enum ErrorCode {
     NOT_FOUND_END_POINT("40401", HttpStatus.NOT_FOUND, "존재하지 않는 엔드포인트입니다."),
     NOT_FOUND_RESOURCE("40402", HttpStatus.NOT_FOUND, "요청한 데이터를 찾을 수 없습니다."),
     NOT_FOUND_KEYWORD("40403", HttpStatus.NOT_FOUND, "해당 키워드가 존재하지 않습니다."),
+    NOT_FOUND_USER_KEYWORD("40404", HttpStatus.NOT_FOUND, "해당 유저 키워드가 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),
