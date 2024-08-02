@@ -40,6 +40,8 @@ public class OAuth2Util {
 
         JsonElement element = JsonParser.parseString(response.getBody());
 
+        log.info(element.toString());
+
         return OAuth2UserInfo.of(
                 element.getAsJsonObject().get("id").getAsString(),
                 element.getAsJsonObject().getAsJsonObject("kakao_account").get("email").getAsString()

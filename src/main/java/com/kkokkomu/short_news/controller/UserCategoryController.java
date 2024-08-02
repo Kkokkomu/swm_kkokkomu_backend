@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/userCategory")
+@RequestMapping("/user-category")
 public class UserCategoryController {
     private final UserCategoryService userCategoryService;
 

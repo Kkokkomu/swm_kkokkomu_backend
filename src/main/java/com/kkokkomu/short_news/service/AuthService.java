@@ -55,7 +55,9 @@ public class AuthService {
         // 공유 이벤트 참여
         ShareEvent shareEvent = shareEventRepository.findByRecommandCode(socialRegisterRequestDto.recommandCode());
 
-        shareEvent.updateParticipantingCnt();
+        if (shareEvent != null) {
+            shareEvent.updateParticipantingCnt();
+        }
 
         // 엑세스, 리프레시 토큰 생성
         final JwtTokenDto jwtTokenDto = jwtUtil.generateToken(user.getId(), user.getRole());
