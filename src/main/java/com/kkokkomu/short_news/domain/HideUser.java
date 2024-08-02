@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Table(name = "hided_comment", indexes = {
         @Index(name = "idx_user_id", columnList = "user_id")
 })
-public class HidedComment {
+public class HideUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,16 +21,16 @@ public class HidedComment {
     private User user; // Foreign key to User entity
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id", nullable = false)
-    private Comment comment; // Foreign key to Comment entity
+    @JoinColumn(name = "hided_user_id", nullable = false)
+    private User hidedUser; // Foreign key to Comment entity
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt; // 처리 일시
 
     @Builder
-    public HidedComment(User user, Comment comment) {
+    public HideUser(User user, User hidedUser) {
         this.user = user;
-        this.comment = comment;
+        this.hidedUser = hidedUser;
         this.createdAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 설정
     }
 }

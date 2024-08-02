@@ -1,15 +1,16 @@
 package com.kkokkomu.short_news.domain;
 
+import com.kkokkomu.short_news.type.ECategory;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "user_favorite_keyword", indexes = {
+@Table(name = "user_favorite_category", indexes = {
         @Index(name = "idx_user_id", columnList = "user_id")
 })
-public class UserFavoriteKeyword {
+public class UserCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,15 +18,15 @@ public class UserFavoriteKeyword {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Foreign key to User entity (사용자 ID)
+    private User user; // Foreign key to User entity (유저 ID)
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "keyword_id", nullable = false)
-    private Keyword keyword; // Foreign key to Keyword entity (키워드 ID)
+    @Column(name = "category", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ECategory category; // 유저가 체크한 카테고리
 
     @Builder
-    public UserFavoriteKeyword(User user, Keyword keyword) {
+    public UserCategory(User user, ECategory category) {
         this.user = user;
-        this.keyword = keyword;
+        this.category = category;
     }
 }
