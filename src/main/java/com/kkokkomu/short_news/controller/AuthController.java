@@ -62,12 +62,8 @@ public class AuthController {
         return ResponseDto.ok(authService.refresh(refreshToken));
     }
 
+    // swagger 표기용
     @Operation(summary = "로그아웃")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "로그아웃 성공",
-//                content = @Content(mediaType = "application/json",
-//                    schema = @Schema(implementation = ResponseDto.class)))
-//    })
     @PostMapping("/logout")
     public ResponseDto<String> logout() {
 
