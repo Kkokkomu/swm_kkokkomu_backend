@@ -7,7 +7,7 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "user_favorite_category", indexes = {
+@Table(name = "user_category", indexes = {
         @Index(name = "idx_user_id", columnList = "user_id")
 })
 public class UserCategory {

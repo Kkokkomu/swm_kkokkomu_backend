@@ -1,13 +1,19 @@
 package com.kkokkomu.short_news.service;
 
 import com.kkokkomu.short_news.domain.Keyword;
+import com.kkokkomu.short_news.dto.common.PageInfoDto;
+import com.kkokkomu.short_news.dto.common.PagingResponseDto;
+import com.kkokkomu.short_news.dto.keyword.response.SearchKeywordDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.repository.KeywordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,4 +42,24 @@ public class KeywordService {
                         .build()
         );
     } // 키워드 생성
+
+    public PagingResponseDto<List<SearchKeywordDto>> searchKeyword(String keyword, int page, int size) {
+        LocalDateTime lastWeek = LocalDateTime.now().minusWeeks(1);
+        Page<Object[]> results = keywordRepository.findPopularKeywords(keyword, lastWeek, PageRequest.of(page, size));
+
+        List<SearchKeywordDto> searchKeywordDtos = new ArrayList<>();
+        for (Object[] result : results) {
+            searchKeywordDtos.add(
+                    SearchKeywordDto.builder()
+                            .keywordId(((Number) result[0]).longValue())
+                            .keyword((String) result[1])
+                            .usedCnt(((Number) result[2]).longValue())
+                            .build()
+            );
+        }
+
+        PageInfoDto pageInfoDto = PageInfoDto.fromPageInfo(results);
+
+        return PagingResponseDto.fromEntityAndPageInfo(searchKeywordDtos, pageInfoDto);
+    } // 키워드 검색
 }

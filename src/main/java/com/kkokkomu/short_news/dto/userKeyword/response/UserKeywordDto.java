@@ -9,13 +9,11 @@ import java.util.List;
 @Builder
 public record UserKeywordDto(
         Long id,
-        Long userId,
         String keyword
 ) {
     static public UserKeywordDto of(UserKeyword userKeyword) {
         return UserKeywordDto.builder()
                 .id(userKeyword.getId())
-                .userId(userKeyword.getUser().getId())
                 .keyword(userKeyword.getKeyword().getKeyword())
                 .build();
     }
