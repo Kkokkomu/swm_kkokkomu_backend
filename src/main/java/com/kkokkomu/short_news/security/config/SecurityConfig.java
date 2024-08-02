@@ -44,7 +44,7 @@ public class SecurityConfig {
                                 .anyRequest().authenticated())
                 .logout(configurer ->
                         configurer
-                                .logoutUrl("/api/v1/auth/sign-out")
+                                .logoutUrl("/oauth2/logout")
                                 .addLogoutHandler(customSignOutProcessHandler)
                                 .logoutSuccessHandler(customSignOutResultHandler)
                                 .deleteCookies(Constant.AUTHORIZATION_HEADER, Constant.REAUTHORIZATION))

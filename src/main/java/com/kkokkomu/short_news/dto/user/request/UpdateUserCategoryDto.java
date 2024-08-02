@@ -1,4 +1,4 @@
-package com.kkokkomu.short_news.dto.User.request;
+package com.kkokkomu.short_news.dto.user.request;
 
 import jakarta.validation.constraints.NotNull;
 
