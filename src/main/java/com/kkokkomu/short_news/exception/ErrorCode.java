@@ -28,6 +28,7 @@ public enum ErrorCode {
     ALREADY_BLOCKED_USER("40017", HttpStatus.BAD_REQUEST, "이미 차단된 사용자입니다."),
     ALREADY_REGISTERED_KEYWORD("40018", HttpStatus.BAD_REQUEST, "이미 등록된 키워드입니다."),
     DUPLICATED_KEYWORD("40019", HttpStatus.BAD_REQUEST, "이미 생성된 키워드입니다."),
+    INVALID_KEYWORD("40020", HttpStatus.BAD_REQUEST, "키워드는 2글자이상 20글자이하 알파벳/한글/숫자로 구성된 한 단어가 되어야합니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
