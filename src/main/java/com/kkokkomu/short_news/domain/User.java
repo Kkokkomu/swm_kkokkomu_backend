@@ -132,6 +132,7 @@ public class User {
                 .alarmNewContentYn(false)
                 .alarmReplyYn(false)
                 .alarmAdYn(false)
+                .isDeleted(false)
                 .build();
     }
 
