@@ -45,6 +45,11 @@ public class AuthService {
         User user = userRepository.findByIdAndELoginProvider(userId, socialRegisterRequestDto.provider())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 
+        // 닉네임 중복검사
+        if (userRepository.findByNickname(socialRegisterRequestDto.nickname()).isPresent()) {
+            throw new CommonException(ErrorCode.DUPLICATED_NICKNAME);
+        }
+
         // 닉네임과 생년월일을 등록 -> 소셜 회원가입 완료 / User Role = USER
         user.register(
                 socialRegisterRequestDto.nickname(),
