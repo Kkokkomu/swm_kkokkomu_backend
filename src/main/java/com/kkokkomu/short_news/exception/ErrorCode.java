@@ -26,6 +26,8 @@ public enum ErrorCode {
     DUPLICATED_SOCIAL_ID("40015", HttpStatus.BAD_REQUEST, "해당 이메일로 가입된 소셜 계정이 존재합니다."),
     CANNOT_BLOCK_MYSELF("40016", HttpStatus.BAD_REQUEST, "자신을 차단할 수 없습니다."),
     ALREADY_BLOCKED_USER("40017", HttpStatus.BAD_REQUEST, "이미 차단된 사용자입니다."),
+    ALREADY_REGISTERED_KEYWORD("40018", HttpStatus.BAD_REQUEST, "이미 등록된 키워드입니다."),
+    DUPLICATED_KEYWORD("40019", HttpStatus.BAD_REQUEST, "이미 생성된 키워드입니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
@@ -47,6 +49,7 @@ public enum ErrorCode {
     NOT_FOUND_USER("40400", HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
     NOT_FOUND_END_POINT("40401", HttpStatus.NOT_FOUND, "존재하지 않는 엔드포인트입니다."),
     NOT_FOUND_RESOURCE("40402", HttpStatus.NOT_FOUND, "요청한 데이터를 찾을 수 없습니다."),
+    NOT_FOUND_KEYWORD("40403", HttpStatus.NOT_FOUND, "해당 키워드가 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),
