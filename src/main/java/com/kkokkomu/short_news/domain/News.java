@@ -15,28 +15,28 @@ public class News {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Primary key
 
-    @Column(name = "shortform_url", nullable = false)
+    @Column(name = "shortform_url", columnDefinition = "TEXT")
     private String shortformUrl; // 숏폼 URL
 
-    @Column(name = "youtube_url", nullable = false)
+    @Column(name = "youtube_url", columnDefinition = "TEXT")
     private String youtubeUrl; // YouTube URL
 
-    @Column(name = "instagram_url", nullable = false)
+    @Column(name = "instagram_url", columnDefinition = "TEXT")
     private String instagramUrl; // Instagram URL
 
-    @Column(name = "thumbnail", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "thumbnail", columnDefinition = "TEXT")
     private String thumbnail; // 썸네일 이미지 링크
 
     @Column(name = "view_cnt", nullable = false)
     private int viewCnt; // 조회수
 
-    @Column(name = "summary", nullable = false)
+    @Column(name = "summary")
     private String summary; // 요약 스크립트
 
     @Column(name = "shared_cnt", nullable = false)
     private int sharedCnt; // 공유수
 
-    @Column(name = "category", nullable = false)
+    @Column(name = "category")
     @Enumerated(EnumType.STRING)
     private ECategory category; // 카테고리
 
@@ -58,6 +58,15 @@ public class News {
         this.category = category;
         this.createdAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 설정
         this.editedAt = LocalDateTime.now(); // 초기값을 현재 시간으로 설정
+    }
+
+    public void update(String shortformUrl, String youtubeUrl, String instagramUrl, String thumbnail, String summary, ECategory category) {
+        this.shortformUrl = shortformUrl;
+        this.youtubeUrl = youtubeUrl;
+        this.instagramUrl = instagramUrl;
+        this.thumbnail = thumbnail;
+        this.summary = summary;
+        this.category = category;
     }
 
     @PreUpdate
