@@ -45,6 +45,9 @@ public class Comment {
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentLike> likes;
 
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportedComment> reportedComments;
+
     @Builder
     public Comment(User user, News news, String content, Comment parent) {
         this.user = user;

@@ -28,4 +28,11 @@ public class CommentController {
         log.info("addComment controller");
         return ResponseDto.ok(commentService.addComment(userId, createCommentDto));
     }
+
+    @Operation(summary = "댓글 삭제")
+    @DeleteMapping("")
+    public ResponseDto<String> addComment(@RequestParam Long commentId) {
+        log.info("addComment controller");
+        return ResponseDto.ok(commentService.deleteComment(commentId));
+    }
 }

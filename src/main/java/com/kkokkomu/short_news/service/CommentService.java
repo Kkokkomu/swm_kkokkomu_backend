@@ -48,6 +48,7 @@ public class CommentService {
 
     public String deleteComment(Long commentId) {
         log.info("deleteComment");
-
-    }
+        commentRepository.deleteById(commentId);
+        return "success";
+    } // 댓글 삭제
 }
