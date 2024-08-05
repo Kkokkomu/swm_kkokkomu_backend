@@ -22,7 +22,7 @@ public record NewsDto(
         String createdAt, // 생성 일자
         String editedAt // 변경 일자
 ) {
-    static public NewsDto fromEntity(News news) {
+    static public NewsDto of(News news) {
         return NewsDto.builder()
                 .shortformUrl(news.getShortformUrl())
                 .youtubeUrl(news.getYoutubeUrl())

@@ -9,7 +9,8 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "news_reaction", indexes = {
         @Index(name = "idx_user_id", columnList = "user_id"),
-        @Index(name = "idx_news_id", columnList = "news_id")
+        @Index(name = "idx_news_id", columnList = "news_id"),
+        @Index(name = "idx_reaction", columnList = "reaction")
 })
 public class NewsReaction {
 

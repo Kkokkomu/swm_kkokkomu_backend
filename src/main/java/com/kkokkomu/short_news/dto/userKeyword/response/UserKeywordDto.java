@@ -18,7 +18,7 @@ public record UserKeywordDto(
                 .build();
     }
 
-    static public List<UserKeywordDto> ofList(List<UserKeyword> userKeywords) {
+    static public List<UserKeywordDto> of(List<UserKeyword> userKeywords) {
         List<UserKeywordDto> userKeywordDtos = new ArrayList<>();
         for (UserKeyword userKeyword : userKeywords) {
             userKeywordDtos.add(UserKeywordDto.of(userKeyword));

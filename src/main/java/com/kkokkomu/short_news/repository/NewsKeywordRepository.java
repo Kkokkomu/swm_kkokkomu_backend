@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NewsKeywordRepository extends JpaRepository<NewsKeyword, Long> {
-    NewsKeyword findByName(String name);
 }

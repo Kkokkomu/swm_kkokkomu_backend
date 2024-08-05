@@ -31,5 +31,8 @@ public class Constant {
             "/oauth2/login/kakao",
             "/oauth2/login/google",
             "/oauth2/login/apple"
+
+            //임시
+//            "/news"
     );
 }

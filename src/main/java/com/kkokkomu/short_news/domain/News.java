@@ -30,6 +30,9 @@ public class News {
     @Column(name = "view_cnt", nullable = false)
     private int viewCnt; // 조회수
 
+    @Column(name = "title")
+    private String title; // 제목
+
     @Column(name = "summary")
     private String summary; // 요약 스크립트
 
@@ -47,12 +50,13 @@ public class News {
     private LocalDateTime editedAt; // 변경 일자
 
     @Builder
-    public News(String shortformUrl, String youtubeUrl, String instagramUrl, String thumbnail, String summary, ECategory category) {
+    public News(String shortformUrl, String youtubeUrl, String instagramUrl, String thumbnail, String title, String summary, ECategory category) {
         this.shortformUrl = shortformUrl;
         this.youtubeUrl = youtubeUrl;
         this.instagramUrl = instagramUrl;
         this.thumbnail = thumbnail;
         this.viewCnt = 0;
+        this.title = title;
         this.summary = summary;
         this.sharedCnt = 0;
         this.category = category;
@@ -60,11 +64,12 @@ public class News {
         this.editedAt = LocalDateTime.now(); // 초기값을 현재 시간으로 설정
     }
 
-    public void update(String shortformUrl, String youtubeUrl, String instagramUrl, String thumbnail, String summary, ECategory category) {
+    public void update(String shortformUrl, String youtubeUrl, String instagramUrl, String thumbnail, String title, String summary, ECategory category) {
         this.shortformUrl = shortformUrl;
         this.youtubeUrl = youtubeUrl;
         this.instagramUrl = instagramUrl;
         this.thumbnail = thumbnail;
+        this.title = title;
         this.summary = summary;
         this.category = category;
     }
