@@ -16,6 +16,7 @@ public record NewsDto(
         String instagramUrl, // Instagram URL
         String thumbnail, // 썸네일 이미지 링크
         int viewCnt, // 조회수
+        String title,
         String summary, // 요약 스크립트
         int sharedCnt, // 공유수
         ECategory category, // 카테고리
@@ -29,6 +30,7 @@ public record NewsDto(
                 .instagramUrl(news.getInstagramUrl())
                 .thumbnail(news.getThumbnail())
                 .viewCnt(news.getViewCnt())
+                .title(news.getTitle())
                 .summary(news.getSummary())
                 .sharedCnt(news.getSharedCnt())
                 .category(news.getCategory())
