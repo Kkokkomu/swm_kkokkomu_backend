@@ -1,7 +1,9 @@
 package com.kkokkomu.short_news.service;
 
 import com.kkokkomu.short_news.constant.Constant;
+import com.kkokkomu.short_news.domain.ProfileImg;
 import com.kkokkomu.short_news.domain.ShareEvent;
+import com.kkokkomu.short_news.domain.Subscription;
 import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.dto.auth.request.SocialRegisterRequestDto;
 import com.kkokkomu.short_news.dto.auth.response.AccessTokenDto;
@@ -9,7 +11,9 @@ import com.kkokkomu.short_news.dto.auth.response.JwtTokenDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.oauth2.OAuth2UserInfo;
+import com.kkokkomu.short_news.repository.ProfileImgRepository;
 import com.kkokkomu.short_news.repository.ShareEventRepository;
+import com.kkokkomu.short_news.repository.SubscriptionRepository;
 import com.kkokkomu.short_news.repository.UserRepository;
 import com.kkokkomu.short_news.type.ELoginProvider;
 import com.kkokkomu.short_news.type.EUserRole;
@@ -24,12 +28,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static com.kkokkomu.short_news.constant.Constant.DEFAULT_PROFILE;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
     private final UserRepository userRepository;
     private final ShareEventRepository shareEventRepository;
+    private final ProfileImgRepository profileImgRepository;
+    private final SubscriptionRepository subscriptionRepository;
 
     private final OAuth2Util oAuth2Util;
     private final JwtUtil jwtUtil;
@@ -63,6 +71,23 @@ public class AuthService {
         if (shareEvent != null) {
             shareEvent.updateParticipantingCnt();
         }
+
+        // 기본 프로필 이미지 등록
+        profileImgRepository.save(
+                ProfileImg.builder()
+                        .user(user)
+                        .imgUrl(DEFAULT_PROFILE)
+                        .resizeUrl(DEFAULT_PROFILE)
+                        .build()
+        );
+
+        // 구독 정보 초기화
+        subscriptionRepository.save(
+                Subscription.builder()
+                        .user(user)
+                        .isPremium(false)
+                        .build()
+        );
 
         // 엑세스, 리프레시 토큰 생성
         final JwtTokenDto jwtTokenDto = jwtUtil.generateToken(user.getId(), user.getRole());

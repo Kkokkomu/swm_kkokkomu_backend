@@ -18,10 +18,10 @@ public class Subscription {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "is_premium")
+    @Column(name = "is_premium", nullable = false)
     private Boolean isPremium; // 프리미엄 여부
 
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")
     private LocalDateTime startDate;
 
     @Column(name = "end_date") // 무기한 구독 가능
