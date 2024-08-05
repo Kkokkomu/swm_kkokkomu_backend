@@ -44,5 +44,10 @@ public class CommentService {
                 .content(comment.getContent())
                 .userId(userId)
                 .build();
+    } // 댓글 생성
+
+    public String deleteComment(Long commentId) {
+        log.info("deleteComment");
+
     }
 }
