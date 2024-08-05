@@ -9,6 +9,7 @@ import com.kkokkomu.short_news.security.handler.CustomSignOutResultHandler;
 import com.kkokkomu.short_news.security.provider.JwtAuthenticationProvider;
 import com.kkokkomu.short_news.security.service.CustomUserDetailsService;
 import com.kkokkomu.short_news.util.JwtUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +43,7 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers(Constant.NO_NEED_AUTH_URLS.toArray(new String[0])).permitAll()
                                 .anyRequest().authenticated())
+                .formLogin(AbstractHttpConfigurer::disable)
                 .logout(configurer ->
                         configurer
                                 .logoutUrl("/oauth2/logout")
@@ -51,6 +53,14 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, new JwtAuthenticationProvider(customUserDetailsService, bCryptPasswordEncoder)), LogoutFilter.class)
                 .addFilterAfter(new JwtExceptionFilter(), JwtAuthenticationFilter.class)
                 .addFilterBefore(new CustomLogoutFilter(), LogoutFilter.class)
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDeniedException.getMessage());
+                        })
+                )
                 .build();
     }
 }

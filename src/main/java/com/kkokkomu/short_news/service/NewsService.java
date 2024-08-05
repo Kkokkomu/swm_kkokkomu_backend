@@ -7,18 +7,12 @@ import com.kkokkomu.short_news.domain.RelatedNews;
 import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.dto.common.PageInfoDto;
 import com.kkokkomu.short_news.dto.common.PagingResponseDto;
-import com.kkokkomu.short_news.dto.news.response.GenerateNewsDto;
-import com.kkokkomu.short_news.dto.news.response.NewsDto;
-import com.kkokkomu.short_news.dto.news.response.NewsListDto;
-import com.kkokkomu.short_news.dto.news.response.NewsSummaryDto;
+import com.kkokkomu.short_news.dto.news.response.*;
 import com.kkokkomu.short_news.dto.newsReaction.response.NewReactionByUserDto;
 import com.kkokkomu.short_news.dto.newsReaction.response.ReactionCntDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
-import com.kkokkomu.short_news.repository.NewsReactionRepository;
-import com.kkokkomu.short_news.repository.NewsRepository;
-import com.kkokkomu.short_news.repository.RelatedNewsRepository;
-import com.kkokkomu.short_news.repository.UserRepository;
+import com.kkokkomu.short_news.repository.*;
 import com.kkokkomu.short_news.type.ECategory;
 import com.kkokkomu.short_news.type.EHomeFilter;
 import com.kkokkomu.short_news.type.ENewsReaction;
@@ -27,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,10 +36,12 @@ public class NewsService {
     private final RelatedNewsRepository relatedNewsRepository;
     private final UserRepository userRepository;
     private final NewsReactionRepository newsReactionRepository;
+    private final NewsKeywordRepository newsKeywordRepository;
 
     private final NewsKeywordService newsKeywordService;
 
     /* 홈화면 */
+
     public GenerateNewsDto generateNews() {
         News news = News.builder().build();
 
@@ -135,7 +132,59 @@ public class NewsService {
         }
 
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
-    } // 숏폼 조회
+    } // 숏폼 리스트 조회
+
+    public PagingResponseDto<List<GuestNewsListDto>> guestReadNewsList(int page, int size) {
+        // 일단 최신순으로 조회
+        Page<News> results = newsRepository.findAll(PageRequest.of(page, size));
+
+        List<News> news = results.getContent();
+        PageInfoDto pageInfo = PageInfoDto.fromPageInfo(results);
+
+        List<GuestNewsListDto> newsListDtos = new ArrayList<>();
+        for (News newsItem : news) {
+
+            // 뉴스 url 및 기본 정보
+            NewsSummaryDto newsSummaryDto = NewsSummaryDto.of(newsItem);
+
+            // 각 감정표현 별 갯수
+            ReactionCntDto reactionCntDto = ReactionCntDto.builder()
+                    .like(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.LIKE))
+                    .angry(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.ANGRY))
+                    .sad(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.SAD))
+                    .surprise(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.SURPRISE))
+                    .build();
+
+            // dto 생성
+            newsListDtos.add(
+                    GuestNewsListDto.builder()
+                            .shortformList(newsSummaryDto)
+                            .reactionCnt(reactionCntDto)
+                            .build()
+            );
+        }
+
+        return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
+    } // 비로그인 숏폼 리스트 조회
+
+    // 비로그인 숏폼 리스트 조회
+
+    @Transactional
+    public NewsInfoDto readNewsInfo(Long newsId) {
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+
+        // 키워드
+        List<String> keywords = newsKeywordRepository.findAllByNewsId(newsId)
+                .stream()
+                .map(keyword -> keyword.getKeyword().getKeyword())
+                .toList();
+
+        return NewsInfoDto.builder()
+                .news(NewsDto.of(news))
+                .keywords(keywords)
+                .build();
+    } // 뉴스 정보 조회
 
     /* 검색화면 */
 

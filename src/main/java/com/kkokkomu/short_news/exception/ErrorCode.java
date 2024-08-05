@@ -29,6 +29,7 @@ public enum ErrorCode {
     ALREADY_REGISTERED_KEYWORD("40018", HttpStatus.BAD_REQUEST, "이미 등록된 키워드입니다."),
     DUPLICATED_KEYWORD("40019", HttpStatus.BAD_REQUEST, "이미 생성된 키워드입니다."),
     INVALID_KEYWORD("40020", HttpStatus.BAD_REQUEST, "키워드는 2글자이상 20글자이하 알파벳/한글/숫자로 구성된 한 단어가 되어야합니다."),
+    DUPLICATED_COMMENT_LIKE("40021", HttpStatus.BAD_REQUEST, "이미 좋아요를 단 댓글입니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
@@ -53,6 +54,9 @@ public enum ErrorCode {
     NOT_FOUND_USER_KEYWORD("40404", HttpStatus.NOT_FOUND, "해당 유저 키워드가 존재하지 않습니다."),
     NOT_FOUND_PROFILE_IMG("40405", HttpStatus.NOT_FOUND, "해당 프로필 사진이 존재하지 않습니다."),
     NOT_FOUND_SUBSCRIPTION("40406", HttpStatus.NOT_FOUND, "해당 사용자 구독 정보가 존재하지 않습니다."),
+    NOT_FOUND_NEWS("40407", HttpStatus.NOT_FOUND, "해당 뉴스가 존재하지 않습니다."),
+    NOT_FOUND_COMMENT("40408", HttpStatus.NOT_FOUND, "해당 댓글이 존재하지 않습니다."),
+    NOT_FOUND_COMMENT_LIKE("40409", HttpStatus.NOT_FOUND, "해당 댓글 좋아요가 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),
