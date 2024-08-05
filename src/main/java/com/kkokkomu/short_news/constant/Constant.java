@@ -30,7 +30,10 @@ public class Constant {
             //소셜로그인
             "/oauth2/login/kakao",
             "/oauth2/login/google",
-            "/oauth2/login/apple"
+            "/oauth2/login/apple",
+
+            // 홈화면
+            "/news/guest/**"
 
             //임시
 //            "/news"

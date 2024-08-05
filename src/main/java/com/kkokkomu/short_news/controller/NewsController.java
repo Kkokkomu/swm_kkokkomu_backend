@@ -44,7 +44,7 @@ public class NewsController {
     }
 
     @Operation(summary = "비로그인 뉴스 리스트 조회")
-    @GetMapping("/list")
+    @GetMapping("/guest/list")
     public ResponseDto<PagingResponseDto<List<GuestNewsListDto>>> guestReadNewsList(@RequestParam int page, @RequestParam int size) {
         log.info("guestReadNewsList controller");
         return ResponseDto.ok(newsService.guestReadNewsList(page, size));
