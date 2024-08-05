@@ -2,9 +2,9 @@ package com.kkokkomu.short_news.controller;
 
 import com.kkokkomu.short_news.annotation.UserId;
 import com.kkokkomu.short_news.dto.comment.request.CreateCommentDto;
+import com.kkokkomu.short_news.dto.comment.request.UpdateCommentDto;
 import com.kkokkomu.short_news.dto.comment.response.CommentDto;
 import com.kkokkomu.short_news.dto.common.ResponseDto;
-import com.kkokkomu.short_news.dto.userCategory.request.UpdateUserCategoryDto;
 import com.kkokkomu.short_news.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,13 +26,20 @@ public class CommentController {
     public ResponseDto<CommentDto> addComment(@Parameter(hidden = true) @UserId Long userId,
                                               @RequestBody CreateCommentDto createCommentDto) {
         log.info("addComment controller");
-        return ResponseDto.ok(commentService.addComment(userId, createCommentDto));
+        return ResponseDto.ok(commentService.createComment(userId, createCommentDto));
     }
 
     @Operation(summary = "댓글 삭제")
     @DeleteMapping("")
-    public ResponseDto<String> addComment(@RequestParam Long commentId) {
-        log.info("addComment controller");
+    public ResponseDto<String> deleteComment(@RequestParam Long commentId) {
+        log.info("deleteComment controller");
         return ResponseDto.ok(commentService.deleteComment(commentId));
+    }
+
+    @Operation(summary = "댓글 수정")
+    @PutMapping("")
+    public ResponseDto<String> editComment(@RequestBody UpdateCommentDto updateCommentDto) {
+        log.info("editComment controller");
+        return ResponseDto.ok(commentService.updateComment(updateCommentDto));
     }
 }

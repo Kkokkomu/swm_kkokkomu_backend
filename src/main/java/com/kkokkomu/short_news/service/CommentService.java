@@ -4,6 +4,7 @@ import com.kkokkomu.short_news.domain.Comment;
 import com.kkokkomu.short_news.domain.News;
 import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.dto.comment.request.CreateCommentDto;
+import com.kkokkomu.short_news.dto.comment.request.UpdateCommentDto;
 import com.kkokkomu.short_news.dto.comment.response.CommentDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
@@ -22,7 +23,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final NewsRepository newsRepository;
 
-    public CommentDto addComment(Long userId, CreateCommentDto createCommentDto) {
+    public CommentDto createComment(Long userId, CreateCommentDto createCommentDto) {
         log.info("addComment");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
@@ -48,7 +49,22 @@ public class CommentService {
 
     public String deleteComment(Long commentId) {
         log.info("deleteComment");
+        commentRepository.findById(commentId)
+                        .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+
         commentRepository.deleteById(commentId);
         return "success";
     } // 댓글 삭제
+
+    public String updateComment(UpdateCommentDto updateCommentDto) {
+        log.info("updateComment");
+        Comment comment = commentRepository.findById(updateCommentDto.commentId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+
+        comment.update(updateCommentDto.content());
+
+        commentRepository.save(comment);
+
+        return updateCommentDto.content();
+    } // 댓글 수정
 }

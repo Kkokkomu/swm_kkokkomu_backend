@@ -62,4 +62,8 @@ public class Comment {
     protected void onUpdate() {
         this.editedAt = LocalDateTime.now(); // 업데이트 시 변경 시간 갱신
     }
+
+    public void update(String content) {
+        this.content = content;
+    }
 }

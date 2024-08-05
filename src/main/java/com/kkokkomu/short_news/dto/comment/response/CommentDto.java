@@ -11,4 +11,5 @@ public record CommentDto(
         Long newsId,
         String content
 ) {
+
 }

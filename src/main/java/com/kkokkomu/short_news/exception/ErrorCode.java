@@ -54,6 +54,7 @@ public enum ErrorCode {
     NOT_FOUND_PROFILE_IMG("40405", HttpStatus.NOT_FOUND, "해당 프로필 사진이 존재하지 않습니다."),
     NOT_FOUND_SUBSCRIPTION("40406", HttpStatus.NOT_FOUND, "해당 사용자 구독 정보가 존재하지 않습니다."),
     NOT_FOUND_NEWS("40407", HttpStatus.NOT_FOUND, "해당 뉴스가 존재하지 않습니다."),
+    NOT_FOUND_COMMENT("40408", HttpStatus.NOT_FOUND, "해당 댓글이 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),
