@@ -35,4 +35,5 @@ public class Constant {
             //임시
 //            "/news"
     );
+    public static final String DEFAULT_PROFILE = "https://kkm-config.s3.ap-northeast-2.amazonaws.com/profile.png";
 }
