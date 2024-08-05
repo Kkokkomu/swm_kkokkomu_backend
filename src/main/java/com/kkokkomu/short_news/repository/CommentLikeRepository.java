@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> {
     void deleteByCommentAndUser(Comment comment, User user);
+
+    Boolean existsByCommentAndUser(Comment comment, User user);
 }

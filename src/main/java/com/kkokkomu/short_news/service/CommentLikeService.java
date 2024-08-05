@@ -9,6 +9,7 @@ import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.repository.CommentLikeRepository;
 import com.kkokkomu.short_news.repository.CommentRepository;
 import com.kkokkomu.short_news.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,10 @@ public class CommentLikeService {
         Comment comment = commentRepository.findById(createCommentLike.commentId())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
 
+        if (commentLikeRepository.existsByCommentAndUser(comment, user)) {
+            throw new CommonException(ErrorCode.DUPLICATED_COMMENT_LIKE);
+        }
+
         commentLikeRepository.save(
                 CommentLike.builder()
                         .user(user)
@@ -39,6 +44,7 @@ public class CommentLikeService {
         return "success";
     } // 댓글 좋아요 생성
 
+    @Transactional
     public String deleteCommentLike(Long userId, Long commentId) {
         log.debug("deleteCommentLike");
         User user = userRepository.findById(userId)
@@ -46,6 +52,10 @@ public class CommentLikeService {
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+
+        if (!commentLikeRepository.existsByCommentAndUser(comment, user)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_COMMENT_LIKE);
+        }
 
         commentLikeRepository.deleteByCommentAndUser(comment, user);
 
