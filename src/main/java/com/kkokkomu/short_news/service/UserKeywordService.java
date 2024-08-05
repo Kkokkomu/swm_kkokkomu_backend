@@ -85,6 +85,6 @@ public class UserKeywordService {
 
         List<UserKeyword> userKeywords = userKeywordRepository.findAllByUserId(userId);
 
-        return UserKeywordDto.ofList(userKeywords);
+        return UserKeywordDto.of(userKeywords);
     }
 }

@@ -59,7 +59,7 @@ public class User {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt; // 최종 삭제 예정 일자
 
-    @Column(name = "is_deleted")
+    @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted; // 소프트 삭제 여부
 
     @Column(name = "privacy_policy_yn")
@@ -100,7 +100,7 @@ public class User {
         this.bannedStartAt = null;
         this.bannedEndAt = null;
         this.deletedAt = null;
-        this.isDeleted = null;
+        this.isDeleted = false;
         this.privacyPolicyYn = privacyPolicyYn;
         this.serviceTermsYn = serviceTermsYn;
         this.alarmYn = alarmYn;

@@ -9,18 +9,16 @@ import java.util.List;
 @Builder
 public record UserKeywordDto(
         Long id,
-        Long userId,
         String keyword
 ) {
     static public UserKeywordDto of(UserKeyword userKeyword) {
         return UserKeywordDto.builder()
                 .id(userKeyword.getId())
-                .userId(userKeyword.getUser().getId())
                 .keyword(userKeyword.getKeyword().getKeyword())
                 .build();
     }
 
-    static public List<UserKeywordDto> ofList(List<UserKeyword> userKeywords) {
+    static public List<UserKeywordDto> of(List<UserKeyword> userKeywords) {
         List<UserKeywordDto> userKeywordDtos = new ArrayList<>();
         for (UserKeyword userKeyword : userKeywords) {
             userKeywordDtos.add(UserKeywordDto.of(userKeyword));

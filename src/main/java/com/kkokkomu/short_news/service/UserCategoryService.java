@@ -8,6 +8,7 @@ import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.repository.UserCategoryRepository;
 import com.kkokkomu.short_news.repository.UserRepository;
 import com.kkokkomu.short_news.type.ECategory;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class UserCategoryService {
     private final UserCategoryRepository userCategoryRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public String updateUserCategory(Long userId, UpdateUserCategoryDto updateUserCategoryDto) {
 
         log.info("updateUserCategory start");
