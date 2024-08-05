@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class CommentLikeController {
     private final CommentLikeService commentLikeService;
 
-    @Operation(summary = "댓글 좋아요 생성")
+    @Operation(summary = "댓글 및 대댓글 좋아요 생성")
     @PostMapping("")
     public ResponseDto<String> addCommentLike(@Parameter(hidden = true) @UserId Long userId,
                                               @RequestBody CreateCommentLike createCommentLike) {
@@ -27,7 +27,7 @@ public class CommentLikeController {
         return ResponseDto.ok(commentLikeService.createCommentLike(userId, createCommentLike));
     }
 
-    @Operation(summary = "댓글 좋아요 삭제")
+    @Operation(summary = "댓글 및 대댓글 좋아요 삭제")
     @DeleteMapping("")
     public ResponseDto<String> deleteCommentLike(@Parameter(hidden = true) @UserId Long userId,
                                                 @RequestParam Long commentId) {
