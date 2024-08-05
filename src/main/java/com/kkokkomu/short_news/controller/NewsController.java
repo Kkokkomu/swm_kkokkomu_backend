@@ -33,7 +33,7 @@ public class NewsController {
 
     @Operation(summary = "뉴스 조회")
     @GetMapping("/list")
-    public ResponseDto<PagingResponseDto<List<NewsListDto>>> readNewsList(@UserId Long userId,
+    public ResponseDto<PagingResponseDto<List<NewsListDto>>> readNewsList(@Parameter(hidden = true) @UserId Long userId,
                                                                           @Parameter(description = "politics, economy, social, entertain, sports, living, world, it를 , 로 구분", example = "social,world") @RequestParam String category,
                                                                           @RequestParam EHomeFilter filter,
                                                                           @RequestParam int page, @RequestParam int size) {
