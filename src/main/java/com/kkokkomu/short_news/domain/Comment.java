@@ -3,6 +3,7 @@ package com.kkokkomu.short_news.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -38,6 +39,15 @@ public class Comment {
     @JoinColumn(name = "parent_id")
     private Comment parent; // 부모 댓글
 
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> children; // 자식 댓글들
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentLike> likes;
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportedComment> reportedComments;
+
     @Builder
     public Comment(User user, News news, String content, Comment parent) {
         this.user = user;
@@ -51,5 +61,9 @@ public class Comment {
     @PreUpdate
     protected void onUpdate() {
         this.editedAt = LocalDateTime.now(); // 업데이트 시 변경 시간 갱신
+    }
+
+    public void update(String content) {
+        this.content = content;
     }
 }

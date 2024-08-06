@@ -5,6 +5,7 @@ import com.kkokkomu.short_news.dto.common.ResponseDto;
 import com.kkokkomu.short_news.dto.user.response.MyPageDto;
 import com.kkokkomu.short_news.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ public class UserController {
 
     @Operation(summary = "마이페이지 유저 정보 조회")
     @GetMapping("/mypage")
-    public ResponseDto<MyPageDto> readMyPageInfo(@UserId Long userId) {
+    public ResponseDto<MyPageDto> readMyPageInfo(@Parameter(hidden = true) @UserId Long userId) {
         log.info("readMyPageInfo controller userId = {}", userId);
         return ResponseDto.ok(userService.readMyPageInfo(userId));
     }
