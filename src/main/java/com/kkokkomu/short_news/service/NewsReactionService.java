@@ -10,9 +10,11 @@ import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.repository.NewsReactionRepository;
 import com.kkokkomu.short_news.repository.NewsRepository;
 import com.kkokkomu.short_news.repository.UserRepository;
+import com.kkokkomu.short_news.type.ENewsReaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -45,4 +47,23 @@ public class NewsReactionService {
 
         return NewsReactionDto.of(newsReaction);
     } // 뉴스 감정표현 생성
+
+    @Transactional
+    public String deleteNewsReaction(Long userId, Long newsId, String reaction) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+
+        ENewsReaction newsReaction = ENewsReaction.valueOf(reaction.toUpperCase());
+
+        // 해당 감정표현이 존재하면 삭제
+        if (newsReactionRepository.existsByNewsIdAndUserIdAndReaction(news.getId(), user.getId(), newsReaction)) {
+            newsReactionRepository.deleteByNewsAndUserAndReaction(news, user, newsReaction);
+            return "success";
+        } else {
+            throw new CommonException(ErrorCode.NOT_FOUND_NEWS_REACTION);
+        }
+    } // 뉴스 감정표현 삭제
 }
