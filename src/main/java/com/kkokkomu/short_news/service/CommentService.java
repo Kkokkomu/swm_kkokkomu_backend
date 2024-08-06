@@ -4,11 +4,9 @@ import com.kkokkomu.short_news.domain.Comment;
 import com.kkokkomu.short_news.domain.News;
 import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.dto.comment.request.CreateCommentDto;
+import com.kkokkomu.short_news.dto.comment.request.CreateReplyDto;
 import com.kkokkomu.short_news.dto.comment.request.UpdateCommentDto;
-import com.kkokkomu.short_news.dto.comment.response.CommentDto;
-import com.kkokkomu.short_news.dto.comment.response.CommentListDto;
-import com.kkokkomu.short_news.dto.comment.response.ReplyDto;
-import com.kkokkomu.short_news.dto.comment.response.ReplyListDto;
+import com.kkokkomu.short_news.dto.comment.response.*;
 import com.kkokkomu.short_news.dto.user.response.CommentSummoryDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
@@ -37,8 +35,10 @@ public class CommentService {
     private final NewsRepository newsRepository;
     private final CommentLikeRepository commentLikeRepository;
 
+    /* 댓글 */
+
     public CommentDto createComment(Long userId, CreateCommentDto createCommentDto) {
-        log.info("addComment");
+        log.info("createComment service");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 
@@ -63,7 +63,7 @@ public class CommentService {
     } // 댓글 생성
 
     public String deleteComment(Long commentId) {
-        log.info("deleteComment");
+        log.info("deleteComment service");
         commentRepository.findById(commentId)
                         .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
 
@@ -72,7 +72,7 @@ public class CommentService {
     } // 댓글 삭제
 
     public String updateComment(UpdateCommentDto updateCommentDto) {
-        log.info("updateComment");
+        log.info("updateComment service");
         Comment comment = commentRepository.findById(updateCommentDto.commentId())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
 
@@ -85,6 +85,7 @@ public class CommentService {
 
     @Transactional
     public List<CommentListDto> readLatestComments(Long newsId, Long cursorId, int size) {
+        log.info("readLatestComments service");
         // 요청한 뉴스랑 댓글이 존재하는지 검사
         if (!newsRepository.existsById(newsId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
@@ -123,6 +124,7 @@ public class CommentService {
 
     @Transactional
     public List<CommentListDto> readPopularComments(Long newsId, Long cursorId, int size) {
+        log.info("readPopularComments service");
 
         // 요청한 뉴스랑 댓글이 존재하는지 검사
         if (!newsRepository.existsById(newsId)) {
@@ -165,8 +167,61 @@ public class CommentService {
         return commentListDtos;
     } // 인기순 댓글 조회
 
+    /* 대댓글 */
+
+    public ReplyDto createReply(Long userId, CreateReplyDto createReplyDto) {
+        log.info("createReply service");
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+
+        News news = newsRepository.findById(createReplyDto.newsId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+
+        Comment parent = commentRepository.findById(createReplyDto.commentId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_PARENT_COMMENT));
+
+        Comment reply = commentRepository.save(
+                Comment.builder()
+                        .user(user)
+                        .news(news)
+                        .content(createReplyDto.content())
+                        .parent(parent)
+                        .build()
+        );
+
+        return ReplyDto.builder()
+                .id(reply.getId())
+                .userId(userId)
+                .newsId(createReplyDto.newsId())
+                .parentId(parent.getId())
+                .content(reply.getContent())
+                .editedAt(reply.getEditedAt().toString())
+                .build();
+    } // 대댓글 생성
+
+//    public String deleteComment(Long commentId) {
+//        log.info("deleteComment");
+//        commentRepository.findById(commentId)
+//                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+//
+//        commentRepository.deleteById(commentId);
+//        return "success";
+//    } // 댓글 삭제
+
+//    public String updateComment(UpdateCommentDto updateCommentDto) {
+//        log.info("updateComment");
+//        Comment comment = commentRepository.findById(updateCommentDto.commentId())
+//                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+//
+//        comment.update(updateCommentDto.content());
+//
+//        commentRepository.save(comment);
+//
+//        return updateCommentDto.content();
+//    } // 댓글 수정
+
     @Transactional
-    public ReplyDto readOldestReply(Long parentId, Long cursorId, int size) {
+    public ReplyByParentDto readOldestReply(Long parentId, Long cursorId, int size) {
         // 요청한 대댓글의 부모가 존재하는지
         Comment parent = commentRepository.findById(parentId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
@@ -207,7 +262,7 @@ public class CommentService {
                 .comment(CommentDto.of(parent))
                 .build();
 
-        return ReplyDto.builder()
+        return ReplyByParentDto.builder()
                 .parentComment(commentListDto)
                 .replies(replyListDtos)
                 .build();

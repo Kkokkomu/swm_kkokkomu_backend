@@ -2,9 +2,11 @@ package com.kkokkomu.short_news.controller;
 
 import com.kkokkomu.short_news.annotation.UserId;
 import com.kkokkomu.short_news.dto.comment.request.CreateCommentDto;
+import com.kkokkomu.short_news.dto.comment.request.CreateReplyDto;
 import com.kkokkomu.short_news.dto.comment.request.UpdateCommentDto;
 import com.kkokkomu.short_news.dto.comment.response.CommentDto;
 import com.kkokkomu.short_news.dto.comment.response.CommentListDto;
+import com.kkokkomu.short_news.dto.comment.response.ReplyByParentDto;
 import com.kkokkomu.short_news.dto.comment.response.ReplyDto;
 import com.kkokkomu.short_news.dto.common.ResponseDto;
 import com.kkokkomu.short_news.service.CommentService;
@@ -24,6 +26,8 @@ import java.util.List;
 @RequestMapping("/comment")
 public class CommentController {
     private final CommentService commentService;
+
+    /* 댓글 */
 
     @Operation(summary = "댓글 추가")
     @PostMapping("")
@@ -63,11 +67,35 @@ public class CommentController {
         return ResponseDto.ok(commentService.readPopularComments(newsId, cursorId, size));
     }
 
-    @Operation(summary = "오래된순 댓글 조회")
+    /* 대댓글 */
+
+    @Operation(summary = "오래된순 대댓글 조회")
     @GetMapping("/reply/oldest")
-    public ResponseDto<ReplyDto> readOldestComment(@RequestParam Long commentId,
-                                                   @Parameter(description = "처음 조회 요청시에는 보내지 않나도됌. 두번째 요청부터 이전에 받은 데이터들 중 제일 마지막 댓글 id를 cursor id로 반환") @RequestParam(required = false) Long cursorId,
-                                                   @RequestParam int size) {
+    public ResponseDto<ReplyByParentDto> readOldestComment(@RequestParam Long commentId,
+                                                           @Parameter(description = "처음 조회 요청시에는 보내지 않나도됌. 두번째 요청부터 이전에 받은 데이터들 중 제일 마지막 댓글 id를 cursor id로 반환") @RequestParam(required = false) Long cursorId,
+                                                           @RequestParam int size) {
         return ResponseDto.ok(commentService.readOldestReply(commentId, cursorId, size));
     }
+
+    @Operation(summary = "대댓글 추가")
+    @PostMapping("/reply")
+    public ResponseDto<ReplyDto> addReply(@Parameter(hidden = true) @UserId Long userId,
+                                          @RequestBody CreateReplyDto createReplyDto) {
+        log.info("addReply controller");
+        return ResponseDto.ok(commentService.createReply(userId, createReplyDto));
+    }
+//
+//    @Operation(summary = "댓글 삭제")
+//    @DeleteMapping("")
+//    public ResponseDto<String> deleteComment(@RequestParam Long commentId) {
+//        log.info("deleteComment controller");
+//        return ResponseDto.ok(commentService.deleteComment(commentId));
+//    }
+//
+//    @Operation(summary = "댓글 수정")
+//    @PutMapping("")
+//    public ResponseDto<String> editComment(@RequestBody UpdateCommentDto updateCommentDto) {
+//        log.info("editComment controller");
+//        return ResponseDto.ok(commentService.updateComment(updateCommentDto));
+//    }
 }
