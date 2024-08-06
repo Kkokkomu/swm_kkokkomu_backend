@@ -1,6 +1,5 @@
 package com.kkokkomu.short_news.service;
 
-import com.google.api.services.youtube.model.PageInfo;
 import com.kkokkomu.short_news.domain.News;
 import com.kkokkomu.short_news.domain.NewsKeyword;
 import com.kkokkomu.short_news.domain.RelatedNews;
@@ -94,7 +93,7 @@ public class NewsService {
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 
         // 일단 최신순으로 조회
-        Page<News> results = newsRepository.findAll(PageRequest.of(page, size));
+        Page<News> results = newsRepository.findAllCreatedAtDesc(PageRequest.of(page, size));
 
         List<News> news = results.getContent();
         PageInfoDto pageInfo = PageInfoDto.fromPageInfo(results);
@@ -136,7 +135,7 @@ public class NewsService {
 
     public PagingResponseDto<List<GuestNewsListDto>> guestReadNewsList(int page, int size) {
         // 일단 최신순으로 조회
-        Page<News> results = newsRepository.findAll(PageRequest.of(page, size));
+        Page<News> results = newsRepository.findAllCreatedAtDesc(PageRequest.of(page, size));
 
         List<News> news = results.getContent();
         PageInfoDto pageInfo = PageInfoDto.fromPageInfo(results);
@@ -185,7 +184,30 @@ public class NewsService {
     } // 뉴스 정보 조회
 
     /* 검색화면 */
+    public List<SearchNewsDto> getCategoryFilteredNews(String category, Long cursorId, int size) {
 
+        log.info("getfilteredNews service");
+
+        ECategory eCategory = ECategory.valueOf(category.toUpperCase());
+
+        // 커서 아이디에 해당하는 뉴스가 있는지 검사
+        if (cursorId != null && !newsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        List<News> news;
+        if (cursorId == null) {
+            news = newsRepository.findFirstPageByCategoryOrderByIdDesc(eCategory, pageRequest);
+        } else {
+            news = newsRepository.findByCategoryAndIdLessThanOrderByIdDesc(eCategory, cursorId, pageRequest);
+        }
+
+        return SearchNewsDto.of(news);
+    } // 탐색 화면 카테고리 필터 조회
+
+    // 뉴스 인기순 조회
 
     public ECategory getCategoryByName(String categoryName) {
         ECategory category = null;

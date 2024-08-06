@@ -3,10 +3,7 @@ package com.kkokkomu.short_news.controller;
 import com.kkokkomu.short_news.annotation.UserId;
 import com.kkokkomu.short_news.dto.common.PagingResponseDto;
 import com.kkokkomu.short_news.dto.common.ResponseDto;
-import com.kkokkomu.short_news.dto.news.response.GenerateNewsDto;
-import com.kkokkomu.short_news.dto.news.response.GuestNewsListDto;
-import com.kkokkomu.short_news.dto.news.response.NewsInfoDto;
-import com.kkokkomu.short_news.dto.news.response.NewsListDto;
+import com.kkokkomu.short_news.dto.news.response.*;
 import com.kkokkomu.short_news.service.NewsService;
 import com.kkokkomu.short_news.type.EHomeFilter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +22,8 @@ import java.util.List;
 @RequestMapping("/news")
 public class NewsController {
     private final NewsService newsService;
+
+    /************************** 홈화면 **************************/
 
     @Operation(summary = "뉴스 생성(이거 건들면안돼!!!!!!!!으어어ㅓ어)")
     @PostMapping("")
@@ -55,5 +54,21 @@ public class NewsController {
     public ResponseDto<NewsInfoDto> readNewsInfo(@RequestParam Long newsId) {
         log.info("readNewsInfo controller");
         return ResponseDto.ok(newsService.readNewsInfo(newsId));
+    }
+
+    /************************** 탐색 화면 **************************/
+
+    @Operation(summary = "탐색 화면 카테고리 필터 조회")
+    @GetMapping("/filter")
+    public ResponseDto<List<SearchNewsDto>> readFilteredNews(@Parameter(description = "popular | politics | economy | social | entertain | sports | living | world | it") @RequestParam String category,
+                                                             @RequestParam(required = false) Long cursorId,
+                                                             @RequestParam int size) {
+        log.info("readFilteredNews controller");
+
+        if (category.equals("popular")) {
+            return ResponseDto.ok(newsService.getCategoryFilteredNews(category, cursorId, size));
+        } else {
+            return ResponseDto.ok(newsService.getCategoryFilteredNews(category, cursorId, size));
+        }
     }
 }
