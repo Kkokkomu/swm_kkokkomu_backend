@@ -4,6 +4,7 @@ import com.kkokkomu.short_news.annotation.UserId;
 import com.kkokkomu.short_news.dto.comment.request.CreateCommentDto;
 import com.kkokkomu.short_news.dto.comment.request.UpdateCommentDto;
 import com.kkokkomu.short_news.dto.comment.response.CommentDto;
+import com.kkokkomu.short_news.dto.comment.response.CommentListDto;
 import com.kkokkomu.short_news.dto.common.ResponseDto;
 import com.kkokkomu.short_news.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "댓글")
 @RestController
@@ -41,5 +44,13 @@ public class CommentController {
     public ResponseDto<String> editComment(@RequestBody UpdateCommentDto updateCommentDto) {
         log.info("editComment controller");
         return ResponseDto.ok(commentService.updateComment(updateCommentDto));
+    }
+
+    @Operation(summary = "최신순 댓글 조회")
+    @GetMapping("/latest")
+    public ResponseDto<List<CommentListDto>> readLatestComment(@RequestParam Long newsId,
+                                                               @Parameter(description = "처음 조회 요청시에는 보내지 않나도됌. 두번째 요청부터 이전에 받은 아디들 중 제일 작은 댓글 id를 cursor id로 반환") @RequestParam(required = false) Long cursorId,
+                                                               @RequestParam int size) {
+        return ResponseDto.ok(commentService.readLatestComments(newsId, cursorId, size));
     }
 }
