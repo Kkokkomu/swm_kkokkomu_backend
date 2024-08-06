@@ -7,6 +7,8 @@ import com.kkokkomu.short_news.dto.comment.request.CreateCommentDto;
 import com.kkokkomu.short_news.dto.comment.request.UpdateCommentDto;
 import com.kkokkomu.short_news.dto.comment.response.CommentDto;
 import com.kkokkomu.short_news.dto.comment.response.CommentListDto;
+import com.kkokkomu.short_news.dto.comment.response.ReplyDto;
+import com.kkokkomu.short_news.dto.comment.response.ReplyListDto;
 import com.kkokkomu.short_news.dto.user.response.CommentSummoryDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
@@ -161,5 +163,53 @@ public class CommentService {
         }
 
         return commentListDtos;
-    }
+    } // 인기순 댓글 조회
+
+    @Transactional
+    public ReplyDto readOldestReply(Long parentId, Long cursorId, int size) {
+        // 요청한 대댓글의 부모가 존재하는지
+        Comment parent = commentRepository.findById(parentId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+
+        // 요청한 커서가 존재하는지
+        if (cursorId != null && !commentRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_COMMENT);
+        }
+
+        // size에 따른 페이지 요청 객체 생성
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 댓글 조회
+        List<Comment> replies;
+        if (cursorId == null) {
+            // 처음 요청
+            replies = commentRepository.findFirstPageByParentOrderById(parent, pageRequest);
+        } else {
+            // 2번째부터
+            replies = commentRepository.findByParentAndIdLessThanOrderById(parent, cursorId, pageRequest);
+        }
+
+        List<ReplyListDto> replyListDtos = new ArrayList<>();
+        for (Comment reply : replies) {
+            replyListDtos.add(
+                    ReplyListDto.builder()
+                            .commentLikeCnt(commentLikeRepository.countByComment(reply))
+                            .user(CommentSummoryDto.of(reply.getUser()))
+                            .comment(CommentDto.of(reply))
+                            .build()
+            );
+        }
+
+        CommentListDto commentListDto = CommentListDto.builder()
+                .commentLikeCnt(commentLikeRepository.countByComment(parent))
+                .replyCnt(parent.getChildren().size())
+                .user(CommentSummoryDto.of(parent.getUser()))
+                .comment(CommentDto.of(parent))
+                .build();
+
+        return ReplyDto.builder()
+                .parentComment(commentListDto)
+                .replies(replyListDtos)
+                .build();
+    } // 오래된순 대댓글 조회
 }

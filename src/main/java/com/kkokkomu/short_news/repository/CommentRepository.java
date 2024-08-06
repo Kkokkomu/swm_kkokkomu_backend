@@ -58,4 +58,19 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             @Param("likeWeight") double likeWeight,
             Pageable pageable
     );
+
+    // 오래된순 대댓글 조회
+    @Query("SELECT c FROM Comment c WHERE c.parent = :parent AND c.id > :cursorId ORDER BY c.id")
+    List<Comment> findByParentAndIdLessThanOrderById(
+            @Param("parent") Comment parent,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    // 최신순 초기화 조회
+    @Query("SELECT c FROM Comment c WHERE c.parent = :parent ORDER BY c.id")
+    List<Comment> findFirstPageByParentOrderById(
+            @Param("parent") Comment parent,
+            Pageable pageable
+    );
 }

@@ -5,6 +5,7 @@ import com.kkokkomu.short_news.dto.comment.request.CreateCommentDto;
 import com.kkokkomu.short_news.dto.comment.request.UpdateCommentDto;
 import com.kkokkomu.short_news.dto.comment.response.CommentDto;
 import com.kkokkomu.short_news.dto.comment.response.CommentListDto;
+import com.kkokkomu.short_news.dto.comment.response.ReplyDto;
 import com.kkokkomu.short_news.dto.common.ResponseDto;
 import com.kkokkomu.short_news.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,5 +61,13 @@ public class CommentController {
                                                                @Parameter(description = "처음 조회 요청시에는 보내지 않나도됌. 두번째 요청부터 이전에 받은 데이터들 중 제일 마지막 댓글 id를 cursor id로 반환") @RequestParam(required = false) Long cursorId,
                                                                @RequestParam int size) {
         return ResponseDto.ok(commentService.readPopularComments(newsId, cursorId, size));
+    }
+
+    @Operation(summary = "오래된순 댓글 조회")
+    @GetMapping("/reply/oldest")
+    public ResponseDto<ReplyDto> readOldestComment(@RequestParam Long commentId,
+                                                   @Parameter(description = "처음 조회 요청시에는 보내지 않나도됌. 두번째 요청부터 이전에 받은 데이터들 중 제일 마지막 댓글 id를 cursor id로 반환") @RequestParam(required = false) Long cursorId,
+                                                   @RequestParam int size) {
+        return ResponseDto.ok(commentService.readOldestReply(commentId, cursorId, size));
     }
 }

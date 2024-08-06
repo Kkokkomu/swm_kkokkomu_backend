@@ -58,6 +58,7 @@ public enum ErrorCode {
     NOT_FOUND_NEWS("40407", HttpStatus.NOT_FOUND, "해당 뉴스가 존재하지 않습니다."),
     NOT_FOUND_COMMENT("40408", HttpStatus.NOT_FOUND, "해당 댓글이 존재하지 않습니다."),
     NOT_FOUND_COMMENT_LIKE("40409", HttpStatus.NOT_FOUND, "해당 댓글 좋아요가 존재하지 않습니다."),
+    NOT_FOUND_PARENT_COMMENT("40410", HttpStatus.NOT_FOUND, "해당 부모 댓글이 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),
