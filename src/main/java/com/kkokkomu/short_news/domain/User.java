@@ -9,6 +9,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -85,6 +86,9 @@ public class User {
 
     @Column(name = "edited_at")
     private LocalDateTime editedAt; // 변경 일자
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProfileImg> profileImgs;
 
     @Builder
     public User(String email, String password, String nickname, LocalDate birthday, ESex sex, EUserRole role, ELoginProvider loginProvider, Boolean isLogin, String refreshToken, LocalDateTime bannedStartAt, LocalDateTime bannedEndAt, LocalDateTime deletedAt, Boolean isDeleted, Boolean privacyPolicyYn, Boolean serviceTermsYn, Boolean alarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn, Boolean alarmAdYn) {
