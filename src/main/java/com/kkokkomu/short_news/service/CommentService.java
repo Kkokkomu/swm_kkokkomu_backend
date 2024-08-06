@@ -199,14 +199,14 @@ public class CommentService {
                 .build();
     } // 대댓글 생성
 
-//    public String deleteComment(Long commentId) {
-//        log.info("deleteComment");
-//        commentRepository.findById(commentId)
-//                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
-//
-//        commentRepository.deleteById(commentId);
-//        return "success";
-//    } // 댓글 삭제
+    public String deleteReply(Long replyId) {
+        log.info("deleteReply service");
+        commentRepository.findById(replyId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPLY));
+
+        commentRepository.deleteById(replyId);
+        return "success";
+    } // 대댓글 삭제
 
 //    public String updateComment(UpdateCommentDto updateCommentDto) {
 //        log.info("updateComment");

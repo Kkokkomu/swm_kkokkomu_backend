@@ -84,13 +84,13 @@ public class CommentController {
         log.info("addReply controller");
         return ResponseDto.ok(commentService.createReply(userId, createReplyDto));
     }
-//
-//    @Operation(summary = "댓글 삭제")
-//    @DeleteMapping("")
-//    public ResponseDto<String> deleteComment(@RequestParam Long commentId) {
-//        log.info("deleteComment controller");
-//        return ResponseDto.ok(commentService.deleteComment(commentId));
-//    }
+
+    @Operation(summary = "대댓글 삭제")
+    @DeleteMapping("/reply")
+    public ResponseDto<String> deleteReply(@RequestParam Long replyId) {
+        log.info("deleteReply controller");
+        return ResponseDto.ok(commentService.deleteReply(replyId));
+    }
 //
 //    @Operation(summary = "댓글 수정")
 //    @PutMapping("")
