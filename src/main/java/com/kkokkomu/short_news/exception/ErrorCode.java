@@ -31,6 +31,7 @@ public enum ErrorCode {
     INVALID_KEYWORD("40020", HttpStatus.BAD_REQUEST, "키워드는 2글자이상 20글자이하 알파벳/한글/숫자로 구성된 한 단어가 되어야합니다."),
     DUPLICATED_COMMENT_LIKE("40021", HttpStatus.BAD_REQUEST, "이미 좋아요를 단 댓글입니다."),
     INVALID_COMMENT_CURSOR("40022", HttpStatus.BAD_REQUEST, "요청하신 커서 id에 해당하는 댓글이 존재하지 않습니다."),
+    DUPLICATED_NEWS_REACTION("40023", HttpStatus.BAD_REQUEST, "이미 감정표현을 한 뉴스입니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
@@ -60,6 +61,7 @@ public enum ErrorCode {
     NOT_FOUND_COMMENT_LIKE("40409", HttpStatus.NOT_FOUND, "해당 댓글 좋아요가 존재하지 않습니다."),
     NOT_FOUND_PARENT_COMMENT("40410", HttpStatus.NOT_FOUND, "해당 부모 댓글이 존재하지 않습니다."),
     NOT_FOUND_REPLY("40411", HttpStatus.NOT_FOUND, "해당 대댓글이 존재하지 않습니다."),
+    NOT_FOUND_CURSOR("40412", HttpStatus.NOT_FOUND, "해당 커서가 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),

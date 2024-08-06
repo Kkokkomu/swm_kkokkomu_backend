@@ -92,7 +92,7 @@ public class CommentService {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
         }
         if (cursorId != null && !commentRepository.existsById(cursorId)) {
-            throw new CommonException(ErrorCode.NOT_FOUND_COMMENT);
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
         }
 
         // size에 따른 페이지 요청 객체 생성
@@ -132,7 +132,7 @@ public class CommentService {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
         }
         if (cursorId != null && !commentRepository.existsById(cursorId)) {
-            throw new CommonException(ErrorCode.NOT_FOUND_COMMENT);
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
         }
 
         PageRequest pageRequest = PageRequest.of(0, size);
@@ -225,7 +225,7 @@ public class CommentService {
     public ReplyByParentDto readOldestReply(Long parentId, Long cursorId, int size) {
         // 요청한 대댓글의 부모가 존재하는지
         Comment parent = commentRepository.findById(parentId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
 
         // 요청한 커서가 존재하는지
         if (cursorId != null && !commentRepository.existsById(cursorId)) {
