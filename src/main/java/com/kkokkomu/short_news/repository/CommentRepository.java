@@ -26,4 +26,36 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             @Param("newsId") Long newsId,
             Pageable pageable
     );
+
+    // 인기순 조회
+    @Query("SELECT c FROM Comment c " +
+            "LEFT JOIN c.likes likes " +
+            "LEFT JOIN c.children children " +
+            "WHERE c.news.id = :newsId " +
+            "GROUP BY c " +
+            "HAVING (COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) < :cursorScore " +
+            "OR ((COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) = :cursorScore AND c.id < :cursorId) " +
+            "ORDER BY (COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) DESC, c.id DESC")
+    List<Comment> findByNewsIdAndPopularityLessThan(
+            @Param("newsId") Long newsId,
+            @Param("replyWeight") double replyWeight,
+            @Param("likeWeight") double likeWeight,
+            @Param("cursorScore") double cursorScore,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    // 인기순 초기화 조회
+    @Query("SELECT c FROM Comment c " +
+            "LEFT JOIN c.likes likes " +
+            "LEFT JOIN c.children children " +
+            "WHERE c.news.id = :newsId " +
+            "GROUP BY c " +
+            "ORDER BY (COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) DESC, c.id DESC")
+    List<Comment> findFirstPageByNewsIdAndPopularity(
+            @Param("newsId") Long newsId,
+            @Param("replyWeight") double replyWeight,
+            @Param("likeWeight") double likeWeight,
+            Pageable pageable
+    );
 }

@@ -30,6 +30,7 @@ public enum ErrorCode {
     DUPLICATED_KEYWORD("40019", HttpStatus.BAD_REQUEST, "이미 생성된 키워드입니다."),
     INVALID_KEYWORD("40020", HttpStatus.BAD_REQUEST, "키워드는 2글자이상 20글자이하 알파벳/한글/숫자로 구성된 한 단어가 되어야합니다."),
     DUPLICATED_COMMENT_LIKE("40021", HttpStatus.BAD_REQUEST, "이미 좋아요를 단 댓글입니다."),
+    INVALID_COMMENT_CURSOR("40022", HttpStatus.BAD_REQUEST, "요청하신 커서 id에 해당하는 댓글이 존재하지 않습니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),

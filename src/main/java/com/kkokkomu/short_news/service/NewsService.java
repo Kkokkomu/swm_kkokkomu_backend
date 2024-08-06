@@ -167,8 +167,6 @@ public class NewsService {
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
     } // 비로그인 숏폼 리스트 조회
 
-    // 비로그인 숏폼 리스트 조회
-
     @Transactional
     public NewsInfoDto readNewsInfo(Long newsId) {
         News news = newsRepository.findById(newsId)

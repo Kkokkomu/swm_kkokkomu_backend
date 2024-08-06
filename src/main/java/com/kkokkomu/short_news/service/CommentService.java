@@ -23,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.kkokkomu.short_news.constant.Constant.LIKE_WEIGHT;
+import static com.kkokkomu.short_news.constant.Constant.REPLY_WEIGHT;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -99,6 +102,50 @@ public class CommentService {
         } else {
             // 2번째부터
             comments = commentRepository.findByNewsIdAndIdLessThanOrderByIdDesc(newsId, cursorId, pageRequest);
+        }
+
+        List<CommentListDto> commentListDtos = new ArrayList<>();
+        for (Comment comment : comments) {
+            commentListDtos.add(
+                    CommentListDto.builder()
+                            .commentLikeCnt(commentLikeRepository.countByComment(comment))
+                            .replyCnt(comment.getChildren().size())
+                            .user(CommentSummoryDto.of(comment.getUser()))
+                            .comment(CommentDto.of(comment))
+                            .build()
+            );
+        }
+
+        return commentListDtos;
+    } // 최신순 댓글 조회
+
+    @Transactional
+    public List<CommentListDto> readPopularComments(Long newsId, Long cursorId, int size) {
+
+        // 요청한 뉴스랑 댓글이 존재하는지 검사
+        if (!newsRepository.existsById(newsId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
+        }
+        if (cursorId != null && !commentRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_COMMENT);
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 댓글 조회
+        List<Comment> comments;
+        if (cursorId == null) {
+             comments = commentRepository.findFirstPageByNewsIdAndPopularity(newsId, REPLY_WEIGHT, LIKE_WEIGHT, pageRequest);
+        } else {
+            // 커서 댓글 찾기
+            Comment cursorComment = commentRepository.findById(cursorId)
+                    .orElseThrow(() -> new CommonException(ErrorCode.INVALID_COMMENT_CURSOR));
+
+            // 커서 점수 계산
+            double cursorScore = (cursorComment.getChildren().size() * REPLY_WEIGHT) +
+                    (cursorComment.getLikes().size() * LIKE_WEIGHT);
+
+            comments = commentRepository.findByNewsIdAndPopularityLessThan(newsId, REPLY_WEIGHT, LIKE_WEIGHT, cursorScore, cursorId, pageRequest);
         }
 
         List<CommentListDto> commentListDtos = new ArrayList<>();

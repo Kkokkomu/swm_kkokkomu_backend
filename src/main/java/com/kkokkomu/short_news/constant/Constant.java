@@ -13,7 +13,8 @@ public class Constant {
     public static final String USER_ID_CLAIM_NAME = "uid";
     public static final String USER_EMAIL_CLAIM_NAME = "email";
     public static final String CONTENT_TYPE = "Content-Type";
-    public static final Long MEMBER_INFO_RETENTION_PERIOD = 30L;
+    public static final double REPLY_WEIGHT = 1.5;
+    public static final double LIKE_WEIGHT = 1.0;
     public static final List<String> NO_NEED_AUTH_URLS = List.of(
             //테스트
             "/test",
