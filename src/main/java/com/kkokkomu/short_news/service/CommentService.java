@@ -6,6 +6,7 @@ import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.dto.comment.request.CreateCommentDto;
 import com.kkokkomu.short_news.dto.comment.request.CreateReplyDto;
 import com.kkokkomu.short_news.dto.comment.request.UpdateCommentDto;
+import com.kkokkomu.short_news.dto.comment.request.UpdateReplyDto;
 import com.kkokkomu.short_news.dto.comment.response.*;
 import com.kkokkomu.short_news.dto.user.response.CommentSummoryDto;
 import com.kkokkomu.short_news.exception.CommonException;
@@ -208,17 +209,17 @@ public class CommentService {
         return "success";
     } // 대댓글 삭제
 
-//    public String updateComment(UpdateCommentDto updateCommentDto) {
-//        log.info("updateComment");
-//        Comment comment = commentRepository.findById(updateCommentDto.commentId())
-//                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
-//
-//        comment.update(updateCommentDto.content());
-//
-//        commentRepository.save(comment);
-//
-//        return updateCommentDto.content();
-//    } // 댓글 수정
+    public String updateReply(UpdateReplyDto updateReplyDto) {
+        log.info("updateComment");
+        Comment reply = commentRepository.findById(updateReplyDto.replyId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPLY));
+
+        reply.update(updateReplyDto.content());
+
+        commentRepository.save(reply);
+
+        return updateReplyDto.content();
+    } // 댓글 수정
 
     @Transactional
     public ReplyByParentDto readOldestReply(Long parentId, Long cursorId, int size) {
