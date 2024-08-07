@@ -66,7 +66,7 @@ public class AuthService {
         );
 
         // 공유 이벤트 참여
-        ShareEvent shareEvent = shareEventRepository.findByRecommandCode(socialRegisterRequestDto.recommandCode());
+        ShareEvent shareEvent = shareEventRepository.findByRecommandCode(socialRegisterRequestDto.recommendCode());
 
         if (shareEvent != null) {
             shareEvent.updateParticipantingCnt();

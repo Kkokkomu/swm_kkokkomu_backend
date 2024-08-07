@@ -67,10 +67,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             Pageable pageable
     );
 
-    // 최신순 초기화 조회
+    // 오래된순 초기화 조회
     @Query("SELECT c FROM Comment c WHERE c.parent = :parent ORDER BY c.id")
     List<Comment> findFirstPageByParentOrderById(
             @Param("parent") Comment parent,
             Pageable pageable
     );
+
+
 }

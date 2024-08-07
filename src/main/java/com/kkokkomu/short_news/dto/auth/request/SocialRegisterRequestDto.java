@@ -20,6 +20,6 @@ public record SocialRegisterRequestDto(
 
         @NotNull LocalDate birthday,
 
-        String recommandCode
+        String recommendCode
 ) {
 }
