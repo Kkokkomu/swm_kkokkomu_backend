@@ -4,6 +4,7 @@ import com.kkokkomu.short_news.type.ECategory;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -48,6 +49,12 @@ public class News {
 
     @Column(name = "edited_at")
     private LocalDateTime editedAt; // 변경 일자
+
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments; // 댓글들
+
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NewsReaction> reactions; // 감정표현
 
     @Builder
     public News(String shortformUrl, String youtubeUrl, String instagramUrl, String thumbnail, String title, String summary, ECategory category) {
