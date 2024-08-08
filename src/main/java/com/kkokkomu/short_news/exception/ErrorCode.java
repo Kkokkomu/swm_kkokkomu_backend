@@ -32,6 +32,7 @@ public enum ErrorCode {
     DUPLICATED_COMMENT_LIKE("40021", HttpStatus.BAD_REQUEST, "이미 좋아요를 단 댓글입니다."),
     INVALID_COMMENT_CURSOR("40022", HttpStatus.BAD_REQUEST, "요청하신 커서 id에 해당하는 댓글이 존재하지 않습니다."),
     DUPLICATED_NEWS_REACTION("40023", HttpStatus.BAD_REQUEST, "이미 감정표현을 한 뉴스입니다."),
+    INVALID_CATEGORY_SELECTION("40024", HttpStatus.BAD_REQUEST, "모든 카테고리가 false일 수는 없습니다"),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),

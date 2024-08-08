@@ -26,8 +26,15 @@ public class UserCategoryService {
 
     @Transactional
     public String updateUserCategory(Long userId, UpdateUserCategoryDto updateUserCategoryDto) {
-
         log.info("updateUserCategory start");
+
+        // 모든 카테고리가 false인지 확인
+        if (!updateUserCategoryDto.politics() && !updateUserCategoryDto.economy() &&
+                !updateUserCategoryDto.social() && !updateUserCategoryDto.entertain() &&
+                !updateUserCategoryDto.sports() && !updateUserCategoryDto.living() &&
+                !updateUserCategoryDto.world() && !updateUserCategoryDto.it()) {
+            throw new CommonException(ErrorCode.INVALID_CATEGORY_SELECTION);
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
