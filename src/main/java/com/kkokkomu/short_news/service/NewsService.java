@@ -48,13 +48,60 @@ public class NewsService {
 
         // 영상 생성 서버에서 영상 url 및 정보 받아옴
 
-        String summary = "한 대표는 당 정책위의장의 사퇴 문제에 대해 인선은 당 대표의 권한이라고 밝혔습니다.\n 그는 인선 지연의 이유로 특수한 정국을 언급하며, 좋은 정치 수행을 위한 과정이라고 강조했습니다.\n 또한, 인물난 지적에 대해 반박하며 능력 있는 인재들이 많다고 자신감을 드러냈습니다.";
-        List<String> keywords = new ArrayList<>(Arrays.asList("인선", "정책위", "변화"));
-        String s3Url = "";
+        String summary = "박찬대 더불어민주당 원내대표가 경제 비상상황에 대한 초당적 대처를 위해 여·야 영수회담을 조속히 개최할 것을 제안했습니다. 그는 정부와 국회 간의 상시 정책협의기구 구축의 필요성과 윤석열 대통령의 재의요구권 행사 중단도 요구했습니다. 박 원내대표는 현재의 경제 위기가 민생에 중대한 영향을 미칠 수 있음을 강조하며 협력의 중요성을 역설했습니다.";
+        List<String> keywords = new ArrayList<>(Arrays.asList("여·야 회담", "정책협의기구", "경제 위기"));
+        String s3Url = "https://kkm-shortform.s3.ap-northeast-2.amazonaws.com/6.mp4";
         String thumnailUrl = "";
-        String title = "";
+        String title = "박찬대, 여·야 영수회담 제안 및 정책협의기구 구성 촉구";
         ECategory category = getCategoryByName("정치");
-        String relatedUrl = "https://n.news.naver.com/mnews/article/277/0005454035";
+        String relatedUrl = "https://n.news.naver.com/mnews/article/028/0002701654";
+
+        // 뉴스 키워드 생성
+        List<NewsKeyword> newsKeywords = newsKeywordService.registerNewsKeyword(news, keywords);
+
+        // 관련 기사 링크 등록
+        RelatedNews relatedNews = relatedNewsRepository.save(
+                RelatedNews.builder()
+                        .news(news)
+                        .relatedUrl(relatedUrl)
+                        .build()
+        );
+
+        news.update(
+                s3Url,
+                "",
+                "",
+                thumnailUrl,
+                title,
+                summary,
+                category
+        );
+
+        news = newsRepository.save(news);
+
+        return GenerateNewsDto.builder()
+                .newsDto(NewsDto.of(news))
+                .keywords(newsKeywords.stream()
+                        .map(newsKeyword -> newsKeyword.getKeyword().getKeyword())
+                        .toList())
+                .relatedUrl(relatedNews.getRelatedUrl())
+                .build();
+    } // 영상 생성 api
+
+    public GenerateNewsDto generateNews2() {
+        News news = News.builder().build();
+
+        news = newsRepository.save(news);
+
+        // 영상 생성 서버에서 영상 url 및 정보 받아옴
+
+        String summary = "배우 한지민이 밴드 잔나비 보컬 최정훈과 열애 중임을 공식적으로 발표했습니다. 소속사는 두 사람이 최근 연인 관계로 발전했으며, 팬들의 응원을 요청했습니다. 한지민과 최정훈은 지난해 방송 프로그램을 통해 인연을 쌓았던 것으로 알려졌습니다.";
+        List<String> keywords = new ArrayList<>(Arrays.asList("한지민", "최정훈", "열애"));
+        String s3Url = "https://kkm-shortform.s3.ap-northeast-2.amazonaws.com/1.mp4";
+        String thumnailUrl = "";
+        String title = "한지민, 최정훈과 열애 인정";
+        ECategory category = getCategoryByName("연애");
+        String relatedUrl = "https://m.entertain.naver.com/ranking/article/609/0000883902";
 
         // 뉴스 키워드 생성
         List<NewsKeyword> newsKeywords = newsKeywordService.registerNewsKeyword(news, keywords);
