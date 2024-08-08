@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum EHomeFilter {
-    RECOMMAND("RECOMMAND"),
+    RECOMMAND("RECOMMEND"),
     LATEST("LATEST");
 
     private final String homeFileter;
