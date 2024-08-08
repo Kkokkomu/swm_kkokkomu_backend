@@ -1,20 +1,15 @@
 package com.kkokkomu.short_news.service;
 
 import com.kkokkomu.short_news.constant.Constant;
-import com.kkokkomu.short_news.domain.ProfileImg;
-import com.kkokkomu.short_news.domain.ShareEvent;
-import com.kkokkomu.short_news.domain.Subscription;
-import com.kkokkomu.short_news.domain.User;
+import com.kkokkomu.short_news.domain.*;
 import com.kkokkomu.short_news.dto.auth.request.SocialRegisterRequestDto;
 import com.kkokkomu.short_news.dto.auth.response.AccessTokenDto;
 import com.kkokkomu.short_news.dto.auth.response.JwtTokenDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.oauth2.OAuth2UserInfo;
-import com.kkokkomu.short_news.repository.ProfileImgRepository;
-import com.kkokkomu.short_news.repository.ShareEventRepository;
-import com.kkokkomu.short_news.repository.SubscriptionRepository;
-import com.kkokkomu.short_news.repository.UserRepository;
+import com.kkokkomu.short_news.repository.*;
+import com.kkokkomu.short_news.type.ECategory;
 import com.kkokkomu.short_news.type.ELoginProvider;
 import com.kkokkomu.short_news.type.EUserRole;
 import com.kkokkomu.short_news.util.JwtUtil;
@@ -23,9 +18,12 @@ import com.kkokkomu.short_news.util.PasswordUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static com.kkokkomu.short_news.constant.Constant.DEFAULT_PROFILE;
@@ -38,6 +36,7 @@ public class AuthService {
     private final ShareEventRepository shareEventRepository;
     private final ProfileImgRepository profileImgRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final UserCategoryRepository userCategoryRepository;
 
     private final OAuth2Util oAuth2Util;
     private final JwtUtil jwtUtil;
@@ -71,6 +70,19 @@ public class AuthService {
         if (shareEvent != null) {
             shareEvent.updateParticipantingCnt();
         }
+
+        // 카테고리 정보 true로 초기화
+        List<UserCategory> userCategories = new ArrayList<>();
+        for (ECategory eCategory : ECategory.values()) {
+            userCategories.add(
+                    UserCategory.builder()
+                            .user(user)
+                            .category(eCategory)
+                            .build()
+            );
+        }
+        userCategoryRepository.saveAll(userCategories);
+
 
         // 기본 프로필 이미지 등록
         profileImgRepository.save(

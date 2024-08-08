@@ -269,7 +269,7 @@ public class NewsService {
         } else if (Objects.equals(categoryName, "생활")) {
             category = ECategory.LIVING;
         } else if (Objects.equals(categoryName, "세계")) {
-            category = ECategory.WOLRD;
+            category = ECategory.WORLD;
         } else if (Objects.equals(categoryName, "연예")) {
             category = ECategory.ENTERTAIN;
         } else if (Objects.equals(categoryName, "스포츠")) {

@@ -10,7 +10,6 @@ import com.kkokkomu.short_news.repository.UserCategoryRepository;
 import com.kkokkomu.short_news.repository.UserRepository;
 import com.kkokkomu.short_news.type.ECategory;
 import jakarta.transaction.Transactional;
-import jdk.jfr.Category;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,8 +26,15 @@ public class UserCategoryService {
 
     @Transactional
     public String updateUserCategory(Long userId, UpdateUserCategoryDto updateUserCategoryDto) {
-
         log.info("updateUserCategory start");
+
+        // 모든 카테고리가 false인지 확인
+        if (!updateUserCategoryDto.politics() && !updateUserCategoryDto.economy() &&
+                !updateUserCategoryDto.social() && !updateUserCategoryDto.entertain() &&
+                !updateUserCategoryDto.sports() && !updateUserCategoryDto.living() &&
+                !updateUserCategoryDto.world() && !updateUserCategoryDto.it()) {
+            throw new CommonException(ErrorCode.INVALID_CATEGORY_SELECTION);
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
@@ -38,78 +44,50 @@ public class UserCategoryService {
 
         // 요청한 카테고리 추가
         List<UserCategory> userCategories = new ArrayList<>();
-
-        if (updateUserCategoryDto.politics()) {
-            userCategories.add(
-                    UserCategory.builder()
-                            .user(user)
-                            .category(ECategory.POLITICS)
-                            .build()
-            );
-            log.info(ECategory.POLITICS.toString());
-        }
-        if (updateUserCategoryDto.economy()) {
-            userCategories.add(
-                    UserCategory.builder()
-                            .user(user)
-                            .category(ECategory.ECONOMY)
-                            .build()
-            );
-            log.info(ECategory.ECONOMY.toString());
-        }
-        if (updateUserCategoryDto.social()) {
-            userCategories.add(
-                    UserCategory.builder()
-                            .user(user)
-                            .category(ECategory.SOCIAL)
-                            .build()
-            );
-            log.info(ECategory.SOCIAL.toString());
-        }
-        if (updateUserCategoryDto.entertain()) {
-            userCategories.add(
-                    UserCategory.builder()
-                            .user(user)
-                            .category(ECategory.ENTERTAIN)
-                            .build()
-            );
-            log.info(ECategory.ENTERTAIN.toString());
-        }
-        if (updateUserCategoryDto.sports()) {
-            userCategories.add(
-                    UserCategory.builder()
-                            .user(user)
-                            .category(ECategory.SPORTS)
-                            .build()
-            );
-            log.info(ECategory.SPORTS.toString());
-        }
-        if (updateUserCategoryDto.living()) {
-            userCategories.add(
-                    UserCategory.builder()
-                            .user(user)
-                            .category(ECategory.LIVING)
-                            .build()
-            );
-            log.info(ECategory.LIVING.toString());
-        }
-        if (updateUserCategoryDto.world()) {
-            userCategories.add(
-                    UserCategory.builder()
-                            .user(user)
-                            .category(ECategory.WOLRD)
-                            .build()
-            );
-            log.info(ECategory.WOLRD.toString());
-        }
-        if (updateUserCategoryDto.it()) {
-            userCategories.add(
-                    UserCategory.builder()
-                            .user(user)
-                            .category(ECategory.IT)
-                            .build()
-            );
-            log.info(ECategory.IT.toString());
+        for (ECategory category : ECategory.values()) {
+            switch (category) {
+                case POLITICS -> {
+                    if (updateUserCategoryDto.politics()) {
+                        userCategories.add(createUserCategory(user, category));
+                    }
+                }
+                case ECONOMY -> {
+                    if (updateUserCategoryDto.economy()) {
+                        userCategories.add(createUserCategory(user, category));
+                    }
+                }
+                case SOCIAL -> {
+                    if (updateUserCategoryDto.social()) {
+                        userCategories.add(createUserCategory(user, category));
+                    }
+                }
+                case ENTERTAIN -> {
+                    if (updateUserCategoryDto.entertain()) {
+                        userCategories.add(createUserCategory(user, category));
+                    }
+                }
+                case SPORTS -> {
+                    if (updateUserCategoryDto.sports()) {
+                        userCategories.add(createUserCategory(user, category));
+                    }
+                }
+                case LIVING -> {
+                    if (updateUserCategoryDto.living()) {
+                        userCategories.add(createUserCategory(user, category));
+                    }
+                }
+                case WORLD -> {
+                    if (updateUserCategoryDto.world()) {
+                        userCategories.add(createUserCategory(user, category));
+                    }
+                }
+                case IT -> {
+                    if (updateUserCategoryDto.it()) {
+                        userCategories.add(createUserCategory(user, category));
+                    }
+                }
+            }
+            log.info(category.toString());
         }
 
         userCategoryRepository.saveAll(userCategories);
@@ -144,7 +122,7 @@ public class UserCategoryService {
                 sports = true;
             } else if (userCategory.getCategory().equals(ECategory.LIVING)) {
                 living = true;
-            } else if (userCategory.getCategory().equals(ECategory.WOLRD)) {
+            } else if (userCategory.getCategory().equals(ECategory.WORLD)) {
                 world = true;
             } else if (userCategory.getCategory().equals(ECategory.IT)) {
                 it = true;
@@ -161,6 +139,13 @@ public class UserCategoryService {
                 .entertain(entertain)
                 .it(it)
                 .sports(sports)
+                .build();
+    }
+
+    private UserCategory createUserCategory(User user, ECategory category) {
+        return UserCategory.builder()
+                .user(user)
+                .category(category)
                 .build();
     }
 }
