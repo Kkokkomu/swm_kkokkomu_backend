@@ -41,6 +41,7 @@ public class NewsService {
 
     /* 홈화면 */
 
+    @jakarta.transaction.Transactional
     public GenerateNewsDto generateNews() {
         News news = News.builder().build();
 
@@ -88,6 +89,7 @@ public class NewsService {
                 .build();
     } // 영상 생성 api
 
+    @jakarta.transaction.Transactional
     public GenerateNewsDto generateNews2() {
         News news = News.builder().build();
 
