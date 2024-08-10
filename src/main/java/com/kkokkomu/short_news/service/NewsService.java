@@ -1,11 +1,14 @@
 package com.kkokkomu.short_news.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kkokkomu.short_news.domain.News;
 import com.kkokkomu.short_news.domain.NewsKeyword;
 import com.kkokkomu.short_news.domain.RelatedNews;
 import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.dto.common.PageInfoDto;
 import com.kkokkomu.short_news.dto.common.PagingResponseDto;
+import com.kkokkomu.short_news.dto.news.request.CreateGenerateNewsDto;
+import com.kkokkomu.short_news.dto.news.request.RequestGenerateNewsDto;
 import com.kkokkomu.short_news.dto.news.response.*;
 import com.kkokkomu.short_news.dto.newsReaction.response.NewReactionByUserDto;
 import com.kkokkomu.short_news.dto.newsReaction.response.ReactionCntDto;
@@ -19,13 +22,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+
+import static com.kkokkomu.short_news.constant.Constant.VIDEO_SERVER_GENERATE_HOST;
 
 @Service
 @RequiredArgsConstructor
@@ -42,51 +49,109 @@ public class NewsService {
     /* 홈화면 */
 
     @jakarta.transaction.Transactional
-    public GenerateNewsDto generateNews() {
-        News news = News.builder().build();
+    public List<GenerateNewsDto> generateNews(CreateGenerateNewsDto createGenerateNewsDto) {
+        int repeat = createGenerateNewsDto.count_news() + createGenerateNewsDto.count_entertain() + createGenerateNewsDto.count_sports();
 
-        news = newsRepository.save(news);
+        // 임시 뉴스 객체 생성 및 id 추출
+        List<News> newsList = new ArrayList<>();
+        for (int i = 0; i < repeat; i++) {
+            News news = News.builder().build();
+
+            newsList.add(newsRepository.save(news));
+        }
+        List<Integer> idList = newsList.stream()
+                .map(news -> Math.toIntExact(news.getId()))
+                .toList();
+
+        // 임시 생성 객체 id를 기반으로 한 요청 생성
+        String url = VIDEO_SERVER_GENERATE_HOST;
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        RequestGenerateNewsDto requestGenerateNewsDto = RequestGenerateNewsDto.builder()
+                .count_news(createGenerateNewsDto.count_news())
+                .count_entertain(createGenerateNewsDto.count_entertain())
+                .count_sports(createGenerateNewsDto.count_sports())
+                .id_list(idList)
+                .build();
+
+        HttpEntity<RequestGenerateNewsDto> entity = new HttpEntity<>(requestGenerateNewsDto, headers);
+
+        log.info("request video");
+        ResponseEntity<GenerateResponseDto[]> response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
+
+        log.info("response data : {}", Objects.requireNonNull(response.getBody()).length);
+        GenerateResponseDto[] generateResponseDtos = response.getBody();
 
         // 영상 생성 서버에서 영상 url 및 정보 받아옴
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<GenerateNewsDto> generateNewsDtos = new ArrayList<>();
+        for (int i = 0; i < idList.size(); i++) {
+            // 인덱스에 맞는 임시 뉴스 객체
+            News news = newsList.get(i);
 
-        String summary = "박찬대 더불어민주당 원내대표가 경제 비상상황에 대한 초당적 대처를 위해 여·야 영수회담을 조속히 개최할 것을 제안했습니다. 그는 정부와 국회 간의 상시 정책협의기구 구축의 필요성과 윤석열 대통령의 재의요구권 행사 중단도 요구했습니다. 박 원내대표는 현재의 경제 위기가 민생에 중대한 영향을 미칠 수 있음을 강조하며 협력의 중요성을 역설했습니다.";
-        List<String> keywords = new ArrayList<>(Arrays.asList("여·야 회담", "정책협의기구", "경제 위기"));
-        String s3Url = "https://kkm-shortform.s3.ap-northeast-2.amazonaws.com/6.mp4";
-        String thumnailUrl = "";
-        String title = "박찬대, 여·야 영수회담 제안 및 정책협의기구 구성 촉구";
-        ECategory category = getCategoryByName("정치");
-        String relatedUrl = "https://n.news.naver.com/mnews/article/028/0002701654";
+            // 인덱스에 맞는 비디오 서버 반환값
+            GenerateResponseDto generateResponseDto;
+            if (generateResponseDtos != null) {
+                generateResponseDto = generateResponseDtos[i];
+            } else {
+                throw new CommonException(ErrorCode.VIDEO_SERVER_ERROR);
+            }
 
-        // 뉴스 키워드 생성
-        List<NewsKeyword> newsKeywords = newsKeywordService.registerNewsKeyword(news, keywords);
 
-        // 관련 기사 링크 등록
-        RelatedNews relatedNews = relatedNewsRepository.save(
-                RelatedNews.builder()
-                        .news(news)
-                        .relatedUrl(relatedUrl)
-                        .build()
-        );
+            Map<String, Object> dataMap = generateResponseDto.data();
+            NewsInfoDataDto dataDto = objectMapper.convertValue(dataMap, NewsInfoDataDto.class);
 
-        news.update(
-                s3Url,
-                "",
-                "",
-                thumnailUrl,
-                title,
-                summary,
-                category
-        );
+            NewsInfoSummaryDto summaryDto = dataDto.summary();
+            Map<String, String> keywordMap = dataDto.keywords();
 
-        news = newsRepository.save(news);
 
-        return GenerateNewsDto.builder()
-                .newsDto(NewsDto.of(news))
-                .keywords(newsKeywords.stream()
-                        .map(newsKeyword -> newsKeyword.getKeyword().getKeyword())
-                        .toList())
-                .relatedUrl(relatedNews.getRelatedUrl())
-                .build();
+            String summary = summaryDto.sentence_total();
+            List<String> keywords = new ArrayList<>(Arrays.asList(keywordMap.get("keyword_0"), keywordMap.get("keyword_1"), keywordMap.get("keyword_2")));
+            String s3Url = generateResponseDto.s3();
+            String thumnailUrl = "";
+            String title = dataDto.title();
+            ECategory category = getCategoryByName(dataDto.section());
+            String relatedUrl = dataDto.url();
+
+            // 뉴스 키워드 생성
+            List<NewsKeyword> newsKeywords = newsKeywordService.registerNewsKeyword(news, keywords);
+
+            // 관련 기사 링크 등록
+            RelatedNews relatedNews = relatedNewsRepository.save(
+                    RelatedNews.builder()
+                            .news(news)
+                            .relatedUrl(relatedUrl)
+                            .build()
+            );
+
+            news.update(
+                    s3Url,
+                    "",
+                    "",
+                    thumnailUrl,
+                    title,
+                    summary,
+                    category
+            );
+
+            news = newsRepository.save(news);
+
+            generateNewsDtos.add(
+                    GenerateNewsDto.builder()
+                            .newsDto(NewsDto.of(news))
+                            .keywords(newsKeywords.stream()
+                                    .map(newsKeyword -> newsKeyword.getKeyword().getKeyword())
+                                    .toList())
+                            .relatedUrl(relatedNews.getRelatedUrl())
+                            .build()
+            );
+        }
+
+        return generateNewsDtos;
     } // 영상 생성 api
 
     @jakarta.transaction.Transactional

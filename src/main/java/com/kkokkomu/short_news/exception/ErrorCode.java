@@ -70,7 +70,8 @@ public enum ErrorCode {
 
     // Server, File Up/DownLoad Error
     SERVER_ERROR("50000", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
-    SHORTFORM_PROCESSING_ERROR("50001", HttpStatus.INTERNAL_SERVER_ERROR, "s3 파일 업로드에 실패했습니다.");
+    SHORTFORM_PROCESSING_ERROR("50001", HttpStatus.INTERNAL_SERVER_ERROR, "s3 파일 업로드에 실패했습니다."),
+    VIDEO_SERVER_ERROR("50002", HttpStatus.INTERNAL_SERVER_ERROR, "비디오 생성에 실패했습니다");
 
     private final String code;
     private final HttpStatus httpStatus;
