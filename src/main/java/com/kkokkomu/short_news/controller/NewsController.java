@@ -3,6 +3,7 @@ package com.kkokkomu.short_news.controller;
 import com.kkokkomu.short_news.annotation.UserId;
 import com.kkokkomu.short_news.dto.common.PagingResponseDto;
 import com.kkokkomu.short_news.dto.common.ResponseDto;
+import com.kkokkomu.short_news.dto.news.request.CreateGenerateNewsDto;
 import com.kkokkomu.short_news.dto.news.response.*;
 import com.kkokkomu.short_news.service.NewsService;
 import com.kkokkomu.short_news.type.EHomeFilter;
@@ -24,21 +25,6 @@ public class NewsController {
     private final NewsService newsService;
 
     /************************** 홈화면 **************************/
-
-    @Operation(summary = "뉴스 생성(이거 건들면안돼!!!!!!!!으어어ㅓ어)")
-    @PostMapping("/test1")
-    public ResponseDto<GenerateNewsDto> generateNews() {
-        log.info("generateNews controller");
-        return ResponseDto.ok(newsService.generateNews());
-    }
-
-    @Operation(summary = "뉴스 생성(이거 건들면안돼!!!!!!!!으어어ㅓ어)")
-    @PostMapping("/test2")
-    public ResponseDto<GenerateNewsDto> generateNews2() {
-        log.info("generateNews controller");
-        return ResponseDto.ok(newsService.generateNews2());
-    }
-
     @Operation(summary = "뉴스 리스트 조회")
     @GetMapping("/list")
     public ResponseDto<PagingResponseDto<List<NewsListDto>>> readNewsList(@Parameter(hidden = true) @UserId Long userId,
@@ -77,5 +63,13 @@ public class NewsController {
         } else {
             return ResponseDto.ok(newsService.getCategoryFilteredNews(category, cursorId, size));
         }
+    }
+
+    /************************** 뉴스 생성 **************************/
+
+    @PostMapping("/generate")
+    public ResponseDto<List<GenerateNewsDto>> generateNews(@RequestBody CreateGenerateNewsDto createGenerateNewsDto) {
+        log.info("generateNews controller");
+        return ResponseDto.ok(newsService.generateNews(createGenerateNewsDto));
     }
 }

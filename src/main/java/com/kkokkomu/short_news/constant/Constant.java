@@ -15,6 +15,7 @@ public class Constant {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final double REPLY_WEIGHT = 1.5;
     public static final double LIKE_WEIGHT = 1.0;
+    public static final String VIDEO_SERVER_GENERATE_HOST = "http://3.34.144.199:8000/generate";
     public static final List<String> NO_NEED_AUTH_URLS = List.of(
             //테스트
             "/test",
