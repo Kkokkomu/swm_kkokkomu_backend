@@ -25,13 +25,6 @@ public class NewsController {
     private final NewsService newsService;
 
     /************************** 홈화면 **************************/
-    @Operation(summary = "뉴스 생성(이거 건들면안돼!!!!!!!!으어어ㅓ어)")
-    @PostMapping("/test2")
-    public ResponseDto<GenerateNewsDto> generateNews2() {
-        log.info("generateNews controller");
-        return ResponseDto.ok(newsService.generateNews2());
-    }
-
     @Operation(summary = "뉴스 리스트 조회")
     @GetMapping("/list")
     public ResponseDto<PagingResponseDto<List<NewsListDto>>> readNewsList(@Parameter(hidden = true) @UserId Long userId,

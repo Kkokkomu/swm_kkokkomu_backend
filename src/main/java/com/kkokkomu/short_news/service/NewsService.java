@@ -154,54 +154,6 @@ public class NewsService {
         return generateNewsDtos;
     } // 영상 생성 api
 
-    @jakarta.transaction.Transactional
-    public GenerateNewsDto generateNews2() {
-        News news = News.builder().build();
-
-        news = newsRepository.save(news);
-
-        // 영상 생성 서버에서 영상 url 및 정보 받아옴
-
-        String summary = "배우 한지민이 밴드 잔나비 보컬 최정훈과 열애 중임을 공식적으로 발표했습니다. 소속사는 두 사람이 최근 연인 관계로 발전했으며, 팬들의 응원을 요청했습니다. 한지민과 최정훈은 지난해 방송 프로그램을 통해 인연을 쌓았던 것으로 알려졌습니다.";
-        List<String> keywords = new ArrayList<>(Arrays.asList("한지민", "최정훈", "열애"));
-        String s3Url = "https://kkm-shortform.s3.ap-northeast-2.amazonaws.com/1.mp4";
-        String thumnailUrl = "";
-        String title = "한지민, 최정훈과 열애 인정";
-        ECategory category = getCategoryByName("연애");
-        String relatedUrl = "https://m.entertain.naver.com/ranking/article/609/0000883902";
-
-        // 뉴스 키워드 생성
-        List<NewsKeyword> newsKeywords = newsKeywordService.registerNewsKeyword(news, keywords);
-
-        // 관련 기사 링크 등록
-        RelatedNews relatedNews = relatedNewsRepository.save(
-                RelatedNews.builder()
-                        .news(news)
-                        .relatedUrl(relatedUrl)
-                        .build()
-        );
-
-        news.update(
-                s3Url,
-                "",
-                "",
-                thumnailUrl,
-                title,
-                summary,
-                category
-        );
-
-        news = newsRepository.save(news);
-
-        return GenerateNewsDto.builder()
-                .newsDto(NewsDto.of(news))
-                .keywords(newsKeywords.stream()
-                        .map(newsKeyword -> newsKeyword.getKeyword().getKeyword())
-                        .toList())
-                .relatedUrl(relatedNews.getRelatedUrl())
-                .build();
-    } // 영상 생성 api
-
     public PagingResponseDto<List<NewsListDto>> readNewsList(Long userId, String category, EHomeFilter filter, int page, int size) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
