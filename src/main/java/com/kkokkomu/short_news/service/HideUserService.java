@@ -5,6 +5,7 @@ import com.kkokkomu.short_news.domain.HideUser;
 import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.dto.hideUser.request.CreateHideUserDto;
 import com.kkokkomu.short_news.dto.hideUser.response.HideUserDto;
+import com.kkokkomu.short_news.dto.hideUser.response.SummaryHideUserDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.repository.CommentRepository;
@@ -13,6 +14,7 @@ import com.kkokkomu.short_news.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -49,10 +51,13 @@ public class HideUserService {
         return "success";
     } // 유저 차단 해제
 
-//    public String readHiddenList() {
-//
-//        hideUserRepository.deleteById(hideUserId);
-//
-//        return "success";
-//    } // 유저 차단 해제
+    @Transactional(readOnly = true)
+    public List<SummaryHideUserDto> readHiddenList(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+
+        List<HideUser> byUser = hideUserRepository.findByUser(user);
+
+        return SummaryHideUserDto.of(byUser);
+    } // 유저 차단 목록 조회
 }

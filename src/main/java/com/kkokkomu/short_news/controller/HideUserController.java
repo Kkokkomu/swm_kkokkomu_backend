@@ -5,6 +5,7 @@ import com.kkokkomu.short_news.dto.common.PagingResponseDto;
 import com.kkokkomu.short_news.dto.common.ResponseDto;
 import com.kkokkomu.short_news.dto.hideUser.request.CreateHideUserDto;
 import com.kkokkomu.short_news.dto.hideUser.response.HideUserDto;
+import com.kkokkomu.short_news.dto.hideUser.response.SummaryHideUserDto;
 import com.kkokkomu.short_news.dto.keyword.response.SearchKeywordDto;
 import com.kkokkomu.short_news.service.HideUserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,5 +38,12 @@ public class HideUserController {
     public ResponseDto<String> deleteHideUser(@RequestParam Long hiddenId ) {
         log.info("deleteHideUser controller");
         return ResponseDto.ok(hideUserService.cancelHideUser(hiddenId));
+    }
+
+    @Operation(summary = "유저 목록 조회")
+    @GetMapping("/list")
+    public ResponseDto<List<SummaryHideUserDto>> readHideUserList(@Parameter(hidden = true) @UserId Long userId) {
+        log.info("readHideUserList controller");
+        return ResponseDto.ok(hideUserService.readHiddenList(userId));
     }
 }
