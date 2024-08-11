@@ -232,7 +232,7 @@ public class NewsService {
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
     } // 비로그인 숏폼 리스트 조회
 
-    @Transactional
+    @Transactional(readOnly = true)
     public NewsInfoDto readNewsInfo(Long newsId) {
         News news = newsRepository.findById(newsId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
@@ -273,7 +273,12 @@ public class NewsService {
         return SearchNewsDto.of(news);
     } // 탐색 화면 카테고리 필터 조회
 
-    // 뉴스 인기순 조회
+//    public List<SearchNewsDto> getFilteredNewsByText(String category, String text, String order, Long cursorId, int size) {
+//        log.info("getFilteredNewsByText service");
+//
+//
+//    }
+//    // 뉴스 인기순 조회
 
     public ECategory getCategoryByName(String categoryName) {
         ECategory category = null;

@@ -14,6 +14,31 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
+    // 비로그인 최신순 댓글 조회
+    @Query("""
+    SELECT c FROM Comment c 
+    WHERE c.news.id = :newsId 
+    AND c.id < :cursorId 
+    ORDER BY c.id DESC
+    """)
+    Page<Comment> findByNewsIdAndIdLessThanOrderByIdDescGuest(
+            @Param("newsId") Long newsId,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+
+    // 비로그인 최신순 댓글 초기화 조회
+    @Query("""
+    SELECT c FROM Comment c 
+    WHERE c.news.id = :newsId 
+    ORDER BY c.id DESC
+    """)
+    Page<Comment> findFirstPageByNewsIdOrderByIdDescGuest(
+            @Param("newsId") Long newsId,
+            Pageable pageable
+    );
+
     // 최신순 댓글 조회
     @Query("""
     SELECT c FROM Comment c 
@@ -89,6 +114,43 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             Pageable pageable
     );
 
+    //  비로그인 인기순 조회
+    @Query("""
+    SELECT c FROM Comment c 
+    LEFT JOIN c.likes likes 
+    LEFT JOIN c.children children 
+    WHERE c.news.id = :newsId 
+    GROUP BY c 
+    HAVING (COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) < :cursorScore 
+    OR ((COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) = :cursorScore AND c.id < :cursorId) 
+    ORDER BY (COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) DESC, c.id DESC
+    """)
+    Page<Comment> findByNewsIdAndPopularityLessThanGuest(
+            @Param("newsId") Long newsId,
+            @Param("replyWeight") double replyWeight,
+            @Param("likeWeight") double likeWeight,
+            @Param("cursorScore") double cursorScore,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+
+    // 비로그인 인기순 초기화 조회
+    @Query("""
+    SELECT c FROM Comment c 
+    LEFT JOIN c.likes likes 
+    LEFT JOIN c.children children 
+    WHERE c.news.id = :newsId 
+    GROUP BY c 
+    ORDER BY (COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) DESC, c.id DESC
+    """)
+    Page<Comment> findFirstPageByNewsIdAndPopularityGuest(
+            @Param("newsId") Long newsId,
+            @Param("replyWeight") double replyWeight,
+            @Param("likeWeight") double likeWeight,
+            Pageable pageable
+    );
+
 
     // 오래된 순 대댓글 조회
     @Query("""
@@ -119,6 +181,32 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findFirstPageByParentOrderById(
             @Param("parent") Comment parent,
             @Param("user") User user,
+            Pageable pageable
+    );
+
+    // 비로그인 오래된 순 대댓글 조회
+    @Query("""
+    SELECT c 
+    FROM Comment c 
+    WHERE c.parent = :parent 
+    AND c.id > :cursorId 
+    ORDER BY c.id
+    """)
+    Page<Comment> findByParentAndIdLessThanOrderByIdGuest(
+            @Param("parent") Comment parent,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    // 비로그인 오래된 순 대댓글 조회 초기화
+    @Query("""
+    SELECT c 
+    FROM Comment c 
+    WHERE c.parent = :parent 
+    ORDER BY c.id
+    """)
+    Page<Comment> findFirstPageByParentOrderByIdGuest(
+            @Param("parent") Comment parent,
             Pageable pageable
     );
 
