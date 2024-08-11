@@ -28,15 +28,14 @@ public class HideUserController {
     @PostMapping("")
     public ResponseDto<HideUserDto> addHideUser(@Parameter(hidden = true) @UserId Long userId,
                                                   @RequestBody CreateHideUserDto createHideUserDto) {
-        log.info("searchKeyword controller");
+        log.info("addHideUser controller");
         return ResponseDto.ok(hideUserService.hideUser(userId, createHideUserDto));
     }
 
-//    @Operation(summary = "유저 차단 삭제")
-//    @PostMapping("")
-//    public ResponseDto<HideUserDto> deleteHideUser(@Parameter(hidden = true) @UserId Long userId,
-//                                                @RequestBody CreateHideUserDto createHideUserDto) {
-//        log.info("searchKeyword controller");
-//        return ResponseDto.ok(hideUserService.hideUser(userId, createHideUserDto));
-//    }
+    @Operation(summary = "유저 차단 삭제")
+    @DeleteMapping("")
+    public ResponseDto<String> deleteHideUser(@RequestParam Long hiddenId ) {
+        log.info("deleteHideUser controller");
+        return ResponseDto.ok(hideUserService.cancelHideUser(hiddenId));
+    }
 }

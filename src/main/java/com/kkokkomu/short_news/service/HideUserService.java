@@ -39,15 +39,20 @@ public class HideUserService {
         return HideUserDto.of(hideUser);
     } // 유저 차단 생성
 
-    public String cancelHideUserList(List<Long> hideUserIdList) {
-        for (Long hideUserId : hideUserIdList) {
-            if (!hideUserRepository.existsById(hideUserId)) {
-                throw new CommonException(ErrorCode.NOT_FOUND_HIDE_USER);
-            }
-
-            hideUserRepository.deleteById(hideUserId);
+    public String cancelHideUser(Long hideUserId) {
+        if (!hideUserRepository.existsById(hideUserId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_HIDE_USER);
         }
+
+        hideUserRepository.deleteById(hideUserId);
 
         return "success";
     } // 유저 차단 해제
+
+//    public String readHiddenList() {
+//
+//        hideUserRepository.deleteById(hideUserId);
+//
+//        return "success";
+//    } // 유저 차단 해제
 }
