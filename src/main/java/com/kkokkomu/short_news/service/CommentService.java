@@ -88,8 +88,10 @@ public class CommentService {
     } // 댓글 수정
 
     @Transactional
-    public CursorResponseDto<List<CommentListDto>> readLatestComments(Long newsId, Long cursorId, int size) {
+    public CursorResponseDto<List<CommentListDto>> readLatestComments(Long userId, Long newsId, Long cursorId, int size) {
         log.info("readLatestComments service");
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         // 요청한 뉴스랑 댓글이 존재하는지 검사
         if (!newsRepository.existsById(newsId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
@@ -106,11 +108,11 @@ public class CommentService {
         Page<Comment> results;
         if (cursorId == null) {
             // 처음 요청
-            results = commentRepository.findFirstPageByNewsIdOrderByIdDesc(newsId, pageRequest);
+            results = commentRepository.findFirstPageByNewsIdOrderByIdDesc(newsId, user, pageRequest);
             comments = results.getContent();
         } else {
             // 2번째부터
-            results = commentRepository.findByNewsIdAndIdLessThanOrderByIdDesc(newsId, cursorId, pageRequest);
+            results = commentRepository.findByNewsIdAndIdLessThanOrderByIdDesc(newsId, cursorId, user, pageRequest);
             comments = results.getContent();
         }
 
@@ -132,8 +134,11 @@ public class CommentService {
     } // 최신순 댓글 조회
 
     @Transactional
-    public CursorResponseDto<List<CommentListDto>> readPopularComments(Long newsId, Long cursorId, int size) {
+    public CursorResponseDto<List<CommentListDto>> readPopularComments(Long userId, Long newsId, Long cursorId, int size) {
         log.info("readPopularComments service");
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 
         // 요청한 뉴스랑 댓글이 존재하는지 검사
         if (!newsRepository.existsById(newsId)) {
@@ -149,7 +154,7 @@ public class CommentService {
         List<Comment> comments;
         Page<Comment> results;
         if (cursorId == null) {
-             results = commentRepository.findFirstPageByNewsIdAndPopularity(newsId, REPLY_WEIGHT, LIKE_WEIGHT, pageRequest);
+             results = commentRepository.findFirstPageByNewsIdAndPopularity(newsId, REPLY_WEIGHT, LIKE_WEIGHT, user, pageRequest);
              comments = results.getContent();
         } else {
             // 커서 댓글 찾기
@@ -160,7 +165,7 @@ public class CommentService {
             double cursorScore = (cursorComment.getChildren().size() * REPLY_WEIGHT) +
                     (cursorComment.getLikes().size() * LIKE_WEIGHT);
 
-            results = commentRepository.findByNewsIdAndPopularityLessThan(newsId, REPLY_WEIGHT, LIKE_WEIGHT, cursorScore, cursorId, pageRequest);
+            results = commentRepository.findByNewsIdAndPopularityLessThan(newsId, REPLY_WEIGHT, LIKE_WEIGHT, cursorScore, cursorId, user, pageRequest);
             comments = results.getContent();
         }
 
@@ -235,7 +240,9 @@ public class CommentService {
     } // 댓글 수정
 
     @Transactional
-    public CursorResponseDto<ReplyByParentDto> readOldestReply(Long parentId, Long cursorId, int size) {
+    public CursorResponseDto<ReplyByParentDto> readOldestReply(Long userId, Long parentId, Long cursorId, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         // 요청한 대댓글의 부모가 존재하는지
         Comment parent = commentRepository.findById(parentId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
@@ -253,11 +260,11 @@ public class CommentService {
         Page<Comment> results;
         if (cursorId == null) {
             // 처음 요청
-            results = commentRepository.findFirstPageByParentOrderById(parent, pageRequest);
+            results = commentRepository.findFirstPageByParentOrderById(parent, user, pageRequest);
             replies = results.getContent();
         } else {
             // 2번째부터
-            results = commentRepository.findByParentAndIdLessThanOrderById(parent, cursorId, pageRequest);
+            results = commentRepository.findByParentAndIdLessThanOrderById(parent, cursorId, user, pageRequest);
             replies = results.getContent();
         }
 

@@ -55,18 +55,20 @@ public class CommentController {
 
     @Operation(summary = "최신순 댓글 조회")
     @GetMapping("/latest")
-    public ResponseDto<CursorResponseDto<List<CommentListDto>>> readLatestComment(@RequestParam Long newsId,
+    public ResponseDto<CursorResponseDto<List<CommentListDto>>> readLatestComment(@Parameter(hidden = true) @UserId Long userId,
+                                                                                  @RequestParam Long newsId,
                                                                                   @Parameter(description = "처음 조회 요청시에는 보내지 않나도됌. 두번째 요청부터 이전에 받은 데이터들 중 제일 마지막 댓글 id를 cursor id로 반환") @RequestParam(required = false) Long cursorId,
                                                                                   @RequestParam int size) {
-        return ResponseDto.ok(commentService.readLatestComments(newsId, cursorId, size));
+        return ResponseDto.ok(commentService.readLatestComments(userId, newsId, cursorId, size));
     }
 
     @Operation(summary = "인기순 댓글 조회")
     @GetMapping("/popular")
-    public ResponseDto<CursorResponseDto<List<CommentListDto>>> readPopularComment(@RequestParam Long newsId,
-                                                               @Parameter(description = "처음 조회 요청시에는 보내지 않나도됌. 두번째 요청부터 이전에 받은 데이터들 중 제일 마지막 댓글 id를 cursor id로 반환") @RequestParam(required = false) Long cursorId,
-                                                               @RequestParam int size) {
-        return ResponseDto.ok(commentService.readPopularComments(newsId, cursorId, size));
+    public ResponseDto<CursorResponseDto<List<CommentListDto>>> readPopularComment(@Parameter(hidden = true) @UserId Long userId,
+                                                                                   @RequestParam Long newsId,
+                                                                                   @Parameter(description = "처음 조회 요청시에는 보내지 않나도됌. 두번째 요청부터 이전에 받은 데이터들 중 제일 마지막 댓글 id를 cursor id로 반환") @RequestParam(required = false) Long cursorId,
+                                                                                   @RequestParam int size) {
+        return ResponseDto.ok(commentService.readPopularComments(userId, newsId, cursorId, size));
     }
 
     /* 대댓글 */
@@ -95,9 +97,10 @@ public class CommentController {
 
     @Operation(summary = "오래된순 대댓글 조회")
     @GetMapping("/reply/oldest")
-    public ResponseDto<CursorResponseDto<ReplyByParentDto>> readOldestComment(@RequestParam Long commentId,
-                                                           @Parameter(description = "처음 조회 요청시에는 보내지 않나도됌. 두번째 요청부터 이전에 받은 데이터들 중 제일 마지막 댓글 id를 cursor id로 반환") @RequestParam(required = false) Long cursorId,
-                                                           @RequestParam int size) {
-        return ResponseDto.ok(commentService.readOldestReply(commentId, cursorId, size));
+    public ResponseDto<CursorResponseDto<ReplyByParentDto>> readOldestComment(@Parameter(hidden = true) @UserId Long userId,
+                                                                              @RequestParam Long commentId,
+                                                                               @Parameter(description = "처음 조회 요청시에는 보내지 않나도됌. 두번째 요청부터 이전에 받은 데이터들 중 제일 마지막 댓글 id를 cursor id로 반환") @RequestParam(required = false) Long cursorId,
+                                                                               @RequestParam int size) {
+        return ResponseDto.ok(commentService.readOldestReply(userId, commentId, cursorId, size));
     }
 }
