@@ -65,4 +65,35 @@ public interface NewsRepository extends JpaRepository<News, Long> {
 //            @Param("timeWeight") double timeWeight,
 //            Pageable pageable
 //    );
+
+    /****************** 뉴스 검색 *************************/
+    // 최신순 검색
+    @Query("""
+    SELECT n FROM News n 
+    WHERE n.category IN :categories 
+    AND n.id < :cursorId 
+    AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+         OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    ORDER BY n.id DESC
+    """)
+    Page<News> findByCKeywordOrderByIdDesc(
+            @Param("categories") List<ECategory> categories,
+            @Param("cursorId") Long cursorId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    // 최신순 검색 초기화
+    @Query("""
+    SELECT n FROM News n 
+    WHERE n.category IN :categories 
+    AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+         OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    ORDER BY n.id DESC
+    """)
+    Page<News> findFirstPageByKeywordOrderByIdDesc(
+            @Param("categories") List<ECategory> categories,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }

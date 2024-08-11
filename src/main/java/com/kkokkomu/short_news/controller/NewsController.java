@@ -1,6 +1,7 @@
 package com.kkokkomu.short_news.controller;
 
 import com.kkokkomu.short_news.annotation.UserId;
+import com.kkokkomu.short_news.dto.common.CursorResponseDto;
 import com.kkokkomu.short_news.dto.common.PagingResponseDto;
 import com.kkokkomu.short_news.dto.common.ResponseDto;
 import com.kkokkomu.short_news.dto.news.request.CreateGenerateNewsDto;
@@ -63,6 +64,18 @@ public class NewsController {
         } else {
             return ResponseDto.ok(newsService.getCategoryFilteredNews(category, cursorId, size));
         }
+    }
+
+    @Operation(summary = "뉴스 검색")
+    @GetMapping("/search")
+    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> searchNews(@Parameter(example = "popular,politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
+                                                                                @RequestParam String text,
+                                                                                @RequestParam EHomeFilter filter,
+                                                                                @RequestParam(required = false) Long cursorId,
+                                                                                @RequestParam int size) {
+        log.info("searchNews controller");
+
+        return ResponseDto.ok(newsService.getFilteredNewsByText(category, text, filter, cursorId, size));
     }
 
     /************************** 뉴스 생성 **************************/
