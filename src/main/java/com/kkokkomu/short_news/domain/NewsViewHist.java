@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.domain;
 
+import com.kkokkomu.short_news.event.NewsViewHistListener;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "news_view_hist", indexes = {
         @Index(name = "idx_user_id", columnList = "user_id")
 })
+@EntityListeners(NewsViewHistListener.class)
 public class NewsViewHist {
 
     @Id

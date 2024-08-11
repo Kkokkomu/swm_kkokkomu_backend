@@ -8,6 +8,8 @@ import com.kkokkomu.short_news.dto.comment.request.CreateReplyDto;
 import com.kkokkomu.short_news.dto.comment.request.UpdateCommentDto;
 import com.kkokkomu.short_news.dto.comment.request.UpdateReplyDto;
 import com.kkokkomu.short_news.dto.comment.response.*;
+import com.kkokkomu.short_news.dto.common.CursorInfoDto;
+import com.kkokkomu.short_news.dto.common.CursorResponseDto;
 import com.kkokkomu.short_news.dto.user.response.CommentSummoryDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
@@ -17,6 +19,7 @@ import com.kkokkomu.short_news.repository.NewsRepository;
 import com.kkokkomu.short_news.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,8 +88,10 @@ public class CommentService {
     } // 댓글 수정
 
     @Transactional
-    public List<CommentListDto> readLatestComments(Long newsId, Long cursorId, int size) {
+    public CursorResponseDto<List<CommentListDto>> readLatestComments(Long userId, Long newsId, Long cursorId, int size) {
         log.info("readLatestComments service");
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         // 요청한 뉴스랑 댓글이 존재하는지 검사
         if (!newsRepository.existsById(newsId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
@@ -100,12 +105,15 @@ public class CommentService {
 
         // 댓글 조회
         List<Comment> comments;
+        Page<Comment> results;
         if (cursorId == null) {
             // 처음 요청
-            comments = commentRepository.findFirstPageByNewsIdOrderByIdDesc(newsId, pageRequest);
+            results = commentRepository.findFirstPageByNewsIdOrderByIdDesc(newsId, user, pageRequest);
+            comments = results.getContent();
         } else {
             // 2번째부터
-            comments = commentRepository.findByNewsIdAndIdLessThanOrderByIdDesc(newsId, cursorId, pageRequest);
+            results = commentRepository.findByNewsIdAndIdLessThanOrderByIdDesc(newsId, cursorId, user, pageRequest);
+            comments = results.getContent();
         }
 
         List<CommentListDto> commentListDtos = new ArrayList<>();
@@ -120,12 +128,61 @@ public class CommentService {
             );
         }
 
-        return commentListDtos;
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(commentListDtos, cursorInfoDto);
     } // 최신순 댓글 조회
 
     @Transactional
-    public List<CommentListDto> readPopularComments(Long newsId, Long cursorId, int size) {
+    public CursorResponseDto<List<CommentListDto>> guestReadLatestComments(Long newsId, Long cursorId, int size) {
+        log.info("geustReadLatestComments service");
+        // 요청한 뉴스랑 댓글이 존재하는지 검사
+        if (!newsRepository.existsById(newsId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
+        }
+        if (cursorId != null && !commentRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        // size에 따른 페이지 요청 객체 생성
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 댓글 조회
+        List<Comment> comments;
+        Page<Comment> results;
+        if (cursorId == null) {
+            // 처음 요청
+            results = commentRepository.findFirstPageByNewsIdOrderByIdDescGuest(newsId, pageRequest);
+            comments = results.getContent();
+        } else {
+            // 2번째부터
+            results = commentRepository.findByNewsIdAndIdLessThanOrderByIdDescGuest(newsId, cursorId, pageRequest);
+            comments = results.getContent();
+        }
+
+        List<CommentListDto> commentListDtos = new ArrayList<>();
+        for (Comment comment : comments) {
+            commentListDtos.add(
+                    CommentListDto.builder()
+                            .commentLikeCnt(commentLikeRepository.countByComment(comment))
+                            .replyCnt(comment.getChildren().size())
+                            .user(CommentSummoryDto.of(comment.getUser()))
+                            .comment(CommentDto.of(comment))
+                            .build()
+            );
+        }
+
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(commentListDtos, cursorInfoDto);
+    } // 비로그인 최신순 댓글 조회
+
+    @Transactional
+    public CursorResponseDto<List<CommentListDto>> readPopularComments(Long userId, Long newsId, Long cursorId, int size) {
         log.info("readPopularComments service");
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 
         // 요청한 뉴스랑 댓글이 존재하는지 검사
         if (!newsRepository.existsById(newsId)) {
@@ -139,8 +196,10 @@ public class CommentService {
 
         // 댓글 조회
         List<Comment> comments;
+        Page<Comment> results;
         if (cursorId == null) {
-             comments = commentRepository.findFirstPageByNewsIdAndPopularity(newsId, REPLY_WEIGHT, LIKE_WEIGHT, pageRequest);
+             results = commentRepository.findFirstPageByNewsIdAndPopularity(newsId, REPLY_WEIGHT, LIKE_WEIGHT, user, pageRequest);
+             comments = results.getContent();
         } else {
             // 커서 댓글 찾기
             Comment cursorComment = commentRepository.findById(cursorId)
@@ -150,7 +209,8 @@ public class CommentService {
             double cursorScore = (cursorComment.getChildren().size() * REPLY_WEIGHT) +
                     (cursorComment.getLikes().size() * LIKE_WEIGHT);
 
-            comments = commentRepository.findByNewsIdAndPopularityLessThan(newsId, REPLY_WEIGHT, LIKE_WEIGHT, cursorScore, cursorId, pageRequest);
+            results = commentRepository.findByNewsIdAndPopularityLessThan(newsId, REPLY_WEIGHT, LIKE_WEIGHT, cursorScore, cursorId, user, pageRequest);
+            comments = results.getContent();
         }
 
         List<CommentListDto> commentListDtos = new ArrayList<>();
@@ -165,8 +225,60 @@ public class CommentService {
             );
         }
 
-        return commentListDtos;
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(commentListDtos, cursorInfoDto);
     } // 인기순 댓글 조회
+
+    @Transactional
+    public CursorResponseDto<List<CommentListDto>> guestReadPopularComments(Long newsId, Long cursorId, int size) {
+        log.info("guestReadPopularComments service");
+
+        // 요청한 뉴스랑 댓글이 존재하는지 검사
+        if (!newsRepository.existsById(newsId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
+        }
+        if (cursorId != null && !commentRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 댓글 조회
+        List<Comment> comments;
+        Page<Comment> results;
+        if (cursorId == null) {
+             results = commentRepository.findFirstPageByNewsIdAndPopularityGuest(newsId, REPLY_WEIGHT, LIKE_WEIGHT, pageRequest);
+             comments = results.getContent();
+        } else {
+            // 커서 댓글 찾기
+            Comment cursorComment = commentRepository.findById(cursorId)
+                    .orElseThrow(() -> new CommonException(ErrorCode.INVALID_COMMENT_CURSOR));
+
+            // 커서 점수 계산
+            double cursorScore = (cursorComment.getChildren().size() * REPLY_WEIGHT) +
+                    (cursorComment.getLikes().size() * LIKE_WEIGHT);
+
+            results = commentRepository.findByNewsIdAndPopularityLessThanGuest(newsId, REPLY_WEIGHT, LIKE_WEIGHT, cursorScore, cursorId, pageRequest);
+            comments = results.getContent();
+        }
+
+        List<CommentListDto> commentListDtos = new ArrayList<>();
+        for (Comment comment : comments) {
+            commentListDtos.add(
+                    CommentListDto.builder()
+                            .commentLikeCnt(commentLikeRepository.countByComment(comment))
+                            .replyCnt(comment.getChildren().size())
+                            .user(CommentSummoryDto.of(comment.getUser()))
+                            .comment(CommentDto.of(comment))
+                            .build()
+            );
+        }
+
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(commentListDtos, cursorInfoDto);
+    } // 비로그인 인기순 댓글 조회
 
     /* 대댓글 */
 
@@ -222,7 +334,9 @@ public class CommentService {
     } // 댓글 수정
 
     @Transactional
-    public ReplyByParentDto readOldestReply(Long parentId, Long cursorId, int size) {
+    public CursorResponseDto<ReplyByParentDto> readOldestReply(Long userId, Long parentId, Long cursorId, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         // 요청한 대댓글의 부모가 존재하는지
         Comment parent = commentRepository.findById(parentId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
@@ -237,12 +351,15 @@ public class CommentService {
 
         // 댓글 조회
         List<Comment> replies;
+        Page<Comment> results;
         if (cursorId == null) {
             // 처음 요청
-            replies = commentRepository.findFirstPageByParentOrderById(parent, pageRequest);
+            results = commentRepository.findFirstPageByParentOrderById(parent, user, pageRequest);
+            replies = results.getContent();
         } else {
             // 2번째부터
-            replies = commentRepository.findByParentAndIdLessThanOrderById(parent, cursorId, pageRequest);
+            results = commentRepository.findByParentAndIdLessThanOrderById(parent, cursorId, user, pageRequest);
+            replies = results.getContent();
         }
 
         List<ReplyListDto> replyListDtos = new ArrayList<>();
@@ -263,9 +380,68 @@ public class CommentService {
                 .comment(CommentDto.of(parent))
                 .build();
 
-        return ReplyByParentDto.builder()
+        ReplyByParentDto replyByParentDto = ReplyByParentDto.builder()
                 .parentComment(commentListDto)
                 .replies(replyListDtos)
                 .build();
+
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(replyByParentDto, cursorInfoDto);
+    } // 오래된순 대댓글 조회
+
+    @Transactional
+    public CursorResponseDto<ReplyByParentDto> guestReadOldestReply(Long parentId, Long cursorId, int size) {
+        // 요청한 대댓글의 부모가 존재하는지
+        Comment parent = commentRepository.findById(parentId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
+
+        // 요청한 커서가 존재하는지
+        if (cursorId != null && !commentRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_COMMENT);
+        }
+
+        // size에 따른 페이지 요청 객체 생성
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 댓글 조회
+        List<Comment> replies;
+        Page<Comment> results;
+        if (cursorId == null) {
+            // 처음 요청
+            results = commentRepository.findFirstPageByParentOrderByIdGuest(parent, pageRequest);
+            replies = results.getContent();
+        } else {
+            // 2번째부터
+            results = commentRepository.findByParentAndIdLessThanOrderByIdGuest(parent, cursorId, pageRequest);
+            replies = results.getContent();
+        }
+
+        List<ReplyListDto> replyListDtos = new ArrayList<>();
+        for (Comment reply : replies) {
+            replyListDtos.add(
+                    ReplyListDto.builder()
+                            .commentLikeCnt(commentLikeRepository.countByComment(reply))
+                            .user(CommentSummoryDto.of(reply.getUser()))
+                            .comment(CommentDto.of(reply))
+                            .build()
+            );
+        }
+
+        CommentListDto commentListDto = CommentListDto.builder()
+                .commentLikeCnt(commentLikeRepository.countByComment(parent))
+                .replyCnt(parent.getChildren().size())
+                .user(CommentSummoryDto.of(parent.getUser()))
+                .comment(CommentDto.of(parent))
+                .build();
+
+        ReplyByParentDto replyByParentDto = ReplyByParentDto.builder()
+                .parentComment(commentListDto)
+                .replies(replyListDtos)
+                .build();
+
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(replyByParentDto, cursorInfoDto);
     } // 오래된순 대댓글 조회
 }

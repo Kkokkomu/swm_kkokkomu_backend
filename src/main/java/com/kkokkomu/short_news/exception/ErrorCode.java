@@ -32,6 +32,7 @@ public enum ErrorCode {
     DUPLICATED_COMMENT_LIKE("40021", HttpStatus.BAD_REQUEST, "이미 좋아요를 단 댓글입니다."),
     INVALID_COMMENT_CURSOR("40022", HttpStatus.BAD_REQUEST, "요청하신 커서 id에 해당하는 댓글이 존재하지 않습니다."),
     DUPLICATED_NEWS_REACTION("40023", HttpStatus.BAD_REQUEST, "이미 감정표현을 한 뉴스입니다."),
+    INVALID_CATEGORY_SELECTION("40024", HttpStatus.BAD_REQUEST, "모든 카테고리가 false일 수는 없습니다"),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
@@ -63,13 +64,16 @@ public enum ErrorCode {
     NOT_FOUND_REPLY("40411", HttpStatus.NOT_FOUND, "해당 대댓글이 존재하지 않습니다."),
     NOT_FOUND_CURSOR("40412", HttpStatus.NOT_FOUND, "해당 커서가 존재하지 않습니다."),
     NOT_FOUND_NEWS_REACTION("40413", HttpStatus.NOT_FOUND, "해당 뉴스 감정표현이 존재하지 않습니다."),
+    NOT_FOUND_TARGET_USER("40414", HttpStatus.NOT_FOUND, "신고하려는 유저가 존재하지 않습니다."),
+    NOT_FOUND_HIDE_USER("40415", HttpStatus.NOT_FOUND, "신고 유저 내역이 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),
 
     // Server, File Up/DownLoad Error
     SERVER_ERROR("50000", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
-    SHORTFORM_PROCESSING_ERROR("50001", HttpStatus.INTERNAL_SERVER_ERROR, "s3 파일 업로드에 실패했습니다.");
+    SHORTFORM_PROCESSING_ERROR("50001", HttpStatus.INTERNAL_SERVER_ERROR, "s3 파일 업로드에 실패했습니다."),
+    VIDEO_SERVER_ERROR("50002", HttpStatus.INTERNAL_SERVER_ERROR, "비디오 생성에 실패했습니다");
 
     private final String code;
     private final HttpStatus httpStatus;
