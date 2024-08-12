@@ -89,8 +89,9 @@ public class NewsService {
         log.info("Sending POST request to URL: {}", url);
         log.info("Request payload: {}", requestGenerateNewsDto);
 
+        ResponseEntity<GenerateResponseDto[]> response;
         try {
-            ResponseEntity<GenerateResponseDto[]> response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
+            response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
             log.info("Received response with status code: {}", response.getStatusCode());
             log.info("Response data: {}", Objects.requireNonNull(response.getBody()).length);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
