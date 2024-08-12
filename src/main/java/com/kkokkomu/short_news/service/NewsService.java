@@ -28,6 +28,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -83,7 +86,20 @@ public class NewsService {
         HttpEntity<RequestGenerateNewsDto> entity = new HttpEntity<>(requestGenerateNewsDto, headers);
 
         log.info("request video");
-        ResponseEntity<GenerateResponseDto[]> response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
+        log.info("Sending POST request to URL: {}", url);
+        log.info("Request payload: {}", requestGenerateNewsDto);
+
+        try {
+            ResponseEntity<GenerateResponseDto[]> response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
+            log.info("Received response with status code: {}", response.getStatusCode());
+            log.info("Response data: {}", Objects.requireNonNull(response.getBody()).length);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("HTTP error occurred: Status code: {}, Response body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw e; // Re-throwing the exception after logging it
+        } catch (RestClientException e) {
+            log.error("Rest client error occurred: {}", e.getMessage());
+            throw e; // Re-throwing the exception after logging it
+        }
 
         log.info("response data : {}", Objects.requireNonNull(response.getBody()).length);
         GenerateResponseDto[] generateResponseDtos = response.getBody();
