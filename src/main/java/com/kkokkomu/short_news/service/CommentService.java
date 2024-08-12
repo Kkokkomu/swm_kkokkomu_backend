@@ -256,7 +256,7 @@ public class CommentService {
                     .orElseThrow(() -> new CommonException(ErrorCode.INVALID_COMMENT_CURSOR));
 
             // 커서 점수 계산
-            double cursorScore = (cursorComment.getChildren().size() * REPLY_WEIGHT) +
+            Long cursorScore = (cursorComment.getChildren().size() * REPLY_WEIGHT) +
                     (cursorComment.getLikes().size() * LIKE_WEIGHT);
 
             results = commentRepository.findByNewsIdAndPopularityLessThanGuest(newsId, REPLY_WEIGHT, LIKE_WEIGHT, cursorScore, cursorId, pageRequest);

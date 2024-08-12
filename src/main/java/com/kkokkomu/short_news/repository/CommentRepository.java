@@ -108,8 +108,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     """)
     Page<Comment> findFirstPageByNewsIdAndPopularity(
             @Param("newsId") Long newsId,
-            @Param("replyWeight") double replyWeight,
-            @Param("likeWeight") double likeWeight,
+            @Param("replyWeight") Long replyWeight,
+            @Param("likeWeight") Long likeWeight,
             @Param("user") User user,
             Pageable pageable
     );
@@ -127,9 +127,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     """)
     Page<Comment> findByNewsIdAndPopularityLessThanGuest(
             @Param("newsId") Long newsId,
-            @Param("replyWeight") double replyWeight,
-            @Param("likeWeight") double likeWeight,
-            @Param("cursorScore") double cursorScore,
+            @Param("replyWeight") Long replyWeight,
+            @Param("likeWeight") Long likeWeight,
+            @Param("cursorScore") Long cursorScore,
             @Param("cursorId") Long cursorId,
             Pageable pageable
     );
