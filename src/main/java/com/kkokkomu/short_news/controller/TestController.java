@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 @Tag(name = "테스트")
 @Slf4j
 @RequiredArgsConstructor
@@ -27,5 +29,10 @@ public class TestController {
     @GetMapping("/error")
     public String errorController(){
         throw new CommonException(ErrorCode.INVALID_PARAMETER);
+    }
+
+    @GetMapping("/date")
+    public String dateController(){
+        return LocalDateTime.now().toString();
     }
 }
