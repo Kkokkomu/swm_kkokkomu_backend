@@ -22,7 +22,7 @@ public class TestController {
     @Operation(summary = "테스트 hello world")
     @GetMapping("")
     public ResponseDto<String> helloController(){
-        return ResponseDto.ok("hello, world!");
+        return ResponseDto.ok(LocalDateTime.now().toString());
     }
 
     @Operation(summary = "테스트 error")

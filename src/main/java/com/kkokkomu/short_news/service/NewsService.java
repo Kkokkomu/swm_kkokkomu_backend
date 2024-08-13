@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kkokkomu.short_news.domain.*;
 import com.kkokkomu.short_news.dto.common.CursorInfoDto;
@@ -87,19 +88,29 @@ public class NewsService {
 
         log.info("request video");
         log.info("Sending POST request to URL: {}", url);
-        log.info("Request payload: {}", requestGenerateNewsDto);
-
+        log.info("Request Headers: {}", headers);  // 헤더 로그 추가
         ResponseEntity<GenerateResponseDto[]> response;
         try {
+            // 요청 본문을 JSON으로 변환해 기록
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonPayload = mapper.writeValueAsString(requestGenerateNewsDto);
+            log.info("Request payload as JSON: {}", jsonPayload);
+
             response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
             log.info("Received response with status code: {}", response.getStatusCode());
-            log.info("Response data: {}", Objects.requireNonNull(response.getBody()).length);
+            log.info("Response data length: {}", Objects.requireNonNull(response.getBody()).length);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error("HTTP error occurred: Status code: {}, Response body: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw e; // Re-throwing the exception after logging it
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw e;
         } catch (RestClientException e) {
             log.error("Rest client error occurred: {}", e.getMessage());
-            throw e; // Re-throwing the exception after logging it
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw e;
+        } catch (JsonProcessingException e) {
+            log.error("Error serializing request payload to JSON: {}", e.getMessage());
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw new RuntimeException("Error processing JSON", e);
         }
 
         log.info("response data : {}", Objects.requireNonNull(response.getBody()).length);
@@ -133,6 +144,7 @@ public class NewsService {
             String s3Url = generateResponseDto.s3();
             String thumnailUrl = "";
             String title = dataDto.title();
+            log.info("section : {}", dataDto.section());
             ECategory category = categoryUtil.getCategoryByName(dataDto.section());
             String relatedUrl = dataDto.url();
 
