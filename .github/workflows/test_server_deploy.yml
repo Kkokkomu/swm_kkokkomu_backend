@@ -23,6 +23,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+        env:
+          JAVA_TOOL_OPTIONS: "-Duser.timezone=Asia/Seoul"
 
       - name: Create application.yml
         run: |
@@ -64,4 +66,6 @@ jobs:
             docker rmi ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest || true # 이전 이미지를 삭제
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker pull ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest
-            docker run -d --name web --network my_network -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest
+            docker run -d --name web --network my_network -p 80:8080 \
+              -e TZ=Asia/Seoul \
+              ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest
