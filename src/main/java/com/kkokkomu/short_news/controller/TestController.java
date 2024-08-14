@@ -3,6 +3,7 @@ package com.kkokkomu.short_news.controller;
 import com.kkokkomu.short_news.dto.common.ResponseDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
+import com.kkokkomu.short_news.service.MailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +20,11 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/test")
 public class TestController {
+    private final MailService mailService;
     @Operation(summary = "테스트 hello world")
     @GetMapping("")
     public ResponseDto<String> helloController(){
-        return ResponseDto.ok(LocalDateTime.now().toString());
+        return ResponseDto.ok(mailService.sendEmail("gouyeonch@naver.com", "test", "test"));
     }
 
     @Operation(summary = "테스트 error")
