@@ -22,7 +22,7 @@ public class NewsScheduler {
     private final NewsService newsService;
     private final MailService mailService;
 
-    @Scheduled(cron = "0 0 8 * * *") // 매일 아침 8시
+    @Scheduled(cron = "0 57 21 * * *") // 매일 아침 8시
     public void generateNewsAt8AM() {
         // 필요 시 CreateGenerateNewsDto 객체를 만들어서 요청 본문에 넣을 수 있습니다.
         CreateGenerateNewsDto createGenerateNewsDto = CreateGenerateNewsDto.builder()
@@ -54,8 +54,11 @@ public class NewsScheduler {
         log.info("Generated News Content: \n{}", content.toString());
 
         // 이메일 전송
-        mailService.sendEmail("gouyeonch@naver.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        log.info("send aahhll654@gmail.com");
         mailService.sendEmail("aahhll654@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        log.info("send gouyeonch@naver.com");
+        mailService.sendEmail("gouyeonch@naver.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        log.info("send leesk9663@gmail.com");
         mailService.sendEmail("leesk9663@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
         
     }
