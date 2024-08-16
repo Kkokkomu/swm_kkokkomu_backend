@@ -1,9 +1,11 @@
 package com.kkokkomu.short_news.controller;
 
 import com.kkokkomu.short_news.dto.common.ResponseDto;
+import com.kkokkomu.short_news.dto.news.request.CreateGenerateNewsDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.service.MailService;
+import com.kkokkomu.short_news.service.NewsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +22,18 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/test")
 public class TestController {
-    private final MailService mailService;
+    private final NewsService newsService;
+
     @Operation(summary = "테스트 hello world")
     @GetMapping("")
     public ResponseDto<String> helloController(){
-        return ResponseDto.ok(mailService.sendEmail("aahhll654@gmail.com", "test", "test"));
+        CreateGenerateNewsDto createGenerateNewsDto = CreateGenerateNewsDto.builder()
+                .count_news(0)
+                .count_entertain(0)
+                .count_sports(1)
+                .build();
+        newsService.generateNews(createGenerateNewsDto);
+        return ResponseDto.ok("success");
     }
 
     @Operation(summary = "테스트 error")
