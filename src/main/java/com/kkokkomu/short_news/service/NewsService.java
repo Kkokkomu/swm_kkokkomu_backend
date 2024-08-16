@@ -1,10 +1,10 @@
 package com.kkokkomu.short_news.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kkokkomu.short_news.domain.News;
-import com.kkokkomu.short_news.domain.NewsKeyword;
-import com.kkokkomu.short_news.domain.RelatedNews;
-import com.kkokkomu.short_news.domain.User;
+import com.kkokkomu.short_news.domain.*;
+import com.kkokkomu.short_news.dto.common.CursorInfoDto;
+import com.kkokkomu.short_news.dto.common.CursorResponseDto;
 import com.kkokkomu.short_news.dto.common.PageInfoDto;
 import com.kkokkomu.short_news.dto.common.PagingResponseDto;
 import com.kkokkomu.short_news.dto.news.request.CreateGenerateNewsDto;
@@ -18,6 +18,7 @@ import com.kkokkomu.short_news.repository.*;
 import com.kkokkomu.short_news.type.ECategory;
 import com.kkokkomu.short_news.type.EHomeFilter;
 import com.kkokkomu.short_news.type.ENewsReaction;
+import com.kkokkomu.short_news.util.CategoryUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,11 +29,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
-import static com.kkokkomu.short_news.constant.Constant.VIDEO_SERVER_GENERATE_HOST;
+import static com.kkokkomu.short_news.constant.Constant.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +49,8 @@ public class NewsService {
     private final NewsKeywordRepository newsKeywordRepository;
 
     private final NewsKeywordService newsKeywordService;
+
+    private final CategoryUtil categoryUtil;
 
     /* 홈화면 */
 
@@ -81,7 +87,31 @@ public class NewsService {
         HttpEntity<RequestGenerateNewsDto> entity = new HttpEntity<>(requestGenerateNewsDto, headers);
 
         log.info("request video");
-        ResponseEntity<GenerateResponseDto[]> response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
+        log.info("Sending POST request to URL: {}", url);
+        log.info("Request Headers: {}", headers);  // 헤더 로그 추가
+        ResponseEntity<GenerateResponseDto[]> response;
+        try {
+            // 요청 본문을 JSON으로 변환해 기록
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonPayload = mapper.writeValueAsString(requestGenerateNewsDto);
+            log.info("Request payload as JSON: {}", jsonPayload);
+
+            response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
+            log.info("Received response with status code: {}", response.getStatusCode());
+            log.info("Response data length: {}", Objects.requireNonNull(response.getBody()).length);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("HTTP error occurred: Status code: {}, Response body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw e;
+        } catch (RestClientException e) {
+            log.error("Rest client error occurred: {}", e.getMessage());
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw e;
+        } catch (JsonProcessingException e) {
+            log.error("Error serializing request payload to JSON: {}", e.getMessage());
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw new RuntimeException("Error processing JSON", e);
+        }
 
         log.info("response data : {}", Objects.requireNonNull(response.getBody()).length);
         GenerateResponseDto[] generateResponseDtos = response.getBody();
@@ -114,7 +144,8 @@ public class NewsService {
             String s3Url = generateResponseDto.s3();
             String thumnailUrl = "";
             String title = dataDto.title();
-            ECategory category = getCategoryByName(dataDto.section());
+            log.info("section : {}", dataDto.section());
+            ECategory category = categoryUtil.getCategoryByName(dataDto.section());
             String relatedUrl = dataDto.url();
 
             // 뉴스 키워드 생성
@@ -273,31 +304,36 @@ public class NewsService {
         return SearchNewsDto.of(news);
     } // 탐색 화면 카테고리 필터 조회
 
-//    public List<SearchNewsDto> getFilteredNewsByText(String category, String text, String order, Long cursorId, int size) {
-//        log.info("getFilteredNewsByText service");
-//
-//
-//    }
-//    // 뉴스 인기순 조회
+    public CursorResponseDto<List<SearchNewsDto>> getFilteredNewsByText(String category, String text, EHomeFilter order, Long cursorId, int size) {
+        log.info("getFilteredNewsByText service");
 
-    public ECategory getCategoryByName(String categoryName) {
-        ECategory category = null;
-        if (Objects.equals(categoryName, "정치")) {
-            category = ECategory.POLITICS;
-        } else if (Objects.equals(categoryName, "사회")) {
-            category = ECategory.SOCIAL;
-        } else if (Objects.equals(categoryName, "경제")) {
-            category = ECategory.ECONOMY;
-        } else if (Objects.equals(categoryName, "생활")) {
-            category = ECategory.LIVING;
-        } else if (Objects.equals(categoryName, "세계")) {
-            category = ECategory.WORLD;
-        } else if (Objects.equals(categoryName, "연예")) {
-            category = ECategory.ENTERTAIN;
-        } else if (Objects.equals(categoryName, "스포츠")) {
-            category = ECategory.SPORTS;
+        if (cursorId != null && !newsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
         }
 
-        return category;
-    }// 카테고리 enum casting
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        List<ECategory> categoryList = categoryUtil.getCategoryList(category);
+
+        // 댓글 조회
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) {
+            results = newsRepository.findFirstPageByKeywordOrderByIdDesc(categoryList, text, pageRequest);
+            news = results.getContent();
+        } else {
+            // 커서 댓글 찾기
+            News cursorNews = newsRepository.findById(cursorId)
+                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+
+            results = newsRepository.findByCKeywordOrderByIdDesc(categoryList, cursorId, text, pageRequest);
+            news = results.getContent();
+        }
+
+        List<SearchNewsDto> newsDtos = SearchNewsDto.of(news);
+
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
+    } // 뉴스 검색
 }

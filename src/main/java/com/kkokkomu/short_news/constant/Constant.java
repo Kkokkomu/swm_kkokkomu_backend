@@ -13,13 +13,12 @@ public class Constant {
     public static final String USER_ID_CLAIM_NAME = "uid";
     public static final String USER_EMAIL_CLAIM_NAME = "email";
     public static final String CONTENT_TYPE = "Content-Type";
-    public static final double REPLY_WEIGHT = 1.5;
-    public static final double LIKE_WEIGHT = 1.0;
+    public static final Long REPLY_WEIGHT = 3L;
+    public static final Long LIKE_WEIGHT = 2L;
     public static final String VIDEO_SERVER_GENERATE_HOST = "http://3.34.144.199:8000/generate";
     public static final List<String> NO_NEED_AUTH_URLS = List.of(
             //테스트
-            "/test",
-            "/test/error",
+            "/test/**",
 
             //스웨거
             "/swagger",
@@ -35,10 +34,12 @@ public class Constant {
             "/oauth2/login/apple",
 
             // 홈화면
-            "/news/guest/**"
+            "/news/list/guest",
 
-            //임시
-//            "/news"
+            //댓글
+            "/comment/latest/guest",
+            "/comment/popular/guest",
+            "/comment/reply/oldest/guest"
     );
     public static final String DEFAULT_PROFILE = "https://kkm-config.s3.ap-northeast-2.amazonaws.com/profile.png";
 }
