@@ -24,7 +24,7 @@ public class TestController {
     @Operation(summary = "테스트 hello world")
     @GetMapping("")
     public ResponseDto<String> helloController(){
-        return ResponseDto.ok(mailService.sendEmail("gouyeonch@naver.com", "test", "test"));
+        return ResponseDto.ok(mailService.sendEmail("aahhll654@gmail.com", "test", "test"));
     }
 
     @Operation(summary = "테스트 error")

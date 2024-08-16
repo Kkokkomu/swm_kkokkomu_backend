@@ -54,8 +54,11 @@ public class NewsScheduler {
         log.info("Generated News Content: \n{}", content.toString());
 
         // 이메일 전송
-        mailService.sendEmail("gouyeonch@naver.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        log.info("send aahhll654@gmail.com");
         mailService.sendEmail("aahhll654@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        log.info("send gouyeonch@naver.com");
+        mailService.sendEmail("gouyeonch@naver.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        log.info("send leesk9663@gmail.com");
         mailService.sendEmail("leesk9663@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
         
     }

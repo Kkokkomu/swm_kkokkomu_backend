@@ -20,6 +20,7 @@ public class MailService {
 
     public String sendEmail(String to, String title, String content) {
         try {
+            log.info("send email to " + to);
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
