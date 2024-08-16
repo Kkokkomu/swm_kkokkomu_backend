@@ -26,8 +26,8 @@ public class NewsScheduler {
     public void generateNewsAt8AM() {
         // 필요 시 CreateGenerateNewsDto 객체를 만들어서 요청 본문에 넣을 수 있습니다.
         CreateGenerateNewsDto createGenerateNewsDto = CreateGenerateNewsDto.builder()
-                .count_news(2)
-                .count_entertain(2)
+                .count_news(0)
+                .count_entertain(0)
                 .count_sports(2)
                 .build();
 
