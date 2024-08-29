@@ -50,7 +50,7 @@ public class News {
     @Column(name = "edited_at")
     private LocalDateTime editedAt; // 변경 일자
 
-    @Column(name = "related_url", nullable = false)
+    @Column(name = "related_url")
     private String relatedUrl; // 관련 URL
 
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
