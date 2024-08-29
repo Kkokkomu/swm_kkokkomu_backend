@@ -14,6 +14,7 @@ public record NewsDto(
         String shortformUrl, // 숏폼 URL
         String youtubeUrl, // YouTube URL
         String instagramUrl, // Instagram URL
+        String relatedUrl, // 관련 기사 URL
         String thumbnail, // 썸네일 이미지 링크
         int viewCnt, // 조회수
         String title,
@@ -28,6 +29,7 @@ public record NewsDto(
                 .shortformUrl(news.getShortformUrl())
                 .youtubeUrl(news.getYoutubeUrl())
                 .instagramUrl(news.getInstagramUrl())
+                .relatedUrl(news.getRelatedUrl())
                 .thumbnail(news.getThumbnail())
                 .viewCnt(news.getViewCnt())
                 .title(news.getTitle())
