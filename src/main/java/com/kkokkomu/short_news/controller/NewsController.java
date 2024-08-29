@@ -25,6 +25,19 @@ import java.util.List;
 public class NewsController {
     private final NewsService newsService;
 
+    /************************** 관리자 **************************/
+    @PostMapping("/generate")
+    public ResponseDto<String> generate(@RequestParam int news, @RequestParam int sport, @RequestParam int entertain) {
+        log.info("generate controller");
+        CreateGenerateNewsDto createGenerateNewsDto = CreateGenerateNewsDto.builder()
+                .count_news(news)
+                .count_entertain(entertain)
+                .count_sports(sport)
+                .build();
+        newsService.generateNews(createGenerateNewsDto);
+        return ResponseDto.ok("success");
+    }
+
     /************************** 홈화면 **************************/
     @Operation(summary = "뉴스 리스트 조회")
     @GetMapping("/list")
