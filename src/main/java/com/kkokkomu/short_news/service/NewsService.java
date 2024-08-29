@@ -43,7 +43,6 @@ import static com.kkokkomu.short_news.constant.Constant.*;
 @Slf4j
 public class NewsService {
     private final NewsRepository newsRepository;
-    private final RelatedNewsRepository relatedNewsRepository;
     private final UserRepository userRepository;
     private final NewsReactionRepository newsReactionRepository;
     private final NewsKeywordRepository newsKeywordRepository;
@@ -53,137 +52,6 @@ public class NewsService {
     private final CategoryUtil categoryUtil;
 
     /* 홈화면 */
-
-    @jakarta.transaction.Transactional
-    public List<GenerateNewsDto> generateNews(CreateGenerateNewsDto createGenerateNewsDto) {
-        int repeat = createGenerateNewsDto.count_news() + createGenerateNewsDto.count_entertain() + createGenerateNewsDto.count_sports();
-
-        // 임시 뉴스 객체 생성 및 id 추출
-        List<News> newsList = new ArrayList<>();
-        for (int i = 0; i < repeat; i++) {
-            News news = News.builder().build();
-
-            newsList.add(newsRepository.save(news));
-        }
-        List<Integer> idList = newsList.stream()
-                .map(news -> Math.toIntExact(news.getId()))
-                .toList();
-
-        // 임시 생성 객체 id를 기반으로 한 요청 생성
-        String url = VIDEO_SERVER_GENERATE_HOST;
-
-        RestTemplate restTemplate = new RestTemplate();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        RequestGenerateNewsDto requestGenerateNewsDto = RequestGenerateNewsDto.builder()
-                .count_news(createGenerateNewsDto.count_news())
-                .count_entertain(createGenerateNewsDto.count_entertain())
-                .count_sports(createGenerateNewsDto.count_sports())
-                .id_list(idList)
-                .build();
-
-        HttpEntity<RequestGenerateNewsDto> entity = new HttpEntity<>(requestGenerateNewsDto, headers);
-
-        log.info("request video");
-        log.info("Sending POST request to URL: {}", url);
-        log.info("Request Headers: {}", headers);  // 헤더 로그 추가
-        ResponseEntity<GenerateResponseDto[]> response;
-        try {
-            // 요청 본문을 JSON으로 변환해 기록
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonPayload = mapper.writeValueAsString(requestGenerateNewsDto);
-            log.info("Request payload as JSON: {}", jsonPayload);
-
-            response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
-            log.info("Received response with status code: {}", response.getStatusCode());
-            log.info("Response data length: {}", Objects.requireNonNull(response.getBody()).length);
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            log.error("HTTP error occurred: Status code: {}, Response body: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
-            throw e;
-        } catch (RestClientException e) {
-            log.error("Rest client error occurred: {}", e.getMessage());
-            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
-            throw e;
-        } catch (JsonProcessingException e) {
-            log.error("Error serializing request payload to JSON: {}", e.getMessage());
-            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
-            throw new RuntimeException("Error processing JSON", e);
-        }
-
-        log.info("response data : {}", Objects.requireNonNull(response.getBody()).length);
-        GenerateResponseDto[] generateResponseDtos = response.getBody();
-
-        // 영상 생성 서버에서 영상 url 및 정보 받아옴
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<GenerateNewsDto> generateNewsDtos = new ArrayList<>();
-        for (int i = 0; i < idList.size(); i++) {
-            // 인덱스에 맞는 임시 뉴스 객체
-            News news = newsList.get(i);
-
-            // 인덱스에 맞는 비디오 서버 반환값
-            GenerateResponseDto generateResponseDto;
-            if (generateResponseDtos != null) {
-                generateResponseDto = generateResponseDtos[i];
-            } else {
-                throw new CommonException(ErrorCode.VIDEO_SERVER_ERROR);
-            }
-
-
-            Map<String, Object> dataMap = generateResponseDto.data();
-            NewsInfoDataDto dataDto = objectMapper.convertValue(dataMap, NewsInfoDataDto.class);
-
-            NewsInfoSummaryDto summaryDto = dataDto.summary();
-            Map<String, String> keywordMap = dataDto.keywords();
-
-
-            String summary = summaryDto.sentence_total();
-            List<String> keywords = new ArrayList<>(Arrays.asList(keywordMap.get("keyword_0"), keywordMap.get("keyword_1"), keywordMap.get("keyword_2")));
-            String s3Url = generateResponseDto.s3();
-            String thumnailUrl = "";
-            String title = dataDto.title();
-            log.info("section : {}", dataDto.section());
-            ECategory category = categoryUtil.getCategoryByName(dataDto.section());
-            String relatedUrl = dataDto.url();
-
-            // 뉴스 키워드 생성
-            List<NewsKeyword> newsKeywords = newsKeywordService.registerNewsKeyword(news, keywords);
-
-            // 관련 기사 링크 등록
-            RelatedNews relatedNews = relatedNewsRepository.save(
-                    RelatedNews.builder()
-                            .news(news)
-                            .relatedUrl(relatedUrl)
-                            .build()
-            );
-
-            news.update(
-                    s3Url,
-                    "",
-                    "",
-                    thumnailUrl,
-                    title,
-                    summary,
-                    category
-            );
-
-            news = newsRepository.save(news);
-
-            generateNewsDtos.add(
-                    GenerateNewsDto.builder()
-                            .newsDto(NewsDto.of(news))
-                            .keywords(newsKeywords.stream()
-                                    .map(newsKeyword -> newsKeyword.getKeyword().getKeyword())
-                                    .toList())
-                            .relatedUrl(relatedNews.getRelatedUrl())
-                            .build()
-            );
-        }
-
-        return generateNewsDtos;
-    } // 영상 생성 api
 
     public PagingResponseDto<List<NewsListDto>> readNewsList(Long userId, String category, EHomeFilter filter, int page, int size) {
         User user = userRepository.findById(userId)
@@ -336,4 +204,129 @@ public class NewsService {
 
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 뉴스 검색
+
+    /* 관리자 */
+
+    @jakarta.transaction.Transactional
+    public List<GenerateNewsDto> generateNews(CreateGenerateNewsDto createGenerateNewsDto) {
+        int repeat = createGenerateNewsDto.count_news() + createGenerateNewsDto.count_entertain() + createGenerateNewsDto.count_sports();
+
+        // 임시 뉴스 객체 생성 및 id 추출
+        List<News> newsList = new ArrayList<>();
+        for (int i = 0; i < repeat; i++) {
+            News news = News.builder().build();
+
+            newsList.add(newsRepository.save(news));
+        }
+        List<Integer> idList = newsList.stream()
+                .map(news -> Math.toIntExact(news.getId()))
+                .toList();
+
+        // 임시 생성 객체 id를 기반으로 한 요청 생성
+        String url = VIDEO_SERVER_GENERATE_HOST;
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        RequestGenerateNewsDto requestGenerateNewsDto = RequestGenerateNewsDto.builder()
+                .count_news(createGenerateNewsDto.count_news())
+                .count_entertain(createGenerateNewsDto.count_entertain())
+                .count_sports(createGenerateNewsDto.count_sports())
+                .id_list(idList)
+                .build();
+
+        HttpEntity<RequestGenerateNewsDto> entity = new HttpEntity<>(requestGenerateNewsDto, headers);
+
+        log.info("request video");
+        log.info("Sending POST request to URL: {}", url);
+        log.info("Request Headers: {}", headers);  // 헤더 로그 추가
+        ResponseEntity<GenerateResponseDto[]> response;
+        try {
+            // 요청 본문을 JSON으로 변환해 기록
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonPayload = mapper.writeValueAsString(requestGenerateNewsDto);
+            log.info("Request payload as JSON: {}", jsonPayload);
+
+            response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
+            log.info("Received response with status code: {}", response.getStatusCode());
+            log.info("Response data length: {}", Objects.requireNonNull(response.getBody()).length);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("HTTP error occurred: Status code: {}, Response body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw e;
+        } catch (RestClientException e) {
+            log.error("Rest client error occurred: {}", e.getMessage());
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw e;
+        } catch (JsonProcessingException e) {
+            log.error("Error serializing request payload to JSON: {}", e.getMessage());
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw new RuntimeException("Error processing JSON", e);
+        }
+
+        log.info("response data : {}", Objects.requireNonNull(response.getBody()).length);
+        GenerateResponseDto[] generateResponseDtos = response.getBody();
+
+        // 영상 생성 서버에서 영상 url 및 정보 받아옴
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<GenerateNewsDto> generateNewsDtos = new ArrayList<>();
+        for (int i = 0; i < idList.size(); i++) {
+            // 인덱스에 맞는 임시 뉴스 객체
+            News news = newsList.get(i);
+
+            // 인덱스에 맞는 비디오 서버 반환값
+            GenerateResponseDto generateResponseDto;
+            if (generateResponseDtos != null) {
+                generateResponseDto = generateResponseDtos[i];
+            } else {
+                throw new CommonException(ErrorCode.VIDEO_SERVER_ERROR);
+            }
+
+
+            Map<String, Object> dataMap = generateResponseDto.data();
+            NewsInfoDataDto dataDto = objectMapper.convertValue(dataMap, NewsInfoDataDto.class);
+
+            NewsInfoSummaryDto summaryDto = dataDto.summary();
+            Map<String, String> keywordMap = dataDto.keywords();
+
+
+            String summary = summaryDto.sentence_total();
+            List<String> keywords = new ArrayList<>(Arrays.asList(keywordMap.get("keyword_0"), keywordMap.get("keyword_1"), keywordMap.get("keyword_2")));
+            String s3Url = generateResponseDto.s3();
+            String thumnailUrl = "";
+            String title = dataDto.title();
+            log.info("section : {}", dataDto.section());
+            ECategory category = categoryUtil.getCategoryByName(dataDto.section());
+            String relatedUrl = dataDto.url();
+
+            // 뉴스 키워드 생성
+            List<NewsKeyword> newsKeywords = newsKeywordService.registerNewsKeyword(news, keywords);
+
+            news.update(
+                    s3Url,
+                    "",
+                    "",
+                    thumnailUrl,
+                    relatedUrl,
+                    title,
+                    summary,
+                    category
+            );
+
+            news = newsRepository.save(news);
+
+            generateNewsDtos.add(
+                    GenerateNewsDto.builder()
+                            .newsDto(NewsDto.of(news))
+                            .keywords(newsKeywords.stream()
+                                    .map(newsKeyword -> newsKeyword.getKeyword().getKeyword())
+                                    .toList())
+                            .build()
+            );
+        }
+
+        return generateNewsDtos;
+    } // 영상 생성 api
 }
