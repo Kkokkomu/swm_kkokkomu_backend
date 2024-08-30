@@ -334,7 +334,7 @@ public class CommentService {
     } // 댓글 수정
 
     @Transactional
-    public CursorResponseDto<ReplyByParentDto> readOldestReply(Long userId, Long parentId, Long cursorId, int size) {
+    public CursorResponseDto<List<ReplyListDto>> readOldestReply(Long userId, Long parentId, Long cursorId, int size) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         // 요청한 대댓글의 부모가 존재하는지
@@ -373,25 +373,13 @@ public class CommentService {
             );
         }
 
-        CommentListDto commentListDto = CommentListDto.builder()
-                .commentLikeCnt(commentLikeRepository.countByComment(parent))
-                .replyCnt(parent.getChildren().size())
-                .user(CommentSummoryDto.of(parent.getUser()))
-                .comment(CommentDto.of(parent))
-                .build();
-
-        ReplyByParentDto replyByParentDto = ReplyByParentDto.builder()
-                .parentComment(commentListDto)
-                .replies(replyListDtos)
-                .build();
-
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
-        return CursorResponseDto.fromEntityAndPageInfo(replyByParentDto, cursorInfoDto);
+        return CursorResponseDto.fromEntityAndPageInfo(replyListDtos, cursorInfoDto);
     } // 오래된순 대댓글 조회
 
     @Transactional
-    public CursorResponseDto<ReplyByParentDto> guestReadOldestReply(Long parentId, Long cursorId, int size) {
+    public CursorResponseDto<List<ReplyListDto>> guestReadOldestReply(Long parentId, Long cursorId, int size) {
         // 요청한 대댓글의 부모가 존재하는지
         Comment parent = commentRepository.findById(parentId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
@@ -428,20 +416,8 @@ public class CommentService {
             );
         }
 
-        CommentListDto commentListDto = CommentListDto.builder()
-                .commentLikeCnt(commentLikeRepository.countByComment(parent))
-                .replyCnt(parent.getChildren().size())
-                .user(CommentSummoryDto.of(parent.getUser()))
-                .comment(CommentDto.of(parent))
-                .build();
-
-        ReplyByParentDto replyByParentDto = ReplyByParentDto.builder()
-                .parentComment(commentListDto)
-                .replies(replyListDtos)
-                .build();
-
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
-        return CursorResponseDto.fromEntityAndPageInfo(replyByParentDto, cursorInfoDto);
+        return CursorResponseDto.fromEntityAndPageInfo(replyListDtos, cursorInfoDto);
     } // 오래된순 대댓글 조회
 }
