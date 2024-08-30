@@ -54,7 +54,7 @@ public class NewsController {
 
     @Operation(summary = "탐색 화면 카테고리 필터 조회")
     @GetMapping("/filter")
-    public ResponseDto<List<SearchNewsDto>> readFilteredNews(@Parameter(description = "popular | politics | economy | social | entertain | sports | living | world | it") @RequestParam String category,
+    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> readFilteredNews(@Parameter(description = "popular | politics | economy | social | entertain | sports | living | world | it") @RequestParam String category,
                                                              @RequestParam(required = false) Long cursorId,
                                                              @RequestParam int size) {
         log.info("readFilteredNews controller");

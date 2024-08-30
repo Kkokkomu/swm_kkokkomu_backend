@@ -149,7 +149,7 @@ public class NewsService {
     } // 뉴스 정보 조회
 
     /* 검색화면 */
-    public List<SearchNewsDto> getCategoryFilteredNews(String category, Long cursorId, int size) {
+    public CursorResponseDto<List<SearchNewsDto>> getCategoryFilteredNews(String category, Long cursorId, int size) {
 
         log.info("getfilteredNews service");
 
@@ -163,13 +163,19 @@ public class NewsService {
         PageRequest pageRequest = PageRequest.of(0, size);
 
         List<News> news;
+        Page<News> results;
         if (cursorId == null) {
-            news = newsRepository.findFirstPageByCategoryOrderByIdDesc(eCategory, pageRequest);
+            results = newsRepository.findFirstPageByCategoryOrderByIdDesc(eCategory, pageRequest);
         } else {
-            news = newsRepository.findByCategoryAndIdLessThanOrderByIdDesc(eCategory, cursorId, pageRequest);
+            results = newsRepository.findByCategoryAndIdLessThanOrderByIdDesc(eCategory, cursorId, pageRequest);
         }
+        news = results.getContent();
 
-        return SearchNewsDto.of(news);
+        List<SearchNewsDto> searchNewsDtos = SearchNewsDto.of(news);
+
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(searchNewsDtos, cursorInfoDto);
     } // 탐색 화면 카테고리 필터 조회
 
     public CursorResponseDto<List<SearchNewsDto>> getFilteredNewsByText(String category, String text, EHomeFilter order, Long cursorId, int size) {
