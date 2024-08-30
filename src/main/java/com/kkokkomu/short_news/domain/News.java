@@ -50,6 +50,9 @@ public class News {
     @Column(name = "edited_at")
     private LocalDateTime editedAt; // 변경 일자
 
+    @Column(name = "related_url")
+    private String relatedUrl; // 관련 URL
+
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments; // 댓글들
 
@@ -57,10 +60,11 @@ public class News {
     private List<NewsReaction> reactions; // 감정표현
 
     @Builder
-    public News(String shortformUrl, String youtubeUrl, String instagramUrl, String thumbnail, String title, String summary, ECategory category) {
+    public News(String shortformUrl, String youtubeUrl, String instagramUrl, String relatedUrl, String thumbnail, String title, String summary, ECategory category) {
         this.shortformUrl = shortformUrl;
         this.youtubeUrl = youtubeUrl;
         this.instagramUrl = instagramUrl;
+        this.relatedUrl = relatedUrl;
         this.thumbnail = thumbnail;
         this.viewCnt = 0;
         this.title = title;
@@ -71,10 +75,11 @@ public class News {
         this.editedAt = LocalDateTime.now(); // 초기값을 현재 시간으로 설정
     }
 
-    public void update(String shortformUrl, String youtubeUrl, String instagramUrl, String thumbnail, String title, String summary, ECategory category) {
+    public void update(String shortformUrl, String youtubeUrl, String instagramUrl, String relatedUrl, String thumbnail, String title, String summary, ECategory category) {
         this.shortformUrl = shortformUrl;
         this.youtubeUrl = youtubeUrl;
         this.instagramUrl = instagramUrl;
+        this.relatedUrl = relatedUrl;
         this.thumbnail = thumbnail;
         this.title = title;
         this.summary = summary;

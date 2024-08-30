@@ -27,12 +27,6 @@ public class TestController {
     @Operation(summary = "테스트 hello world")
     @GetMapping("")
     public ResponseDto<String> helloController(){
-        CreateGenerateNewsDto createGenerateNewsDto = CreateGenerateNewsDto.builder()
-                .count_news(0)
-                .count_entertain(0)
-                .count_sports(1)
-                .build();
-        newsService.generateNews(createGenerateNewsDto);
         return ResponseDto.ok("success");
     }
 

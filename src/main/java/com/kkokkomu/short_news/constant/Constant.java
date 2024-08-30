@@ -15,7 +15,7 @@ public class Constant {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final Long REPLY_WEIGHT = 3L;
     public static final Long LIKE_WEIGHT = 2L;
-    public static final String VIDEO_SERVER_GENERATE_HOST = "http://3.34.144.199:8000/generate";
+    public static final String VIDEO_SERVER_GENERATE_HOST = "http://43.201.54.121:8000/generate";
     public static final List<String> NO_NEED_AUTH_URLS = List.of(
             //테스트
             "/test/**",
@@ -39,7 +39,20 @@ public class Constant {
             //댓글
             "/comment/latest/guest",
             "/comment/popular/guest",
-            "/comment/reply/oldest/guest"
+            "/comment/reply/oldest/guest",
+
+            //뉴스 탐색
+            "/news/filter",
+
+            //뉴스 검색
+            "/news/search/guest"
     );
     public static final String DEFAULT_PROFILE = "https://kkm-config.s3.ap-northeast-2.amazonaws.com/profile.png";
+
+    /* 뉴스 인기순 정렬 가중치 */
+    public static final Long VIEW_WEIGHT = 1L;
+    public static final Long COMMENT_WEIGHT = 4L;
+    public static final Long REACTION_WEIGHT = 3L;
+    public static final Long SHARE_WEIGHT = 6L;
+    public static final Long DATE_WEIGHT = -1000L;
 }
