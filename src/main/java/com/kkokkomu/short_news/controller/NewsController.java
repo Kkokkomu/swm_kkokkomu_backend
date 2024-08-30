@@ -75,7 +75,11 @@ public class NewsController {
                                                                                 @RequestParam int size) {
         log.info("searchNews controller");
 
-        return ResponseDto.ok(newsService.getFilteredNewsByText(category, text, filter, cursorId, size));
+        if (filter == EHomeFilter.LATEST) {
+            return ResponseDto.ok(newsService.searchNewsByLatest(category, text, cursorId, size));
+        } else {
+            return ResponseDto.ok(newsService.searchNewsByLatest(category, text, cursorId, size));
+        }
     }
 
     /************************** 뉴스 생성 **************************/
