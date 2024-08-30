@@ -39,7 +39,10 @@ public class Constant {
             //댓글
             "/comment/latest/guest",
             "/comment/popular/guest",
-            "/comment/reply/oldest/guest"
+            "/comment/reply/oldest/guest",
+
+            //뉴스 탐색
+            "/news/filter"
     );
     public static final String DEFAULT_PROFILE = "https://kkm-config.s3.ap-northeast-2.amazonaws.com/profile.png";
 }
