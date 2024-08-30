@@ -60,22 +60,43 @@ public class NewsController {
         log.info("readFilteredNews controller");
 
         if (category.equals("popular")) {
-            return ResponseDto.ok(newsService.getCategoryFilteredNews(category, cursorId, size));
+            return ResponseDto.ok(newsService.getPopularNewsFilteredByCategory(cursorId, size));
         } else {
-            return ResponseDto.ok(newsService.getCategoryFilteredNews(category, cursorId, size));
+            return ResponseDto.ok(newsService.getLatestNewsFilteredByCategory(category, cursorId, size));
         }
     }
 
     @Operation(summary = "뉴스 검색")
     @GetMapping("/search")
     public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> searchNews(@Parameter(example = "popular,politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
+                                                                            @RequestParam String text,
+                                                                            @RequestParam EHomeFilter filter,
+                                                                            @RequestParam(required = false) Long cursorId,
+                                                                            @RequestParam int size,
+                                                                            @UserId Long userId) {
+        log.info("searchNews controller");
+
+        if (filter == EHomeFilter.LATEST) {
+            return ResponseDto.ok(newsService.searchLatestNews(category, text, cursorId, size));
+        } else {
+            return ResponseDto.ok(newsService.searchLatestNews(category, text, cursorId, size));
+        }
+    }
+
+    @Operation(summary = "비로그인 뉴스 검색")
+    @GetMapping("/search/guest")
+    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> guestSearchNews(@Parameter(example = "popular,politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
                                                                                 @RequestParam String text,
                                                                                 @RequestParam EHomeFilter filter,
                                                                                 @RequestParam(required = false) Long cursorId,
                                                                                 @RequestParam int size) {
-        log.info("searchNews controller");
+        log.info("guestSearchNews controller");
 
-        return ResponseDto.ok(newsService.getFilteredNewsByText(category, text, filter, cursorId, size));
+        if (filter == EHomeFilter.LATEST) {
+            return ResponseDto.ok(newsService.searchLatestNews(category, text, cursorId, size));
+        } else {
+            return ResponseDto.ok(newsService.searchLatestNews(category, text, cursorId, size));
+        }
     }
 
     /************************** 뉴스 생성 **************************/

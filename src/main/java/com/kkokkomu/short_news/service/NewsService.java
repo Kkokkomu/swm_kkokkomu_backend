@@ -34,6 +34,8 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static com.kkokkomu.short_news.constant.Constant.*;
@@ -148,8 +150,8 @@ public class NewsService {
                 .build();
     } // 뉴스 정보 조회
 
-    /* 검색화면 */
-    public CursorResponseDto<List<SearchNewsDto>> getCategoryFilteredNews(String category, Long cursorId, int size) {
+    /* 탐색화면 */
+    public CursorResponseDto<List<SearchNewsDto>> getLatestNewsFilteredByCategory(String category, Long cursorId, int size) {
 
         log.info("getfilteredNews service");
 
@@ -176,9 +178,41 @@ public class NewsService {
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(searchNewsDtos, cursorInfoDto);
-    } // 탐색 화면 카테고리 필터 조회
+    } // 탐색 화면 카테고리 필터 최신순
 
-    public CursorResponseDto<List<SearchNewsDto>> getFilteredNewsByText(String category, String text, EHomeFilter order, Long cursorId, int size) {
+    public CursorResponseDto<List<SearchNewsDto>> getPopularNewsFilteredByCategory(Long cursorId, int size) {
+
+        log.info("getPopularNewsFilteredByCategory service");
+
+        // 커서 아이디에 해당하는 뉴스가 있는지 검사
+        if (cursorId != null && !newsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) {
+            results = newsRepository.findFirstPageByPopularity(VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, pageRequest);
+        } else {
+            // cursorScore 계산
+            News cursorNews = newsRepository.findById(cursorId)
+                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
+
+            double cursorScore = calculateScore(cursorNews);
+
+            results = newsRepository.findByPopularityLessThan(VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, cursorScore, cursorId, pageRequest);
+        }
+        news = results.getContent();
+
+        List<SearchNewsDto> searchNewsDtos = SearchNewsDto.of(news);
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(searchNewsDtos, cursorInfoDto);
+    } // 탐색 화면 카테고리 필터 인기순
+
+    public CursorResponseDto<List<SearchNewsDto>> searchLatestNews(String category, String text, Long cursorId, int size) {
         log.info("getFilteredNewsByText service");
 
         if (cursorId != null && !newsRepository.existsById(cursorId)) {
@@ -189,27 +223,25 @@ public class NewsService {
 
         List<ECategory> categoryList = categoryUtil.getCategoryList(category);
 
-        // 댓글 조회
         List<News> news;
         Page<News> results;
-        if (cursorId == null) {
+        if (cursorId == null) { // 첫 요청
             results = newsRepository.findFirstPageByKeywordOrderByIdDesc(categoryList, text, pageRequest);
-            news = results.getContent();
-        } else {
-            // 커서 댓글 찾기
-            News cursorNews = newsRepository.findById(cursorId)
-                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+        } else { // 두 번째 이후 요청
+            if (newsRepository.existsById(cursorId)){ // 커서 id에 해당하는 뉴스가 있는지 검사
+                    throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
+            }
 
             results = newsRepository.findByCKeywordOrderByIdDesc(categoryList, cursorId, text, pageRequest);
-            news = results.getContent();
         }
+        news = results.getContent();
 
         List<SearchNewsDto> newsDtos = SearchNewsDto.of(news);
 
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
-    } // 뉴스 검색
+    } // 최신순 뉴스 검색
 
     /* 관리자 */
 
@@ -335,4 +367,17 @@ public class NewsService {
 
         return generateNewsDtos;
     } // 영상 생성 api
+
+    // cursorScore 계산 메서드
+    private double calculateScore(News news) {
+        long daysDifference = ChronoUnit.DAYS.between(news.getCreatedAt(), LocalDateTime.now());
+
+        double score = (news.getViewCnt() * VIEW_WEIGHT) +
+                (news.getComments().size() * COMMENT_WEIGHT) +
+                (news.getReactions().size() * REACTION_WEIGHT) +
+                (news.getSharedCnt() * SHARE_WEIGHT) +
+                (daysDifference * DATE_WEIGHT);
+
+        return score;
+    }
 }
