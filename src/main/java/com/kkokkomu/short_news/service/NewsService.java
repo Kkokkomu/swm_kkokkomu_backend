@@ -212,7 +212,7 @@ public class NewsService {
         return CursorResponseDto.fromEntityAndPageInfo(searchNewsDtos, cursorInfoDto);
     } // 탐색 화면 카테고리 필터 인기순
 
-    public CursorResponseDto<List<SearchNewsDto>> searchNewsByLatest(String category, String text, Long cursorId, int size) {
+    public CursorResponseDto<List<SearchNewsDto>> searchLatestNews(String category, String text, Long cursorId, int size) {
         log.info("getFilteredNewsByText service");
 
         if (cursorId != null && !newsRepository.existsById(cursorId)) {
@@ -241,7 +241,7 @@ public class NewsService {
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
-    } // 뉴스 검색
+    } // 최신순 뉴스 검색
 
     /* 관리자 */
 

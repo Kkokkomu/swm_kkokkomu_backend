@@ -77,9 +77,9 @@ public class NewsController {
         log.info("searchNews controller");
 
         if (filter == EHomeFilter.LATEST) {
-            return ResponseDto.ok(newsService.searchNewsByLatest(category, text, cursorId, size));
+            return ResponseDto.ok(newsService.searchLatestNews(category, text, cursorId, size));
         } else {
-            return ResponseDto.ok(newsService.searchNewsByLatest(category, text, cursorId, size));
+            return ResponseDto.ok(newsService.searchLatestNews(category, text, cursorId, size));
         }
     }
 
@@ -93,9 +93,9 @@ public class NewsController {
         log.info("guestSearchNews controller");
 
         if (filter == EHomeFilter.LATEST) {
-            return ResponseDto.ok(newsService.searchNewsByLatest(category, text, cursorId, size));
+            return ResponseDto.ok(newsService.searchLatestNews(category, text, cursorId, size));
         } else {
-            return ResponseDto.ok(newsService.searchNewsByLatest(category, text, cursorId, size));
+            return ResponseDto.ok(newsService.searchLatestNews(category, text, cursorId, size));
         }
     }
 
