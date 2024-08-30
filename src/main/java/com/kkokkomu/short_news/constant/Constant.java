@@ -45,4 +45,11 @@ public class Constant {
             "/news/filter"
     );
     public static final String DEFAULT_PROFILE = "https://kkm-config.s3.ap-northeast-2.amazonaws.com/profile.png";
+
+    /* 뉴스 인기순 정렬 가중치 */
+    public static final Long VIEW_WEIGHT = 1L;
+    public static final Long COMMENT_WEIGHT = 4L;
+    public static final Long REACTION_WEIGHT = 3L;
+    public static final Long SHARE_WEIGHT = 6L;
+    public static final Long DATE_WEIGHT = -1000L;
 }
