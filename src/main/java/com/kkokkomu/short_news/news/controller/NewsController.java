@@ -68,12 +68,11 @@ public class NewsController {
 
     @Operation(summary = "뉴스 검색")
     @GetMapping("/search")
-    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> searchNews(@Parameter(example = "popular,politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
+    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> searchNews(@Parameter(example = "politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
                                                                             @RequestParam String text,
                                                                             @RequestParam EHomeFilter filter,
                                                                             @RequestParam(required = false) Long cursorId,
-                                                                            @RequestParam int size,
-                                                                            @UserId Long userId) {
+                                                                            @RequestParam int size) {
         log.info("searchNews controller");
 
         if (filter == EHomeFilter.LATEST) {

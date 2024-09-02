@@ -225,6 +225,7 @@ public class NewsService{
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 최신순 뉴스 검색
 
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<SearchNewsDto>> searchPopularNews(String category, String text, Long cursorId, int size) {
         log.info("searchPopularNews service");
 
@@ -234,7 +235,7 @@ public class NewsService{
 
         PageRequest pageRequest = PageRequest.of(0, size);
 
-        List<ECategory> categoryList = categoryUtil.getCategoryList(category);
+        List<String> categoryList = categoryUtil.getCategoryStringList(category);
 
         List<News> news;
         Page<News> results;

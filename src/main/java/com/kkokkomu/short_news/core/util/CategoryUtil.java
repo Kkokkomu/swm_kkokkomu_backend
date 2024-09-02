@@ -47,6 +47,19 @@ public class CategoryUtil {
         return categoryList;
     }
 
+    public List<String> getCategoryStringList(String category) {
+        // 문자열을 ','로 스플릿하여 배열로 분리
+        String[] categoryArray = category.split(",");
+
+        // 배열을 ECategory 타입의 리스트로 변환
+        List<String> categoryList = Arrays.stream(categoryArray)
+                .map(String::trim) // 필요하면 앞뒤 공백 제거
+                .map(String::toUpperCase)
+                .collect(Collectors.toList());
+
+        return categoryList;
+    }
+
     private ECategory convertToECategory(String category) {
         try {
             return ECategory.valueOf(category);

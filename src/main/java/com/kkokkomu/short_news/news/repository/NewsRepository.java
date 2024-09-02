@@ -108,20 +108,21 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     );
 
     @Query(value = """
-    SELECT n.* FROM News n
-    LEFT JOIN comments c ON n.id = c.news_id
-    LEFT JOIN reactions r ON n.id = r.news_id
+    SELECT n.*, 
+           (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.shared_cnt * :shareWeight +
+            TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) AS popularity_score
+    FROM news n
+    LEFT JOIN comment c ON n.id = c.news_id
+    LEFT JOIN news_reaction r ON n.id = r.news_id
     WHERE n.category IN :categories
-    AND (n.viewCnt * :viewWeight + COUNT(c) * :commentWeight + COUNT(r) * :reactionWeight + n.sharedCnt * :shareWeight +
-    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) <= :cursorScore
     AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
     GROUP BY n.id
-    ORDER BY (n.viewCnt * :viewWeight + COUNT(c) * :commentWeight + COUNT(r) * :reactionWeight + n.sharedCnt * :shareWeight +
-    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
+    HAVING popularity_score <= :cursorScore
+    ORDER BY popularity_score DESC, n.id DESC
     """, nativeQuery = true)
     Page<News> findByKeywordOrderByPopularity(
-            @Param("categories") List<ECategory> categories,
+            @Param("categories") List<String> categories,
             @Param("viewWeight") double viewWeight,
             @Param("commentWeight") double commentWeight,
             @Param("reactionWeight") double reactionWeight,
@@ -134,18 +135,18 @@ public interface NewsRepository extends JpaRepository<News, Long> {
 
     // 인기순 검색 초기화
     @Query(value = """
-    SELECT n.* FROM News n
-    LEFT JOIN comments c ON n.id = c.news_id
-    LEFT JOIN reactions r ON n.id = r.news_id
+    SELECT n.* FROM news n
+    LEFT JOIN comment c ON n.id = c.news_id
+    LEFT JOIN news_reaction r ON n.id = r.news_id
     WHERE n.category IN :categories
-    AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+    AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
     GROUP BY n.id
-    ORDER BY (n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
-    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
+    ORDER BY (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.shared_cnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
     """, nativeQuery = true)
     Page<News> findFirstByKeywordOrderByPopularity(
-            @Param("categories") List<ECategory> categories,
+            @Param("categories") List<String> categories,
             @Param("viewWeight") double viewWeight,
             @Param("commentWeight") double commentWeight,
             @Param("reactionWeight") double reactionWeight,
@@ -154,4 +155,5 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             @Param("keyword") String keyword,
             Pageable pageable
     );
+
 }
