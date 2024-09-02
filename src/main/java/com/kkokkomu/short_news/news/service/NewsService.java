@@ -238,14 +238,15 @@ public class NewsService{
 
         List<News> news;
         Page<News> results;
-        if (cursorId == null) { // 첫 요청
-            results = newsRepository.findFirstByKeywordOrderByIdDesc(categoryList, text, pageRequest);
-        } else { // 두 번째 이후 요청
-            if (newsRepository.existsById(cursorId)){ // 커서 id에 해당하는 뉴스가 있는지 검사
-                    throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
-            }
+        if (cursorId == null) {
+            results = newsRepository.findFirstByKeywordOrderByPopularity(categoryList, VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, text, pageRequest);
+        } else {
+            // cursorScore 계산
+            News cursorNews = newsLookupService.findNewsById(cursorId);
 
-            results = newsRepository.findByKeywordOrderByIdDesc(categoryList, cursorId, text, pageRequest);
+            double cursorScore = calculateScore(cursorNews);
+
+            results = newsRepository.findByKeywordOrderByPopularity(categoryList, VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, cursorScore, text, pageRequest);
         }
         news = results.getContent();
 

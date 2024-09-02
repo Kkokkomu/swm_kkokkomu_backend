@@ -114,7 +114,6 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     WHERE n.category IN :categories
     AND (n.viewCnt * :viewWeight + COUNT(c) * :commentWeight + COUNT(r) * :reactionWeight + n.sharedCnt * :shareWeight +
     TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) <= :cursorScore
-    AND n.id < :cursorId
     AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
     GROUP BY n.id
@@ -129,7 +128,6 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             @Param("shareWeight") double shareWeight,
             @Param("dateWeight") double dateWeight,
             @Param("cursorScore") double cursorScore,
-            @Param("cursorId") Long cursorId,
             @Param("keyword") String keyword,
             Pageable pageable
     );
