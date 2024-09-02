@@ -35,6 +35,7 @@ public class UserService {
         }
 
         return MyPageDto.builder()
+                .id(userId)
                 .nickname(user.getNickname())
                 .email(user.getEmail())
                 .isPremium(subscription.getIsPremium())
