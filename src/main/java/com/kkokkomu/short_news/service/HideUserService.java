@@ -22,14 +22,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class HideUserService {
-    private final UserRepository userRepository;
     private final HideUserRepository hideUserRepository;
 
+    private final UserService userService;
+
     public HideUserDto hideUser(Long userId, CreateHideUserDto createHideUserDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        User hidedUser = userRepository.findById(createHideUserDto.hidedUserId())
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_TARGET_USER));
+        User user = userService.findUserById(userId);
+        User hidedUser = userService.findUserById(createHideUserDto.hidedUserId());
 
         HideUser hideUser = hideUserRepository.save(
                 HideUser.builder()
@@ -53,8 +52,7 @@ public class HideUserService {
 
     @Transactional(readOnly = true)
     public List<SummaryHideUserDto> readHiddenList(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
         List<HideUser> byUser = hideUserRepository.findByUser(user);
 

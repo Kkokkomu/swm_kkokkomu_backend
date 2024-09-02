@@ -19,26 +19,17 @@ import java.util.List;
 @Slf4j
 public class NewsKeywordService {
     private final NewsKeywordRepository newsKeywordRepository;
-    private final KeywordRepository keywordRepository;
+
+    private final KeywordService keywordService;
 
     public List<NewsKeyword> registerNewsKeyword(News news, List<String> newsKeywordList) {
         List<NewsKeyword> newsKeywords = new ArrayList<>();
         for (String newsKeyword : newsKeywordList) {
 
-            // 만약 키워드가 2글자이상 20글자이하 알파벳/한글/숫자로 구성된 한 단어가 아니면 등록 안함
-            if (!newsKeyword.matches("^[a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣0-9]{2,20}$")) {
-                continue;
-            }
+            Keyword keyword = keywordService.createKeywordOrNull(newsKeyword);
 
-            Keyword keyword = keywordRepository.findByKeyword(newsKeyword).orElse(null);
-            // 같은 이름의 키워드가 없다면
             if (keyword == null) {
-                // 키워드 등록
-                keyword = keywordRepository.save(
-                        Keyword.builder()
-                                .keyword(newsKeyword)
-                                .build()
-                );
+                continue;
             }
 
             // 뉴스 키워드 등록
@@ -53,5 +44,12 @@ public class NewsKeywordService {
         newsKeywordRepository.saveAll(newsKeywords);
 
         return newsKeywords;
+    }
+
+    public List<String> getStrKeywordListByNewsId(Long newsId) {
+        return newsKeywordRepository.findAllByNewsId(newsId)
+                .stream()
+                .map(keyword -> keyword.getKeyword().getKeyword())
+                .toList();
     }
 }

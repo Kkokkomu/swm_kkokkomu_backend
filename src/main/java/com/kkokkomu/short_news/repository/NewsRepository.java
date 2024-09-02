@@ -34,16 +34,19 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             Pageable pageable
     );
 
-    @Query("SELECT n FROM News n " +
-            "LEFT JOIN n.comments comments " +
-            "LEFT JOIN n.reactions reactions " +
-            "WHERE (n.viewCnt * :viewWeight + COUNT(comments) * :commentWeight + COUNT(reactions) * :reactionWeight + n.sharedCnt * :shareWeight + " +
-            "TIMESTAMPDIFF(DAY , n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) < :cursorScore " +
-            "OR ((n.viewCnt * :viewWeight + COUNT(comments) * :commentWeight + COUNT(reactions) * :reactionWeight + n.sharedCnt * :shareWeight + " +
-            "TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) = :cursorScore AND n.id < :cursorId) " +
-            "GROUP BY n " +
-            "ORDER BY (n.viewCnt * :viewWeight + COUNT(comments) * :commentWeight + COUNT(reactions) * :reactionWeight + n.sharedCnt * :shareWeight + " +
-            "TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC")
+    // 인기순 필터 쿼리
+    @Query(value = """
+    SELECT n.* FROM News n
+    LEFT JOIN comments c ON n.id = c.news_id
+    LEFT JOIN reactions r ON n.id = r.news_id
+    WHERE (n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) < :cursorScore
+    OR ((n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) = :cursorScore AND n.id < :cursorId)
+    GROUP BY n.id
+    ORDER BY (n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
+    """, nativeQuery = true)
     Page<News> findByPopularityLessThan(
             @Param("viewWeight") double viewWeight,
             @Param("commentWeight") double commentWeight,
@@ -55,12 +58,15 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             Pageable pageable
     );
 
-    @Query("SELECT n FROM News n " +
-            "LEFT JOIN n.comments comments " +
-            "LEFT JOIN n.reactions reactions " +
-            "GROUP BY n " +
-            "ORDER BY (n.viewCnt * :viewWeight + COUNT(comments) * :commentWeight + COUNT(reactions) * :reactionWeight + n.sharedCnt * :shareWeight + " +
-            "TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC")
+    // 첫 페이지 인기순 필터 쿼리
+    @Query(value = """
+    SELECT n.* FROM News n
+    LEFT JOIN comments c ON n.id = c.news_id
+    LEFT JOIN reactions r ON n.id = r.news_id
+    GROUP BY n.id
+    ORDER BY (n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
+    """, nativeQuery = true)
     Page<News> findFirstPageByPopularity(
             @Param("viewWeight") double viewWeight,
             @Param("commentWeight") double commentWeight,
@@ -81,7 +87,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
     ORDER BY n.id DESC
     """)
-    Page<News> findByCKeywordOrderByIdDesc(
+    Page<News> findByKeywordOrderByIdDesc(
             @Param("categories") List<ECategory> categories,
             @Param("cursorId") Long cursorId,
             @Param("keyword") String keyword,
@@ -96,8 +102,58 @@ public interface NewsRepository extends JpaRepository<News, Long> {
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
     ORDER BY n.id DESC
     """)
-    Page<News> findFirstPageByKeywordOrderByIdDesc(
+    Page<News> findFirstByKeywordOrderByIdDesc(
             @Param("categories") List<ECategory> categories,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @Query(value = """
+    SELECT n.* FROM News n
+    LEFT JOIN comments c ON n.id = c.news_id
+    LEFT JOIN reactions r ON n.id = r.news_id
+    WHERE n.category IN :categories
+    AND (n.viewCnt * :viewWeight + COUNT(c) * :commentWeight + COUNT(r) * :reactionWeight + n.sharedCnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) <= :cursorScore
+    AND n.id < :cursorId
+    AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+         OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    GROUP BY n.id
+    ORDER BY (n.viewCnt * :viewWeight + COUNT(c) * :commentWeight + COUNT(r) * :reactionWeight + n.sharedCnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
+    """, nativeQuery = true)
+    Page<News> findByKeywordOrderByPopularity(
+            @Param("categories") List<ECategory> categories,
+            @Param("viewWeight") double viewWeight,
+            @Param("commentWeight") double commentWeight,
+            @Param("reactionWeight") double reactionWeight,
+            @Param("shareWeight") double shareWeight,
+            @Param("dateWeight") double dateWeight,
+            @Param("cursorScore") double cursorScore,
+            @Param("cursorId") Long cursorId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    // 인기순 검색 초기화
+    @Query(value = """
+    SELECT n.* FROM News n
+    LEFT JOIN comments c ON n.id = c.news_id
+    LEFT JOIN reactions r ON n.id = r.news_id
+    WHERE n.category IN :categories
+    AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+         OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    GROUP BY n.id
+    ORDER BY (n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
+    """, nativeQuery = true)
+    Page<News> findFirstByKeywordOrderByPopularity(
+            @Param("categories") List<ECategory> categories,
+            @Param("viewWeight") double viewWeight,
+            @Param("commentWeight") double commentWeight,
+            @Param("reactionWeight") double reactionWeight,
+            @Param("shareWeight") double shareWeight,
+            @Param("dateWeight") double dateWeight,
             @Param("keyword") String keyword,
             Pageable pageable
     );

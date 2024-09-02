@@ -18,18 +18,16 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
-    private final SubscriptionRepository subscriptionRepository;
-    private final ProfileImgRepository profileImgRepository;
+
+    private final SubscriptionService subscriptionService;
+    private final ProfileImgService profileImgService;
 
     public MyPageDto readMyPageInfo(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = findUserById(userId);
 
-        ProfileImg profileImg = profileImgRepository.findByUser(user)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_PROFILE_IMG));
+        ProfileImg profileImg = profileImgService.findProfileImgByUser(user);
 
-        Subscription subscription = subscriptionRepository.findByUser(user)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_SUBSCRIPTION));
+        Subscription subscription = subscriptionService.findSubscriptionByUser(user);
 
         String endDate = "";
         if (subscription.getIsPremium()) {
@@ -43,5 +41,11 @@ public class UserService {
                 .premiumEndDate(endDate)
                 .profileImg(profileImg.getImgUrl())
                 .build();
+    }
+
+    // 유저가 존재하는지 검사
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
     }
 }

@@ -43,21 +43,20 @@ import static com.kkokkomu.short_news.constant.Constant.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class NewsService {
+public class NewsService{
     private final NewsRepository newsRepository;
-    private final UserRepository userRepository;
-    private final NewsReactionRepository newsReactionRepository;
-    private final NewsKeywordRepository newsKeywordRepository;
 
+    private final UserService userService;
     private final NewsKeywordService newsKeywordService;
+    private final NewsReactionService newsReactionService;
+    private final NewsLookupService newsLookupService;
 
     private final CategoryUtil categoryUtil;
 
     /* 홈화면 */
 
     public PagingResponseDto<List<NewsListDto>> readNewsList(Long userId, String category, EHomeFilter filter, int page, int size) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
         // 일단 최신순으로 조회
         Page<News> results = newsRepository.findAllCreatedAtDesc(PageRequest.of(page, size));
@@ -72,20 +71,10 @@ public class NewsService {
             NewsSummaryDto newsSummaryDto = NewsSummaryDto.of(newsItem);
 
             // 각 감정표현 별 갯수
-            ReactionCntDto reactionCntDto = ReactionCntDto.builder()
-                    .like(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.LIKE))
-                    .angry(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.ANGRY))
-                    .sad(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.SAD))
-                    .surprise(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.SURPRISE))
-                    .build();
+            ReactionCntDto reactionCntDto = newsReactionService.countNewsReaction(newsItem.getId());
 
             // 유저 감정표현 여부
-            NewReactionByUserDto newReactionByUserDto = NewReactionByUserDto.builder()
-                    .like(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsItem.getId(), userId, ENewsReaction.LIKE))
-                    .angry(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsItem.getId(), userId, ENewsReaction.ANGRY))
-                    .sad(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsItem.getId(), userId, ENewsReaction.SAD))
-                    .surprise(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsItem.getId(), userId, ENewsReaction.SURPRISE))
-                    .build();
+            NewReactionByUserDto newReactionByUserDto = newsReactionService.checkNewsReaction(userId, newsItem.getId());
 
             // dto 생성
             newsListDtos.add(
@@ -114,12 +103,7 @@ public class NewsService {
             NewsSummaryDto newsSummaryDto = NewsSummaryDto.of(newsItem);
 
             // 각 감정표현 별 갯수
-            ReactionCntDto reactionCntDto = ReactionCntDto.builder()
-                    .like(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.LIKE))
-                    .angry(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.ANGRY))
-                    .sad(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.SAD))
-                    .surprise(newsReactionRepository.countByNewsIdAndReaction(newsItem.getId(), ENewsReaction.SURPRISE))
-                    .build();
+            ReactionCntDto reactionCntDto = newsReactionService.countNewsReaction(newsItem.getId());
 
             // dto 생성
             newsListDtos.add(
@@ -135,14 +119,10 @@ public class NewsService {
 
     @Transactional(readOnly = true)
     public NewsInfoDto readNewsInfo(Long newsId) {
-        News news = newsRepository.findById(newsId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+        News news = newsLookupService.findNewsById(newsId);
 
         // 키워드
-        List<String> keywords = newsKeywordRepository.findAllByNewsId(newsId)
-                .stream()
-                .map(keyword -> keyword.getKeyword().getKeyword())
-                .toList();
+        List<String> keywords = newsKeywordService.getStrKeywordListByNewsId(newsId);
 
         return NewsInfoDto.builder()
                 .news(NewsDto.of(news))
@@ -197,8 +177,7 @@ public class NewsService {
             results = newsRepository.findFirstPageByPopularity(VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, pageRequest);
         } else {
             // cursorScore 계산
-            News cursorNews = newsRepository.findById(cursorId)
-                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
+            News cursorNews = newsLookupService.findNewsById(cursorId);
 
             double cursorScore = calculateScore(cursorNews);
 
@@ -213,7 +192,7 @@ public class NewsService {
     } // 탐색 화면 카테고리 필터 인기순
 
     public CursorResponseDto<List<SearchNewsDto>> searchLatestNews(String category, String text, Long cursorId, int size) {
-        log.info("getFilteredNewsByText service");
+        log.info("searchLatestNews service");
 
         if (cursorId != null && !newsRepository.existsById(cursorId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
@@ -226,13 +205,13 @@ public class NewsService {
         List<News> news;
         Page<News> results;
         if (cursorId == null) { // 첫 요청
-            results = newsRepository.findFirstPageByKeywordOrderByIdDesc(categoryList, text, pageRequest);
+            results = newsRepository.findFirstByKeywordOrderByIdDesc(categoryList, text, pageRequest);
         } else { // 두 번째 이후 요청
             if (newsRepository.existsById(cursorId)){ // 커서 id에 해당하는 뉴스가 있는지 검사
                     throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
             }
 
-            results = newsRepository.findByCKeywordOrderByIdDesc(categoryList, cursorId, text, pageRequest);
+            results = newsRepository.findByKeywordOrderByIdDesc(categoryList, cursorId, text, pageRequest);
         }
         news = results.getContent();
 
@@ -242,6 +221,37 @@ public class NewsService {
 
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 최신순 뉴스 검색
+
+    public CursorResponseDto<List<SearchNewsDto>> searchPopularNews(String category, String text, Long cursorId, int size) {
+        log.info("searchPopularNews service");
+
+        if (cursorId != null && !newsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        List<ECategory> categoryList = categoryUtil.getCategoryList(category);
+
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) { // 첫 요청
+            results = newsRepository.findFirstByKeywordOrderByIdDesc(categoryList, text, pageRequest);
+        } else { // 두 번째 이후 요청
+            if (newsRepository.existsById(cursorId)){ // 커서 id에 해당하는 뉴스가 있는지 검사
+                    throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
+            }
+
+            results = newsRepository.findByKeywordOrderByIdDesc(categoryList, cursorId, text, pageRequest);
+        }
+        news = results.getContent();
+
+        List<SearchNewsDto> newsDtos = SearchNewsDto.of(news);
+
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
+    } // 인기순 뉴스 검색
 
     /* 관리자 */
 

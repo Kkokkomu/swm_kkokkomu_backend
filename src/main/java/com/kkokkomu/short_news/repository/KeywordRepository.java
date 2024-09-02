@@ -27,4 +27,6 @@ public interface KeywordRepository extends JpaRepository<Keyword, Long> {
                     "WHERE k.keyword LIKE %:keyword%",
             nativeQuery = true)
     Page<Object[]> findPopularKeywords(@Param("keyword") String keyword, @Param("lastWeek") LocalDateTime lastWeek, Pageable pageable);
+
+    Boolean existsByKeyword(String keyword);
 }

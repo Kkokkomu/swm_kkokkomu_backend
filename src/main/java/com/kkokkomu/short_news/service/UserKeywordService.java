@@ -22,17 +22,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class UserKeywordService {
-    private final UserRepository userRepository;
     private final UserKeywordRepository userKeywordRepository;
-    private final KeywordRepository keywordRepository;
 
+    private final UserService userService;
     private final KeywordService keywordService; // 이벤트 핸들링 필요
 
     public UserKeywordDto createUserKeyword(Long userId, CreateUserKeywordDto createUserKeywordDto) {
         log.info("createUserKeyword start");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-
+        User user = userService.findUserById(userId);
 
         Keyword newKeyword = keywordService.createKeyword(createUserKeywordDto.keyword());
 
@@ -48,11 +45,9 @@ public class UserKeywordService {
 
     public UserKeywordDto registerUserKeyword(Long userId, RegisterUserKeyword registerUserKeyword) {
         log.info("registerUserKeyword start");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
-        Keyword newKeyword = keywordRepository.findById(registerUserKeyword.keywordId())
-                        .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_KEYWORD));
+        Keyword newKeyword = keywordService.getKeywordById(registerUserKeyword.keywordId());
 
         // 이미 등록된 키워드인지 검
         if (userKeywordRepository.findByUserIdAndKeywordId(userId, registerUserKeyword.keywordId()).isPresent()) {
