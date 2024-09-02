@@ -8,6 +8,7 @@ public record CommentListDto(
         CommentSummoryDto user,
         CommentDto comment,
         int replyCnt,
-        Long commentLikeCnt
+        Long commentLikeCnt,
+        Boolean userLike
 ) {
 }

@@ -114,14 +114,25 @@ public class CommentService {
             comments = results.getContent();
         }
 
+        // 유저가 좋아요한 댓글들 불러오기
+        List<Comment> commentList = commentRepository.findByUserAndCommentLike(user);
+
         List<CommentListDto> commentListDtos = new ArrayList<>();
+        Boolean userLike = null;
         for (Comment comment : comments) {
+            if (commentList == null) {
+                userLike = false;
+            } else {
+                userLike = commentList.contains(comment);
+            }
+
             commentListDtos.add(
                     CommentListDto.builder()
                             .commentLikeCnt(commentLikeService.countByComment(comment))
                             .replyCnt(comment.getChildren().size())
                             .user(CommentSummoryDto.of(comment.getUser()))
                             .comment(CommentDto.of(comment))
+                            .userLike(userLike)
                             .build()
             );
         }
@@ -132,7 +143,7 @@ public class CommentService {
     } // 최신순 댓글 조회
 
     @Transactional
-    public CursorResponseDto<List<CommentListDto>> guestReadLatestComments(Long newsId, Long cursorId, int size) {
+    public CursorResponseDto<List<GuestCommentListDto>> guestReadLatestComments(Long newsId, Long cursorId, int size) {
         log.info("geustReadLatestComments service");
         // 요청한 뉴스랑 댓글이 존재하는지 검사
         if (!newsLookupService.existNewsById(newsId)) {
@@ -158,10 +169,10 @@ public class CommentService {
             comments = results.getContent();
         }
 
-        List<CommentListDto> commentListDtos = new ArrayList<>();
+        List<GuestCommentListDto> commentListDtos = new ArrayList<>();
         for (Comment comment : comments) {
             commentListDtos.add(
-                    CommentListDto.builder()
+                    GuestCommentListDto.builder()
                             .commentLikeCnt(commentLikeService.countByComment(comment))
                             .replyCnt(comment.getChildren().size())
                             .user(CommentSummoryDto.of(comment.getUser()))
@@ -210,14 +221,25 @@ public class CommentService {
             comments = results.getContent();
         }
 
+        // 유저가 좋아요한 댓글들 불러오기
+        List<Comment> commentList = commentRepository.findByUserAndCommentLike(user);
+
         List<CommentListDto> commentListDtos = new ArrayList<>();
+        Boolean userLike = null;
         for (Comment comment : comments) {
+            if (commentList == null) {
+                userLike = false;
+            } else {
+                userLike = commentList.contains(comment);
+            }
+
             commentListDtos.add(
                     CommentListDto.builder()
                             .commentLikeCnt(commentLikeService.countByComment(comment))
                             .replyCnt(comment.getChildren().size())
                             .user(CommentSummoryDto.of(comment.getUser()))
                             .comment(CommentDto.of(comment))
+                            .userLike(userLike)
                             .build()
             );
         }
@@ -228,7 +250,7 @@ public class CommentService {
     } // 인기순 댓글 조회
 
     @Transactional
-    public CursorResponseDto<List<CommentListDto>> guestReadPopularComments(Long newsId, Long cursorId, int size) {
+    public CursorResponseDto<List<GuestCommentListDto>> guestReadPopularComments(Long newsId, Long cursorId, int size) {
         log.info("guestReadPopularComments service");
 
         // 요청한 뉴스랑 댓글이 존재하는지 검사
@@ -260,10 +282,10 @@ public class CommentService {
             comments = results.getContent();
         }
 
-        List<CommentListDto> commentListDtos = new ArrayList<>();
+        List<GuestCommentListDto> commentListDtos = new ArrayList<>();
         for (Comment comment : comments) {
             commentListDtos.add(
-                    CommentListDto.builder()
+                    GuestCommentListDto.builder()
                             .commentLikeCnt(commentLikeService.countByComment(comment))
                             .replyCnt(comment.getChildren().size())
                             .user(CommentSummoryDto.of(comment.getUser()))
@@ -356,8 +378,18 @@ public class CommentService {
             replies = results.getContent();
         }
 
+        // 유저가 좋아요한 댓글들 불러오기
+        List<Comment> commentList = commentRepository.findByUserAndCommentLike(user);
+
         List<ReplyListDto> replyListDtos = new ArrayList<>();
+        Boolean userLike = null;
         for (Comment reply : replies) {
+            if (commentList == null) {
+                userLike = false;
+            } else {
+                userLike = commentList.contains(reply);
+            }
+
             replyListDtos.add(
                     ReplyListDto.builder()
                             .commentLikeCnt(commentLikeService.countByComment(reply))
@@ -413,5 +445,5 @@ public class CommentService {
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(replyListDtos, cursorInfoDto);
-    } // 오래된순 대댓글 조회
+    } // 비로그인 오래된순 대댓글 조회
 }

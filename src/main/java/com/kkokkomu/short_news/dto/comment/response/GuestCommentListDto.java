@@ -4,10 +4,10 @@ import com.kkokkomu.short_news.dto.user.response.CommentSummoryDto;
 import lombok.Builder;
 
 @Builder
-public record ReplyListDto(
+public record GuestCommentListDto(
         CommentSummoryDto user,
         CommentDto comment,
-        Long commentLikeCnt,
-        Boolean userLike
+        int replyCnt,
+        Long commentLikeCnt
 ) {
 }
