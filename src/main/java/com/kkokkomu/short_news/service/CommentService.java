@@ -35,19 +35,18 @@ import static com.kkokkomu.short_news.constant.Constant.REPLY_WEIGHT;
 @Slf4j
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
-    private final NewsRepository newsRepository;
-    private final CommentLikeRepository commentLikeRepository;
+
+    private final UserService userService;
+    private final CommentLikeService commentLikeService;
+    private final NewsLookupService newsLookupService;
 
     /* 댓글 */
 
     public CommentDto createComment(Long userId, CreateCommentDto createCommentDto) {
         log.info("createComment service");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
-        News news = newsRepository.findById(createCommentDto.newsId())
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+        News news = newsLookupService.findNewsById(createCommentDto.newsId());
 
         Comment comment = commentRepository.save(
                 Comment.builder()
@@ -90,10 +89,9 @@ public class CommentService {
     @Transactional
     public CursorResponseDto<List<CommentListDto>> readLatestComments(Long userId, Long newsId, Long cursorId, int size) {
         log.info("readLatestComments service");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
         // 요청한 뉴스랑 댓글이 존재하는지 검사
-        if (!newsRepository.existsById(newsId)) {
+        if (!newsLookupService.existNewsById(newsId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
         }
         if (cursorId != null && !commentRepository.existsById(cursorId)) {
@@ -116,14 +114,25 @@ public class CommentService {
             comments = results.getContent();
         }
 
+        // 유저가 좋아요한 댓글들 불러오기
+        List<Comment> commentList = commentRepository.findByUserAndCommentLike(user);
+
         List<CommentListDto> commentListDtos = new ArrayList<>();
+        Boolean userLike = null;
         for (Comment comment : comments) {
+            if (commentList == null) {
+                userLike = false;
+            } else {
+                userLike = commentList.contains(comment);
+            }
+
             commentListDtos.add(
                     CommentListDto.builder()
-                            .commentLikeCnt(commentLikeRepository.countByComment(comment))
+                            .commentLikeCnt(commentLikeService.countByComment(comment))
                             .replyCnt(comment.getChildren().size())
                             .user(CommentSummoryDto.of(comment.getUser()))
                             .comment(CommentDto.of(comment))
+                            .userLike(userLike)
                             .build()
             );
         }
@@ -134,10 +143,10 @@ public class CommentService {
     } // 최신순 댓글 조회
 
     @Transactional
-    public CursorResponseDto<List<CommentListDto>> guestReadLatestComments(Long newsId, Long cursorId, int size) {
+    public CursorResponseDto<List<GuestCommentListDto>> guestReadLatestComments(Long newsId, Long cursorId, int size) {
         log.info("geustReadLatestComments service");
         // 요청한 뉴스랑 댓글이 존재하는지 검사
-        if (!newsRepository.existsById(newsId)) {
+        if (!newsLookupService.existNewsById(newsId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
         }
         if (cursorId != null && !commentRepository.existsById(cursorId)) {
@@ -160,11 +169,11 @@ public class CommentService {
             comments = results.getContent();
         }
 
-        List<CommentListDto> commentListDtos = new ArrayList<>();
+        List<GuestCommentListDto> commentListDtos = new ArrayList<>();
         for (Comment comment : comments) {
             commentListDtos.add(
-                    CommentListDto.builder()
-                            .commentLikeCnt(commentLikeRepository.countByComment(comment))
+                    GuestCommentListDto.builder()
+                            .commentLikeCnt(commentLikeService.countByComment(comment))
                             .replyCnt(comment.getChildren().size())
                             .user(CommentSummoryDto.of(comment.getUser()))
                             .comment(CommentDto.of(comment))
@@ -181,11 +190,10 @@ public class CommentService {
     public CursorResponseDto<List<CommentListDto>> readPopularComments(Long userId, Long newsId, Long cursorId, int size) {
         log.info("readPopularComments service");
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
         // 요청한 뉴스랑 댓글이 존재하는지 검사
-        if (!newsRepository.existsById(newsId)) {
+        if (!newsLookupService.existNewsById(newsId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
         }
         if (cursorId != null && !commentRepository.existsById(cursorId)) {
@@ -213,14 +221,25 @@ public class CommentService {
             comments = results.getContent();
         }
 
+        // 유저가 좋아요한 댓글들 불러오기
+        List<Comment> commentList = commentRepository.findByUserAndCommentLike(user);
+
         List<CommentListDto> commentListDtos = new ArrayList<>();
+        Boolean userLike = null;
         for (Comment comment : comments) {
+            if (commentList == null) {
+                userLike = false;
+            } else {
+                userLike = commentList.contains(comment);
+            }
+
             commentListDtos.add(
                     CommentListDto.builder()
-                            .commentLikeCnt(commentLikeRepository.countByComment(comment))
+                            .commentLikeCnt(commentLikeService.countByComment(comment))
                             .replyCnt(comment.getChildren().size())
                             .user(CommentSummoryDto.of(comment.getUser()))
                             .comment(CommentDto.of(comment))
+                            .userLike(userLike)
                             .build()
             );
         }
@@ -231,11 +250,11 @@ public class CommentService {
     } // 인기순 댓글 조회
 
     @Transactional
-    public CursorResponseDto<List<CommentListDto>> guestReadPopularComments(Long newsId, Long cursorId, int size) {
+    public CursorResponseDto<List<GuestCommentListDto>> guestReadPopularComments(Long newsId, Long cursorId, int size) {
         log.info("guestReadPopularComments service");
 
         // 요청한 뉴스랑 댓글이 존재하는지 검사
-        if (!newsRepository.existsById(newsId)) {
+        if (!newsLookupService.existNewsById(newsId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
         }
         if (cursorId != null && !commentRepository.existsById(cursorId)) {
@@ -263,11 +282,11 @@ public class CommentService {
             comments = results.getContent();
         }
 
-        List<CommentListDto> commentListDtos = new ArrayList<>();
+        List<GuestCommentListDto> commentListDtos = new ArrayList<>();
         for (Comment comment : comments) {
             commentListDtos.add(
-                    CommentListDto.builder()
-                            .commentLikeCnt(commentLikeRepository.countByComment(comment))
+                    GuestCommentListDto.builder()
+                            .commentLikeCnt(commentLikeService.countByComment(comment))
                             .replyCnt(comment.getChildren().size())
                             .user(CommentSummoryDto.of(comment.getUser()))
                             .comment(CommentDto.of(comment))
@@ -284,11 +303,9 @@ public class CommentService {
 
     public ReplyDto createReply(Long userId, CreateReplyDto createReplyDto) {
         log.info("createReply service");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
-        News news = newsRepository.findById(createReplyDto.newsId())
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+        News news = newsLookupService.findNewsById(createReplyDto.newsId());
 
         Comment parent = commentRepository.findById(createReplyDto.commentId())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_PARENT_COMMENT));
@@ -335,8 +352,7 @@ public class CommentService {
 
     @Transactional
     public CursorResponseDto<List<ReplyListDto>> readOldestReply(Long userId, Long parentId, Long cursorId, int size) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
         // 요청한 대댓글의 부모가 존재하는지
         Comment parent = commentRepository.findById(parentId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
@@ -362,11 +378,21 @@ public class CommentService {
             replies = results.getContent();
         }
 
+        // 유저가 좋아요한 댓글들 불러오기
+        List<Comment> commentList = commentRepository.findByUserAndCommentLike(user);
+
         List<ReplyListDto> replyListDtos = new ArrayList<>();
+        Boolean userLike = null;
         for (Comment reply : replies) {
+            if (commentList == null) {
+                userLike = false;
+            } else {
+                userLike = commentList.contains(reply);
+            }
+
             replyListDtos.add(
                     ReplyListDto.builder()
-                            .commentLikeCnt(commentLikeRepository.countByComment(reply))
+                            .commentLikeCnt(commentLikeService.countByComment(reply))
                             .user(CommentSummoryDto.of(reply.getUser()))
                             .comment(CommentDto.of(reply))
                             .build()
@@ -409,7 +435,7 @@ public class CommentService {
         for (Comment reply : replies) {
             replyListDtos.add(
                     ReplyListDto.builder()
-                            .commentLikeCnt(commentLikeRepository.countByComment(reply))
+                            .commentLikeCnt(commentLikeService.countByComment(reply))
                             .user(CommentSummoryDto.of(reply.getUser()))
                             .comment(CommentDto.of(reply))
                             .build()
@@ -419,5 +445,5 @@ public class CommentService {
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(replyListDtos, cursorInfoDto);
-    } // 오래된순 대댓글 조회
+    } // 비로그인 오래된순 대댓글 조회
 }

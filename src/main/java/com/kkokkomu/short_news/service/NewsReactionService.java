@@ -4,7 +4,9 @@ import com.kkokkomu.short_news.domain.News;
 import com.kkokkomu.short_news.domain.NewsReaction;
 import com.kkokkomu.short_news.domain.User;
 import com.kkokkomu.short_news.dto.newsReaction.request.CreateNewsReactionDto;
+import com.kkokkomu.short_news.dto.newsReaction.response.NewReactionByUserDto;
 import com.kkokkomu.short_news.dto.newsReaction.response.NewsReactionDto;
+import com.kkokkomu.short_news.dto.newsReaction.response.ReactionCntDto;
 import com.kkokkomu.short_news.exception.CommonException;
 import com.kkokkomu.short_news.exception.ErrorCode;
 import com.kkokkomu.short_news.repository.NewsReactionRepository;
@@ -21,17 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class NewsReactionService {
     private final NewsReactionRepository newsReactionRepository;
-    private final NewsRepository newsRepository;
-    private final UserRepository userRepository;
+
+    private final UserService userService;
+    private final NewsLookupService newsLookupService;
 
     public NewsReactionDto createNewsReaction(Long userId, CreateNewsReactionDto createNewsReactionDto) {
         log.info("createNewsReaction service");
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
-        News news = newsRepository.findById(createNewsReactionDto.newsId())
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+        News news = newsLookupService.findNewsById(createNewsReactionDto.newsId());
 
         if (newsReactionRepository.existsByNewsIdAndUserIdAndReaction(news.getId(), user.getId(), createNewsReactionDto.reaction())) {
             throw new CommonException(ErrorCode.DUPLICATED_NEWS_REACTION);
@@ -50,11 +51,9 @@ public class NewsReactionService {
 
     @Transactional
     public String deleteNewsReaction(Long userId, Long newsId, String reaction) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
-        News news = newsRepository.findById(newsId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+        News news = newsLookupService.findNewsById(newsId);
 
         ENewsReaction newsReaction = ENewsReaction.valueOf(reaction.toUpperCase());
 
@@ -66,4 +65,24 @@ public class NewsReactionService {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS_REACTION);
         }
     } // 뉴스 감정표현 삭제
+
+    // 각 감정표현 별 갯수 카운드
+    public ReactionCntDto countNewsReaction(Long newsId) {
+        return ReactionCntDto.builder()
+                .like(newsReactionRepository.countByNewsIdAndReaction(newsId, ENewsReaction.LIKE))
+                .angry(newsReactionRepository.countByNewsIdAndReaction(newsId, ENewsReaction.ANGRY))
+                .sad(newsReactionRepository.countByNewsIdAndReaction(newsId, ENewsReaction.SAD))
+                .surprise(newsReactionRepository.countByNewsIdAndReaction(newsId, ENewsReaction.SURPRISE))
+                .build();
+    }
+
+    // 유저 감정표현 여부 체크
+    public NewReactionByUserDto checkNewsReaction(Long userId, Long newsId) {
+        return NewReactionByUserDto.builder()
+                .like(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsId, userId, ENewsReaction.LIKE))
+                .angry(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsId, userId, ENewsReaction.ANGRY))
+                .sad(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsId, userId, ENewsReaction.SAD))
+                .surprise(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsId, userId, ENewsReaction.SURPRISE))
+                .build();
+    }
 }

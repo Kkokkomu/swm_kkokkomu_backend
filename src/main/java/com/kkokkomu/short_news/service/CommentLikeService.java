@@ -19,20 +19,17 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class CommentLikeService {
     private final CommentLikeRepository commentLikeRepository;
-    private final UserRepository userRepository;
-    private final CommentRepository commentRepository;
+
+    private final UserService userService;
+    private final CommentLookupService commentLookupService;
 
     public String createCommentLike(Long userId, CreateCommentLike createCommentLike) {
         log.info("createCommentLike");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
-        Comment comment = commentRepository.findById(createCommentLike.commentId())
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+        Comment comment = commentLookupService.findCommentById(createCommentLike.commentId());
 
-        if (commentLikeRepository.existsByCommentAndUser(comment, user)) {
-            throw new CommonException(ErrorCode.DUPLICATED_COMMENT_LIKE);
-        }
+        existsCommentLike(user, comment);
 
         commentLikeRepository.save(
                 CommentLike.builder()
@@ -47,18 +44,24 @@ public class CommentLikeService {
     @Transactional
     public String deleteCommentLike(Long userId, Long commentId) {
         log.debug("deleteCommentLike");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+        Comment comment = commentLookupService.findCommentById(commentId);
 
-        if (!commentLikeRepository.existsByCommentAndUser(comment, user)) {
-            throw new CommonException(ErrorCode.NOT_FOUND_COMMENT_LIKE);
-        }
+        existsCommentLike(user, comment);
 
         commentLikeRepository.deleteByCommentAndUser(comment, user);
 
         return "success";
     } // 댓글 좋아요 삭제
+
+    public void existsCommentLike(User user, Comment comment) {
+        if (!commentLikeRepository.existsByCommentAndUser(comment, user)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_COMMENT_LIKE);
+        }
+    } // 댓글 좋아요 객체가 존재하는지 검사
+
+    public Long countByComment(Comment comment) {
+        return commentLikeRepository.countByComment(comment);
+    }
 }

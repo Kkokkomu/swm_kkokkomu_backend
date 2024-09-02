@@ -43,6 +43,29 @@ public class KeywordService {
         );
     } // 키워드 생성
 
+    public Keyword createKeywordOrNull(String newsKeyword) {
+        log.info("Create keyword or Null: {}", newsKeyword);
+
+        // 키워드가 2글자이상 20글자이하 알파벳/한글/숫자로 구성된 한 단어로 구성됐는지 검사
+        if (!newsKeyword.matches("^[a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣0-9]{2,20}$")) {
+            return null;
+        }
+
+        Keyword keyword = keywordRepository.findByKeyword(newsKeyword).orElse(null);
+
+        // 같은 이름의 키워드가 없다면
+        if (keyword == null) {
+            // 키워드 등록
+            keyword = keywordRepository.save(
+                    Keyword.builder()
+                            .keyword(newsKeyword)
+                            .build()
+            );
+        }
+
+        return keyword;
+    } // 키워드 생성 유효하지 않으면 null 반환
+
     public PagingResponseDto<List<SearchKeywordDto>> searchKeyword(String keyword, int page, int size) {
         LocalDateTime lastWeek = LocalDateTime.now().minusWeeks(1);
         Page<Object[]> results = keywordRepository.findPopularKeywords(keyword, lastWeek, PageRequest.of(page, size));
@@ -62,4 +85,9 @@ public class KeywordService {
 
         return PagingResponseDto.fromEntityAndPageInfo(searchKeywordDtos, pageInfoDto);
     } // 키워드 검색
+
+    public Keyword getKeywordById(Long id) {
+        return keywordRepository.findById(id)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_KEYWORD));
+    }
 }

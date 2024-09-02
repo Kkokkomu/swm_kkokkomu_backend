@@ -210,5 +210,15 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             Pageable pageable
     );
 
+    // 유저가 좋아요한 댓글만 반환
+    @Query("""
+    SELECT c
+    FROM Comment c
+    JOIN CommentLike cl ON c = cl.comment
+    WHERE cl.user = :user
+    """)
+    List<Comment> findByUserAndCommentLike(
+            @Param("user") User user
+    );
 
 }
