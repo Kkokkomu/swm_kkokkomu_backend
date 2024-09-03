@@ -7,6 +7,7 @@ import com.kkokkomu.short_news.comment.dto.commentLike.request.CreateCommentLike
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.comment.repository.CommentLikeRepository;
+import com.kkokkomu.short_news.user.service.UserLookupService;
 import com.kkokkomu.short_news.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,12 @@ import org.springframework.stereotype.Service;
 public class CommentLikeService {
     private final CommentLikeRepository commentLikeRepository;
 
-    private final UserService userService;
+    private final UserLookupService userLookupService;
     private final CommentLookupService commentLookupService;
 
     public String createCommentLike(Long userId, CreateCommentLike createCommentLike) {
         log.info("createCommentLike");
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         Comment comment = commentLookupService.findCommentById(createCommentLike.commentId());
 
@@ -43,7 +44,7 @@ public class CommentLikeService {
     @Transactional
     public String deleteCommentLike(Long userId, Long commentId) {
         log.debug("deleteCommentLike");
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         Comment comment = commentLookupService.findCommentById(commentId);
 

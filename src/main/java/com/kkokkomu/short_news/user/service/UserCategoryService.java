@@ -22,7 +22,7 @@ import java.util.List;
 public class UserCategoryService {
     private final UserCategoryRepository userCategoryRepository;
 
-    private final UserService userService;
+    private final UserLookupService userLookupService;
 
     @Transactional
     public String updateUserCategory(Long userId, UpdateUserCategoryDto updateUserCategoryDto) {
@@ -36,7 +36,7 @@ public class UserCategoryService {
             throw new CommonException(ErrorCode.INVALID_CATEGORY_SELECTION);
         }
 
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         // 유저 아이디 기준, 기존 카테고리 다 삭제
         userCategoryRepository.deleteAllByUserId(userId);
@@ -95,7 +95,7 @@ public class UserCategoryService {
     } // 유저 카테고리 업데이트
 
     public CategoryByUserDto findUserCategoryByUserId(Long userId) {
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         List<UserCategory> categoryList = userCategoryRepository.findAllByUserId(userId);
 

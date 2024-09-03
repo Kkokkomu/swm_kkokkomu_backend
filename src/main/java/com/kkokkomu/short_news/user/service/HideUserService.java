@@ -21,11 +21,11 @@ import java.util.List;
 public class HideUserService {
     private final HideUserRepository hideUserRepository;
 
-    private final UserService userService;
+    private final UserLookupService userLookupService;
 
     public HideUserDto hideUser(Long userId, CreateHideUserDto createHideUserDto) {
-        User user = userService.findUserById(userId);
-        User hidedUser = userService.findUserById(createHideUserDto.hidedUserId());
+        User user = userLookupService.findUserById(userId);
+        User hidedUser = userLookupService.findUserById(createHideUserDto.hidedUserId());
 
         HideUser hideUser = hideUserRepository.save(
                 HideUser.builder()
@@ -49,7 +49,7 @@ public class HideUserService {
 
     @Transactional(readOnly = true)
     public List<SummaryHideUserDto> readHiddenList(Long userId) {
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         List<HideUser> byUser = hideUserRepository.findByUser(user);
 

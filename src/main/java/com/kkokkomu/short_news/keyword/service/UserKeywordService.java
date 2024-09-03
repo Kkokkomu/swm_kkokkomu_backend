@@ -9,6 +9,7 @@ import com.kkokkomu.short_news.keyword.dto.userKeyword.response.UserKeywordDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.keyword.repository.UserKeywordRepository;
+import com.kkokkomu.short_news.user.service.UserLookupService;
 import com.kkokkomu.short_news.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +24,12 @@ import java.util.List;
 public class UserKeywordService {
     private final UserKeywordRepository userKeywordRepository;
 
-    private final UserService userService;
+    private final UserLookupService userLookupService;
     private final KeywordService keywordService; // 이벤트 핸들링 필요
 
     public UserKeywordDto createUserKeyword(Long userId, CreateUserKeywordDto createUserKeywordDto) {
         log.info("createUserKeyword start");
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         Keyword newKeyword = keywordService.createKeyword(createUserKeywordDto.keyword());
 
@@ -44,7 +45,7 @@ public class UserKeywordService {
 
     public UserKeywordDto registerUserKeyword(Long userId, RegisterUserKeyword registerUserKeyword) {
         log.info("registerUserKeyword start");
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         Keyword newKeyword = keywordService.getKeywordById(registerUserKeyword.keywordId());
 

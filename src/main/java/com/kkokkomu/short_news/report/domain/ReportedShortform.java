@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.report.domain;
 
+import com.kkokkomu.short_news.core.type.ENewsReport;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.user.domain.User;
 import jakarta.persistence.*;
@@ -25,13 +26,13 @@ public class ReportedShortform {
     private News news; // Foreign key to News entity (신고된 뉴스)
 
     @Column(name = "reason", nullable = false)
-    private String reason; // 신고 이유
+    private ENewsReport reason; // 신고 이유
 
     @Column(name = "reported_at", nullable = false)
     private LocalDateTime reportedAt; // 신고 일시
 
     @Builder
-    public ReportedShortform(User reporter, News news, String reason) {
+    public ReportedShortform(User reporter, News news, ENewsReport reason) {
         this.reporter = reporter;
         this.news = news;
         this.reason = reason;
