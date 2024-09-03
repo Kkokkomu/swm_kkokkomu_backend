@@ -58,6 +58,7 @@ public class CommentService {
         );
 
         return CommentDto.builder()
+                .id(comment.getId())
                 .newsId(createCommentDto.newsId())
                 .content(comment.getContent())
                 .userId(userId)
