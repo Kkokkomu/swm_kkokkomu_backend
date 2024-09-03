@@ -348,7 +348,8 @@ public class NewsService{
             String summary = summaryDto.sentence_total();
             List<String> keywords = new ArrayList<>(Arrays.asList(keywordMap.get("keyword_0"), keywordMap.get("keyword_1"), keywordMap.get("keyword_2")));
             String s3Url = generateResponseDto.s3();
-            String thumnailUrl = "";
+            String thumbnailUrl = generateResponseDto.thumbnail();
+            log.info("thumbnailUrl : {}", generateResponseDto.thumbnail());
             String title = dataDto.title();
             log.info("data : {}", dataDto);
             log.info("section : {}", dataDto.section());
@@ -364,7 +365,7 @@ public class NewsService{
                     "",
                     "",
                     relatedUrl,
-                    thumnailUrl,
+                    thumbnailUrl,
                     title,
                     summary,
                     category
