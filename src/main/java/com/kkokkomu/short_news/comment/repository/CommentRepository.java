@@ -19,9 +19,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     SELECT c FROM Comment c 
     WHERE c.news.id = :newsId 
     AND c.id < :cursorId 
-    ORDER BY c.id DESC
+    ORDER BY c.editedAt DESC, c.id DESC
     """)
-    Page<Comment> findByNewsIdAndIdLessThanOrderByIdDescGuest(
+    Page<Comment> findByNewsIdAndIdLessThanOrderByEditedAtDescGuest(
             @Param("newsId") Long newsId,
             @Param("cursorId") Long cursorId,
             Pageable pageable
@@ -32,9 +32,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("""
     SELECT c FROM Comment c 
     WHERE c.news.id = :newsId 
-    ORDER BY c.id DESC
+    ORDER BY c.editedAt DESC, c.id DESC
     """)
-    Page<Comment> findFirstPageByNewsIdOrderByIdDescGuest(
+    Page<Comment> findFirstPageByNewsIdOrderByEditedAtDescGuest(
             @Param("newsId") Long newsId,
             Pageable pageable
     );
@@ -46,15 +46,14 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     WHERE c.news.id = :newsId 
     AND c.id < :cursorId 
     AND hu.id IS NULL
-    ORDER BY c.id DESC
+    ORDER BY c.editedAt DESC, c.id DESC
     """)
-    Page<Comment> findByNewsIdAndIdLessThanOrderByIdDesc(
+    Page<Comment> findByNewsIdAndIdLessThanOrderByEditedAtDesc(
             @Param("newsId") Long newsId,
             @Param("cursorId") Long cursorId,
             @Param("user") User user,
             Pageable pageable
     );
-
 
     // 최신순 댓글 초기화 조회
     @Query("""
@@ -62,13 +61,14 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     LEFT JOIN HideUser hu ON hu.hidedUser = c.user AND hu.user = :user
     WHERE c.news.id = :newsId 
     AND hu.id IS NULL
-    ORDER BY c.id DESC
+    ORDER BY c.editedAt DESC, c.id DESC
     """)
-    Page<Comment> findFirstPageByNewsIdOrderByIdDesc(
+    Page<Comment> findFirstPageByNewsIdOrderByEditedAtDesc(
             @Param("newsId") Long newsId,
             @Param("user") User user,
             Pageable pageable
     );
+
 
 
     // 인기순 조회

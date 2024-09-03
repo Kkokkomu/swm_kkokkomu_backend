@@ -58,7 +58,6 @@ public class NewsService{
     private final CategoryUtil categoryUtil;
 
     /* 홈화면 */
-
     public PagingResponseDto<List<NewsListDto>> readNewsList(Long userId, String category, EHomeFilter filter, int page, int size) {
         User user = userLookupService.findUserById(userId);
 
@@ -260,7 +259,6 @@ public class NewsService{
     } // 인기순 뉴스 검색
 
     /* 관리자 */
-
     @jakarta.transaction.Transactional
     public List<GenerateNewsDto> generateNews(CreateGenerateNewsDto createGenerateNewsDto) {
         int repeat = createGenerateNewsDto.count_news() + createGenerateNewsDto.count_entertain() + createGenerateNewsDto.count_sports();
@@ -320,7 +318,8 @@ public class NewsService{
             throw new RuntimeException("Error processing JSON", e);
         }
 
-        log.info("response data : {}", Objects.requireNonNull(response.getBody()).length);
+        log.info("response data length: {}", Objects.requireNonNull(response.getBody()).length);
+        log.info("response data : {}", (Object) Objects.requireNonNull(response.getBody()));
         GenerateResponseDto[] generateResponseDtos = response.getBody();
 
         // 영상 생성 서버에서 영상 url 및 정보 받아옴
@@ -351,9 +350,11 @@ public class NewsService{
             String s3Url = generateResponseDto.s3();
             String thumnailUrl = "";
             String title = dataDto.title();
+            log.info("data : {}", dataDto);
             log.info("section : {}", dataDto.section());
             ECategory category = categoryUtil.getCategoryByName(dataDto.section());
             String relatedUrl = dataDto.url();
+            log.info("relatedUrl : {}", dataDto.url());
 
             // 뉴스 키워드 생성
             List<NewsKeyword> newsKeywords = newsKeywordService.registerNewsKeyword(news, keywords);

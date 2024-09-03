@@ -107,11 +107,11 @@ public class CommentService {
         Page<Comment> results;
         if (cursorId == null) {
             // 처음 요청
-            results = commentRepository.findFirstPageByNewsIdOrderByIdDesc(newsId, user, pageRequest);
+            results = commentRepository.findFirstPageByNewsIdOrderByEditedAtDesc(newsId, user, pageRequest);
             comments = results.getContent();
         } else {
             // 2번째부터
-            results = commentRepository.findByNewsIdAndIdLessThanOrderByIdDesc(newsId, cursorId, user, pageRequest);
+            results = commentRepository.findByNewsIdAndIdLessThanOrderByEditedAtDesc(newsId, cursorId, user, pageRequest);
             comments = results.getContent();
         }
 
@@ -162,11 +162,11 @@ public class CommentService {
         Page<Comment> results;
         if (cursorId == null) {
             // 처음 요청
-            results = commentRepository.findFirstPageByNewsIdOrderByIdDescGuest(newsId, pageRequest);
+            results = commentRepository.findFirstPageByNewsIdOrderByEditedAtDescGuest(newsId, pageRequest);
             comments = results.getContent();
         } else {
             // 2번째부터
-            results = commentRepository.findByNewsIdAndIdLessThanOrderByIdDescGuest(newsId, cursorId, pageRequest);
+            results = commentRepository.findByNewsIdAndIdLessThanOrderByEditedAtDescGuest(newsId, cursorId, pageRequest);
             comments = results.getContent();
         }
 
