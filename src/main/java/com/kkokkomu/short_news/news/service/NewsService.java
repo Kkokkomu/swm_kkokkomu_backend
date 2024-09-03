@@ -21,6 +21,7 @@ import com.kkokkomu.short_news.core.type.EHomeFilter;
 import com.kkokkomu.short_news.core.util.CategoryUtil;
 import com.kkokkomu.short_news.keyword.service.NewsKeywordService;
 import com.kkokkomu.short_news.user.domain.User;
+import com.kkokkomu.short_news.user.service.UserLookupService;
 import com.kkokkomu.short_news.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,7 @@ import static com.kkokkomu.short_news.core.constant.Constant.*;
 public class NewsService{
     private final NewsRepository newsRepository;
 
-    private final UserService userService;
+    private final UserLookupService userLookupService;
     private final NewsKeywordService newsKeywordService;
     private final NewsReactionService newsReactionService;
     private final NewsLookupService newsLookupService;
@@ -59,7 +60,7 @@ public class NewsService{
     /* 홈화면 */
 
     public PagingResponseDto<List<NewsListDto>> readNewsList(Long userId, String category, EHomeFilter filter, int page, int size) {
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         // 일단 최신순으로 조회
         Page<News> results = newsRepository.findAllCreatedAtDesc(PageRequest.of(page, size));

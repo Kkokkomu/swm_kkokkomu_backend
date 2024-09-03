@@ -11,6 +11,7 @@ import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.news.repository.NewsReactionRepository;
 import com.kkokkomu.short_news.core.type.ENewsReaction;
+import com.kkokkomu.short_news.user.service.UserLookupService;
 import com.kkokkomu.short_news.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class NewsReactionService {
     private final NewsReactionRepository newsReactionRepository;
 
-    private final UserService userService;
+    private final UserLookupService userLookupService;
     private final NewsLookupService newsLookupService;
 
     public NewsReactionDto createNewsReaction(Long userId, CreateNewsReactionDto createNewsReactionDto) {
         log.info("createNewsReaction service");
 
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         News news = newsLookupService.findNewsById(createNewsReactionDto.newsId());
 
@@ -50,7 +51,7 @@ public class NewsReactionService {
 
     @Transactional
     public String deleteNewsReaction(Long userId, Long newsId, String reaction) {
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         News news = newsLookupService.findNewsById(newsId);
 

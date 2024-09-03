@@ -15,6 +15,7 @@ import com.kkokkomu.short_news.user.dto.user.response.CommentSummoryDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.comment.repository.CommentRepository;
+import com.kkokkomu.short_news.user.service.UserLookupService;
 import com.kkokkomu.short_news.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ import static com.kkokkomu.short_news.core.constant.Constant.REPLY_WEIGHT;
 public class CommentService {
     private final CommentRepository commentRepository;
 
-    private final UserService userService;
+    private final UserLookupService userLookupService;
     private final CommentLikeService commentLikeService;
     private final NewsLookupService newsLookupService;
 
@@ -43,7 +44,7 @@ public class CommentService {
 
     public CommentDto createComment(Long userId, CreateCommentDto createCommentDto) {
         log.info("createComment service");
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         News news = newsLookupService.findNewsById(createCommentDto.newsId());
 
@@ -88,7 +89,7 @@ public class CommentService {
     @Transactional
     public CursorResponseDto<List<CommentListDto>> readLatestComments(Long userId, Long newsId, Long cursorId, int size) {
         log.info("readLatestComments service");
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
         // 요청한 뉴스랑 댓글이 존재하는지 검사
         if (!newsLookupService.existNewsById(newsId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
@@ -189,7 +190,7 @@ public class CommentService {
     public CursorResponseDto<List<CommentListDto>> readPopularComments(Long userId, Long newsId, Long cursorId, int size) {
         log.info("readPopularComments service");
 
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         // 요청한 뉴스랑 댓글이 존재하는지 검사
         if (!newsLookupService.existNewsById(newsId)) {
@@ -302,7 +303,7 @@ public class CommentService {
 
     public ReplyDto createReply(Long userId, CreateReplyDto createReplyDto) {
         log.info("createReply service");
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         News news = newsLookupService.findNewsById(createReplyDto.newsId());
 
@@ -351,7 +352,8 @@ public class CommentService {
 
     @Transactional
     public CursorResponseDto<List<ReplyListDto>> readOldestReply(Long userId, Long parentId, Long cursorId, int size) {
-        User user = userService.findUserById(userId);
+        User user = userLookupService.findUserById(userId);
+
         // 요청한 대댓글의 부모가 존재하는지
         Comment parent = commentRepository.findById(parentId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));

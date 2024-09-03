@@ -51,6 +51,9 @@ public class User {
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     private String refreshToken; // 리프레쉬 토큰
 
+    @Column(name = "reported_cnt", nullable = false)
+    private int reportedCnt; // 댓글 경고 횟수
+
     @Column(name = "banned_start_at")
     private LocalDateTime bannedStartAt; // 제제 시작 일시
 
@@ -101,6 +104,7 @@ public class User {
         this.loginProvider = loginProvider;
         this.isLogin = false;
         this.refreshToken = null;
+        this.reportedCnt = 0;
         this.bannedStartAt = null;
         this.bannedEndAt = null;
         this.deletedAt = null;
@@ -145,5 +149,9 @@ public class User {
         this.sex = sex;
         this.birthday = birthday;
         this.role = EUserRole.USER;
+    }
+
+    public void updateReportedCnt() {
+        this.reportedCnt++;
     }
 }

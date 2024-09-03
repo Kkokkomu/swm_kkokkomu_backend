@@ -1,6 +1,7 @@
 package com.kkokkomu.short_news.report.domain;
 
 import com.kkokkomu.short_news.comment.domain.Comment;
+import com.kkokkomu.short_news.core.type.ECommentReport;
 import com.kkokkomu.short_news.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,13 +26,13 @@ public class ReportedComment {
     private User reporter; // Foreign key to User entity (제보자)
 
     @Column(name = "reason", nullable = false)
-    private String reason; // 신고 사유
+    private ECommentReport reason; // 신고 사유
 
     @Column(name = "reported_at", nullable = false)
     private LocalDateTime reportedAt; // 신고 일시
 
     @Builder
-    public ReportedComment(Comment comment, User reporter, String reason) {
+    public ReportedComment(Comment comment, User reporter, ECommentReport reason) {
         this.comment = comment;
         this.reporter = reporter;
         this.reason = reason;

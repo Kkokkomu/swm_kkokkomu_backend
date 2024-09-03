@@ -18,11 +18,13 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
 
+    private final UserLookupService userLookupService;
+
     private final SubscriptionService subscriptionService;
     private final ProfileImgService profileImgService;
 
     public MyPageDto readMyPageInfo(Long userId) {
-        User user = findUserById(userId);
+        User user = userLookupService.findUserById(userId);
 
         ProfileImg profileImg = profileImgService.findProfileImgByUser(user);
 
@@ -41,11 +43,5 @@ public class UserService {
                 .premiumEndDate(endDate)
                 .profileImg(profileImg.getImgUrl())
                 .build();
-    }
-
-    // 유저가 존재하는지 검사
-    public User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
     }
 }
