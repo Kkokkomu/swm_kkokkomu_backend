@@ -1,17 +1,17 @@
-package com.kkokkomu.short_news.report.dto.commentReport.response;
+package com.kkokkomu.short_news.report.dto.reportedComment.response;
 
 import com.kkokkomu.short_news.report.domain.ReportedComment;
 import lombok.Builder;
 
 @Builder
-public record CommentReportDto(
+public record ReportedCommentDto(
         Long reportId,
         String reason,
         Long reporterId,
         String createdAt
 ) {
-    public static CommentReportDto of(ReportedComment reportedComment) {
-        return CommentReportDto.builder()
+    public static ReportedCommentDto of(ReportedComment reportedComment) {
+        return ReportedCommentDto.builder()
                 .reportId(reportedComment.getId())
                 .reporterId(reportedComment.getReporter().getId())
                 .reason(reportedComment.getReason().toString())

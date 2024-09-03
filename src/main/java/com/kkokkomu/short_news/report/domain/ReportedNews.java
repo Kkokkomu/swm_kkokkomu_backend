@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "reported_shortform")
-public class ReportedShortform {
+@Table(name = "reported_news")
+public class ReportedNews {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +32,7 @@ public class ReportedShortform {
     private LocalDateTime reportedAt; // 신고 일시
 
     @Builder
-    public ReportedShortform(User reporter, News news, ENewsReport reason) {
+    public ReportedNews(User reporter, News news, ENewsReport reason) {
         this.reporter = reporter;
         this.news = news;
         this.reason = reason;

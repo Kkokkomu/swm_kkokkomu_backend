@@ -3,8 +3,8 @@ package com.kkokkomu.short_news.report.service;
 import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.comment.service.CommentLookupService;
 import com.kkokkomu.short_news.report.domain.ReportedComment;
-import com.kkokkomu.short_news.report.dto.commentReport.request.CreateCommentReportDto;
-import com.kkokkomu.short_news.report.dto.commentReport.response.CommentReportDto;
+import com.kkokkomu.short_news.report.dto.reportedComment.request.CreateReportedCommentDto;
+import com.kkokkomu.short_news.report.dto.reportedComment.response.ReportedCommentDto;
 import com.kkokkomu.short_news.report.repository.ReportedCommentRepository;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.service.UserLookupService;
@@ -21,7 +21,7 @@ public class ReportedCommentService {
     private final UserLookupService userLookupService;
     private final CommentLookupService commentLookupService;
 
-    public CommentReportDto create(CreateCommentReportDto commentReportDto, Long userId) {
+    public ReportedCommentDto create(CreateReportedCommentDto commentReportDto, Long userId) {
         // 신고자, 신고댓글, 댓글 작성자 유효성 확인
         User reporter = userLookupService.findUserById(userId);
 
@@ -41,6 +41,6 @@ public class ReportedCommentService {
         // 사용자 신고 카운트 +1
         writer.updateReportedCnt();
 
-        return CommentReportDto.of(reportedComment);
+        return ReportedCommentDto.of(reportedComment);
     }
 }
