@@ -363,8 +363,8 @@ public class NewsService{
                     s3Url,
                     "",
                     "",
-                    thumnailUrl,
                     relatedUrl,
+                    thumnailUrl,
                     title,
                     summary,
                     category
