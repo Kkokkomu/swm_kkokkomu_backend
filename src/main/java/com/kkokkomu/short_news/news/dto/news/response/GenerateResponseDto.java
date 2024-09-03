@@ -7,6 +7,7 @@ import java.util.Map;
 @Builder
 public record GenerateResponseDto(
         Map<String, Object> data,
-        String s3
+        String s3,
+        String thumbnail
 ) {
 }
