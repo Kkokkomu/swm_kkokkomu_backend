@@ -28,7 +28,7 @@ public class CommentLikeService {
 
         Comment comment = commentLookupService.findCommentById(createCommentLike.commentId());
 
-        existsCommentLike(user, comment);
+        isDuplicateCommentLike(user, comment);
 
         commentLikeRepository.save(
                 CommentLike.builder()
@@ -57,6 +57,12 @@ public class CommentLikeService {
     public void existsCommentLike(User user, Comment comment) {
         if (!commentLikeRepository.existsByCommentAndUser(comment, user)) {
             throw new CommonException(ErrorCode.NOT_FOUND_COMMENT_LIKE);
+        }
+    } // 댓글 좋아요 객체가 존재하는지 검사
+
+    public void isDuplicateCommentLike(User user, Comment comment) {
+        if (commentLikeRepository.existsByCommentAndUser(comment, user)) {
+            throw new CommonException(ErrorCode.DUPLICATED_COMMENT_LIKE);
         }
     } // 댓글 좋아요 객체가 존재하는지 검사
 
