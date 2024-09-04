@@ -11,7 +11,7 @@ public record SearchNewsDto(
         Long newsId,
         String title,
         String createdAt,
-        String thumnailUrl,
+        String thumbnailUrl,
         int viewCnt
 ) {
     static public SearchNewsDto of(News news) {
@@ -19,7 +19,7 @@ public record SearchNewsDto(
                 .newsId(news.getId())
                 .title(news.getTitle())
                 .createdAt(news.getCreatedAt().toString())
-                .thumnailUrl(news.getThumbnail())
+                .thumbnailUrl(news.getThumbnail())
                 .viewCnt(news.getViewCnt())
                 .build();
     }
