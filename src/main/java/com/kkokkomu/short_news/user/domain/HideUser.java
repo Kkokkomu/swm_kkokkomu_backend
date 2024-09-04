@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "hided_comment", indexes = {
+@Table(name = "hide_user", indexes = {
         @Index(name = "idx_user_id", columnList = "user_id")
 })
 public class HideUser {

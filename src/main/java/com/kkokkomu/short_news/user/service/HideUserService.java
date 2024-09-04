@@ -27,6 +27,16 @@ public class HideUserService {
         User user = userLookupService.findUserById(userId);
         User hidedUser = userLookupService.findUserById(createHideUserDto.hidedUserId());
 
+        // 자기 자신을 차단하고 있는지 검사
+        if (user == hidedUser) {
+            throw new CommonException(ErrorCode.INVALID_HIDE_USER);
+        }
+
+        // 이미 차단한 유저인지 검사
+        if (hideUserRepository.existsByUserAndHidedUser(user, hidedUser)) {
+            throw new CommonException(ErrorCode.DUPLICATED_HIDE_USER);
+        }
+
         HideUser hideUser = hideUserRepository.save(
                 HideUser.builder()
                         .user(user)
