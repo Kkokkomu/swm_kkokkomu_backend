@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +29,7 @@ public class HideUserService {
         User hidedUser = userLookupService.findUserById(createHideUserDto.hidedUserId());
 
         // 자기 자신을 차단하고 있는지 검사
-        if (user == hidedUser) {
+        if (Objects.equals(user.getId(), hidedUser.getId())) {
             throw new CommonException(ErrorCode.INVALID_HIDE_USER);
         }
 
