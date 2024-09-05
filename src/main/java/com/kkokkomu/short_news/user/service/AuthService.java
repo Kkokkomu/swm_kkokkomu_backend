@@ -183,8 +183,8 @@ public class AuthService {
     private OAuth2UserInfo getOAuth2UserInfo(String provider, String accessToken){
         if (provider.equals(ELoginProvider.KAKAO.toString())){
             return oAuth2Util.getKakaoUserInfo(accessToken);
-//        } else if (provider.equals(ELoginProvider.GOOGLE.toString())) {
-//            return oAuth2Util.getGoogleUserInfo(accessToken);
+        } else if (provider.equals(ELoginProvider.GOOGLE.toString())) {
+            return oAuth2Util.getGoogleUserInfo(accessToken);
         } else if (provider.equals(ELoginProvider.APPLE.toString())) {
             return appleOAuthService.getAppleUserInfo(accessToken);
         }
