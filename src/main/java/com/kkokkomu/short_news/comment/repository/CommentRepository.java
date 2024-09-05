@@ -94,7 +94,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             Pageable pageable
     );
 
-
     // 인기순 초기화 조회
     @Query("""
     SELECT c FROM Comment c 

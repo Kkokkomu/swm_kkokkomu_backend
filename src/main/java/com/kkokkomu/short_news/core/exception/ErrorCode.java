@@ -34,6 +34,8 @@ public enum ErrorCode {
     DUPLICATED_NEWS_REACTION("40023", HttpStatus.BAD_REQUEST, "이미 감정표현을 한 뉴스입니다."),
     INVALID_CATEGORY_SELECTION("40024", HttpStatus.BAD_REQUEST, "모든 카테고리가 false일 수는 없습니다"),
     INVALID_CATEGORY_CONCAT("40025", HttpStatus.BAD_REQUEST, "요청과 매칭 되는 카테고리가 존재하지 않습니다."),
+    INVALID_HIDE_USER("40026", HttpStatus.BAD_REQUEST, "자기 자신을 차단할 수 없습니다."),
+    DUPLICATED_HIDE_USER("40027", HttpStatus.BAD_REQUEST, "이미 차단한 유저입니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
