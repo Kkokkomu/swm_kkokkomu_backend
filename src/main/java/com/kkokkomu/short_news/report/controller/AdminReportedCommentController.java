@@ -45,4 +45,13 @@ public class AdminReportedCommentController {
         log.info("executeReportedComment controller");
         return ResponseDto.ok(reportedCommentService.executeReport(executeReportedComment, adminId));
     }
+
+    @Operation(summary = "관리자 신고 기각")
+    @PostMapping("/dismiss")
+    public ResponseDto<ReportedCommentDto> dismissReportedComment(@RequestBody ExecuteReportedComment executeReportedComment,
+                                                                  @UserId Long adminId
+    ) {
+        log.info("dismissReportedComment controller");
+        return ResponseDto.ok(reportedCommentService.dismissReport(executeReportedComment, adminId));
+    }
 }

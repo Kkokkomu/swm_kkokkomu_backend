@@ -57,4 +57,10 @@ public class ReportedComment {
         this.executedAt = LocalDateTime.now();
         this.progress = EProgress.EXECUTED;
     }
+
+    public void dismiss(User admin) {
+        this.agent = admin;
+        this.executedAt = LocalDateTime.now();
+        this.progress = EProgress.DISMISSED;
+    }
 }

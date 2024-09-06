@@ -124,8 +124,8 @@ public class ReportedCommentService {
 
         User adminUser = userLookupService.findUserById(adminId);
 
-        // 신고 내역 처리 완료
-        reportedComment.execute(adminUser);
+        // 신고 내역 기각 처리 완료
+        reportedComment.dismiss(adminUser);
 
         return ReportedCommentDto.of(reportedComment);
     } // 댓글 신고 기각
