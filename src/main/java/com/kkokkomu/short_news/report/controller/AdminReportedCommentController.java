@@ -28,7 +28,7 @@ public class AdminReportedCommentController {
     private final ReportedCommentService reportedCommentService;
 
 
-    @Operation(summary = "신고 리스트 조회")
+    @Operation(summary = "관리자 신고 리스트 조회")
     @GetMapping("")
     public ResponseDto<CursorResponseDto<List<AdminCommentListDto>>> readReportedComment(@RequestParam int size,
                                                                             @RequestParam(required = false) Long cursorId
@@ -37,7 +37,7 @@ public class AdminReportedCommentController {
         return ResponseDto.ok(reportedCommentService.findAllAdminComments(cursorId, size));
     }
 
-    @Operation(summary = "신고 처리 및 유저 경고 부여")
+    @Operation(summary = "관리자 신고 처리 및 유저 경고 부여")
     @PostMapping("/execute")
     public ResponseDto<ReportedCommentDto> executeReportedComment(@RequestBody ExecuteReportedComment executeReportedComment,
                                                                   @UserId Long adminId

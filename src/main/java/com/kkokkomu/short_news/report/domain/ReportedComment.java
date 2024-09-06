@@ -33,6 +33,7 @@ public class ReportedComment {
     private LocalDateTime reportedAt; // 신고 일시
 
     @Column(name = "progress", nullable = false)
+    @Enumerated(EnumType.STRING)
     private EProgress progress; // 처리 여부
 
     @ManyToOne(fetch = FetchType.LAZY)
