@@ -6,4 +6,8 @@ import org.springframework.stereotype.Service;
 @Service
 public interface CommentLookupService {
     Comment findCommentById(Long id);
+
+    void deleteCommentById(Long id);
+
+    Boolean existsCommentById(Long id);
 }

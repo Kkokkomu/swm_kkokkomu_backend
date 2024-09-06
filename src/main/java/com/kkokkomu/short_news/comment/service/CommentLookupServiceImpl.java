@@ -17,4 +17,18 @@ public class CommentLookupServiceImpl implements CommentLookupService {
         return commentRepository.findById(id)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
     }
+
+    @Override
+    public void deleteCommentById(Long id) {
+        if (!commentRepository.existsById(id)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_COMMENT);
+        }
+
+        commentRepository.deleteById(id);
+    }
+
+    @Override
+    public Boolean existsCommentById(Long id) {
+        return commentRepository.existsById(id);
+    }
 }

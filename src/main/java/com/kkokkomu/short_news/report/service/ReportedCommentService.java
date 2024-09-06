@@ -56,28 +56,6 @@ public class ReportedCommentService {
         return ReportedCommentDto.of(reportedComment);
     } // 댓글 신고
 
-    @Transactional
-    public ReportedCommentDto executeReport(ExecuteReportedComment executeReportedComment, Long adminId) {
-        ReportedComment reportedComment = reportedCommentRepository.findById(executeReportedComment.reportedCommentId())
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_COMMENT));
-
-        if (!reportedComment.getProgress().equals(EProgress.UNEXECUTED)) {
-            throw new CommonException(ErrorCode.NOT_FOUND_ADMIN);
-        }
-
-        User adminUser = userLookupService.findUserById(adminId);
-
-        User writer = reportedComment.getComment().getUser();
-
-        // 작성자 제재
-        writer.executeAboutComment();
-
-        // 신고 내역 처리 완료
-        reportedComment.execute(adminUser);
-
-        return ReportedCommentDto.of(reportedComment);
-    }
-
     /* 관리자 */
 
     @Transactional(readOnly = true)
@@ -110,4 +88,45 @@ public class ReportedCommentService {
 
         return CursorResponseDto.fromEntityAndPageInfo(adminCommentListDtos, cursorInfoDto);
     } // 신고 리스트 조회 (오래된순)
+
+    @Transactional
+    public ReportedCommentDto executeReport(ExecuteReportedComment executeReportedComment, Long adminId) {
+        ReportedComment reportedComment = reportedCommentRepository.findById(executeReportedComment.reportedCommentId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_COMMENT));
+
+        if (!reportedComment.getProgress().equals(EProgress.UNEXECUTED)) {
+            throw new CommonException(ErrorCode.ALREADY_EXECUTED_COMMENT);
+        }
+
+        User adminUser = userLookupService.findUserById(adminId);
+
+        User writer = reportedComment.getComment().getUser();
+
+        // 작성자 제재
+        writer.executeAboutComment();
+
+        // 신고 내역 처리 완료
+        reportedComment.execute(adminUser);
+
+        // 댓글 삭제
+        commentLookupService.deleteCommentById(reportedComment.getComment().getId());
+
+        return ReportedCommentDto.of(reportedComment);
+    } // 댓글 신고 처리
+
+    public ReportedCommentDto dismissReport(ExecuteReportedComment executeReportedComment, Long adminId) {
+        ReportedComment reportedComment = reportedCommentRepository.findById(executeReportedComment.reportedCommentId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_COMMENT));
+
+        if (!reportedComment.getProgress().equals(EProgress.UNEXECUTED)) {
+            throw new CommonException(ErrorCode.ALREADY_EXECUTED_COMMENT);
+        }
+
+        User adminUser = userLookupService.findUserById(adminId);
+
+        // 신고 내역 처리 완료
+        reportedComment.execute(adminUser);
+
+        return ReportedCommentDto.of(reportedComment);
+    } // 댓글 신고 기각
 }

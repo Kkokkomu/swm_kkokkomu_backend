@@ -159,7 +159,7 @@ public class User {
         log.info("{} reported cnt {}", this.nickname, this.reportedCnt);
 
         if (this.reportedCnt >= 3) {
-            if (this.bannedEndAt.isBefore(LocalDateTime.now())) {
+            if (this.bannedEndAt == null || this.bannedEndAt.isBefore(LocalDateTime.now())) {
                 // 현재 차단 상태가 아니면 새롭게 3일 차단
                 this.bannedStartAt = LocalDateTime.now();
                 this.bannedEndAt = LocalDateTime.now().plusDays(3);
