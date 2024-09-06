@@ -10,6 +10,7 @@ import java.util.List;
 
 @Builder
 public record AdminCommentListDto(
+        Long id,
         CommentSummoryDto user,
         CommentDto comment,
         String reason,
@@ -17,6 +18,7 @@ public record AdminCommentListDto(
 ) {
     public static AdminCommentListDto of(ReportedComment reportedComment) {
         return AdminCommentListDto.builder()
+                .id(reportedComment.getId())
                 .user(CommentSummoryDto.of(reportedComment.getComment().getUser()))
                 .comment(CommentDto.of(reportedComment.getComment()))
                 .reason(reportedComment.getReason().toString())

@@ -8,5 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface UserLookupService {
-    public User findUserById(Long userId);
+    User findUserById(Long userId);
+
+    User findAdminUser(Long userId);
 }

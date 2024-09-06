@@ -2,6 +2,7 @@ package com.kkokkomu.short_news.user.service;
 
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
+import com.kkokkomu.short_news.core.type.EUserRole;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,5 +19,13 @@ public class UserLookupServiceImpl implements UserLookupService {
     public User findUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+    }
+
+    // 관리자가 유저 get
+
+    @Override
+    public User findAdminUser(Long userId) {
+        return userRepository.findByIdAndRole(userId, EUserRole.ADMIN)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ADMIN));
     }
 }

@@ -6,6 +6,8 @@ import com.kkokkomu.short_news.core.type.ESex;
 import com.kkokkomu.short_news.core.type.EUserRole;
 import jakarta.persistence.*;
 import lombok.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,6 +19,7 @@ import java.util.List;
 @Table(name = "user")
 public class User {
 
+    private static final Logger log = LoggerFactory.getLogger(User.class);
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Primary key
@@ -151,7 +154,17 @@ public class User {
         this.role = EUserRole.USER;
     }
 
-    public void updateReportedCnt() {
+    public void executeAboutComment() {
+        log.info(String.valueOf(this.reportedCnt));
         this.reportedCnt++;
+        log.info(String.valueOf(this.reportedCnt));
+
+
+        if (this.reportedCnt >= 3) {
+            this.bannedStartAt = LocalDateTime.now();
+            this.bannedEndAt = LocalDateTime.now().plusDays(3);
+
+            this.reportedCnt = 0;
+        }
     }
 }

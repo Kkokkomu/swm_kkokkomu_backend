@@ -19,7 +19,7 @@ public class ReportedComment {
     private Long id; // Primary key
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id", nullable = false)
+    @JoinColumn(name = "comment_id")
     private Comment comment; // Foreign key to Comment entity (신고된 댓글)
 
     @ManyToOne(fetch = FetchType.LAZY)

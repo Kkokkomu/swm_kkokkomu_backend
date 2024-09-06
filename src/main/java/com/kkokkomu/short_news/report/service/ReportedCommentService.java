@@ -9,6 +9,7 @@ import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.EProgress;
 import com.kkokkomu.short_news.report.domain.ReportedComment;
 import com.kkokkomu.short_news.report.dto.reportedComment.request.CreateReportedCommentDto;
+import com.kkokkomu.short_news.report.dto.reportedComment.request.ExecuteReportedComment;
 import com.kkokkomu.short_news.report.dto.reportedComment.response.AdminCommentListDto;
 import com.kkokkomu.short_news.report.dto.reportedComment.response.ReportedCommentDto;
 import com.kkokkomu.short_news.report.repository.ReportedCommentRepository;
@@ -38,8 +39,6 @@ public class ReportedCommentService {
 
         Comment comment = commentLookupService.findCommentById(commentReportDto.commentId());
 
-        User writer = userLookupService.findUserById(comment.getUser().getId());
-
         // 이미 신고한 댓글인지 검사
         if (reportedCommentRepository.existsByCommentAndReporter(comment, reporter)) {
             throw new CommonException(ErrorCode.DUPLICATED_REPORTED_COMMENT);
@@ -54,12 +53,30 @@ public class ReportedCommentService {
                         .build()
         );
 
-        // 사용자 신고 카운트 +1
-        writer.updateReportedCnt();
-
         return ReportedCommentDto.of(reportedComment);
     } // 댓글 신고
 
+    @Transactional
+    public ReportedCommentDto executeReport(ExecuteReportedComment executeReportedComment, Long adminId) {
+        ReportedComment reportedComment = reportedCommentRepository.findById(executeReportedComment.reportedCommentId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_COMMENT));
+
+        if (!reportedComment.getProgress().equals(EProgress.UNEXECUTED)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_ADMIN);
+        }
+
+        User adminUser = userLookupService.findUserById(adminId);
+
+        User writer = reportedComment.getComment().getUser();
+
+        // 작성자 제재
+        writer.executeAboutComment();
+
+        // 신고 내역 처리 완료
+        reportedComment.execute(adminUser);
+
+        return ReportedCommentDto.of(reportedComment);
+    }
 
     /* 관리자 */
 

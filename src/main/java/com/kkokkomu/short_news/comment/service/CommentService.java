@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +48,11 @@ public class CommentService {
         User user = userLookupService.findUserById(userId);
 
         News news = newsLookupService.findNewsById(createCommentDto.newsId());
+
+        // 차단된 유저인지 검사
+        if (user.getBannedEndAt() != null && user.getBannedEndAt().isAfter(LocalDateTime.now())) {
+            throw new CommonException(ErrorCode.BANNED_USER_COMMENT);
+        }
 
         Comment comment = commentRepository.save(
                 Comment.builder()

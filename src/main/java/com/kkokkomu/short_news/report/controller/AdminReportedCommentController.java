@@ -4,6 +4,7 @@ import com.kkokkomu.short_news.core.annotation.UserId;
 import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.report.dto.reportedComment.request.CreateReportedCommentDto;
+import com.kkokkomu.short_news.report.dto.reportedComment.request.ExecuteReportedComment;
 import com.kkokkomu.short_news.report.dto.reportedComment.response.AdminCommentListDto;
 import com.kkokkomu.short_news.report.dto.reportedComment.response.ReportedCommentDto;
 import com.kkokkomu.short_news.report.service.ReportedCommentService;
@@ -34,5 +35,14 @@ public class AdminReportedCommentController {
     ) {
         log.info("readReportedComment controller");
         return ResponseDto.ok(reportedCommentService.findAllAdminComments(cursorId, size));
+    }
+
+    @Operation(summary = "신고 처리 및 유저 경고 부여")
+    @PostMapping("/execute")
+    public ResponseDto<ReportedCommentDto> executeReportedComment(@RequestBody ExecuteReportedComment executeReportedComment,
+                                                                  @UserId Long adminId
+    ) {
+        log.info("executeReportedComment controller");
+        return ResponseDto.ok(reportedCommentService.executeReport(executeReportedComment, adminId));
     }
 }
