@@ -29,12 +29,21 @@ public class AdminReportedCommentController {
 
 
     @Operation(summary = "관리자 신고 리스트 조회")
-    @GetMapping("")
+    @GetMapping("/unexecuted")
     public ResponseDto<CursorResponseDto<List<AdminCommentListDto>>> readReportedComment(@RequestParam int size,
                                                                             @RequestParam(required = false) Long cursorId
     ) {
         log.info("readReportedComment controller");
         return ResponseDto.ok(reportedCommentService.findAllAdminComments(cursorId, size));
+    }
+
+    @Operation(summary = "관리자 신고 처리완료 리스트 조회")
+    @GetMapping("/executed")
+    public ResponseDto<CursorResponseDto<List<AdminCommentListDto>>> readExecutedComment(@RequestParam int size,
+                                                                            @RequestParam(required = false) Long cursorId
+    ) {
+        log.info("readExecutedComment controller");
+        return ResponseDto.ok(reportedCommentService.findAllAdminExecutedComments(cursorId, size));
     }
 
     @Operation(summary = "관리자 신고 처리 및 유저 경고 부여")

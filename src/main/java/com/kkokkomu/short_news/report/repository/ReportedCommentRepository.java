@@ -39,6 +39,33 @@ public interface ReportedCommentRepository extends JpaRepository<ReportedComment
             Pageable pageable
     );
 
+    // 최신순 처리완료 댓글 조회 (커서 기반)
+    @Query("""
+    SELECT rc FROM ReportedComment rc
+    WHERE rc.progress = :executed OR rc.progress = :unexecuted
+    AND rc.id < :cursorId
+    ORDER BY rc.reportedAt DESC, rc.id ASC
+    """)
+    Page<ReportedComment> findByProgressOrderByReportedAtDesc(
+            @Param("cursorId") Long cursorId,
+            @Param("executed") EProgress executed,
+            @Param("unexecuted") EProgress unexecuted,
+            Pageable pageable
+    );
+
+
+    // 최신순 처리완료 댓글 최초 페이지 조회 (커서 기반)
+    @Query("""
+    SELECT rc FROM ReportedComment rc
+    WHERE rc.progress = :executed OR rc.progress = :unexecuted
+    ORDER BY rc.reportedAt DESC, rc.id ASC
+    """)
+    Page<ReportedComment> findFirstPageByProgressOrderByReportedAtDesc(
+            @Param("executed") EProgress executed,
+            @Param("unexecuted") EProgress unexecuted,
+            Pageable pageable
+    );
+
     // 작성자랑 댓글로 신고내역 조회
     Boolean existsByCommentAndReporter(Comment comment, User reporter);
 }

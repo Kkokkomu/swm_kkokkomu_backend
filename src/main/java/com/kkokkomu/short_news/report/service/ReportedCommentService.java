@@ -89,6 +89,37 @@ public class ReportedCommentService {
         return CursorResponseDto.fromEntityAndPageInfo(adminCommentListDtos, cursorInfoDto);
     } // 신고 리스트 조회 (오래된순)
 
+    @Transactional(readOnly = true)
+    public CursorResponseDto<List<AdminCommentListDto>> findAllAdminExecutedComments(Long cursorId, int size) {
+
+        // 커서에 해당하는 신고 내역이 존재하는지 검사
+        if (cursorId != null && !reportedCommentRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        // size에 따른 페이지 요청 객체 생성
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 신고 리스트 조회
+        Page<ReportedComment> results;
+        if (cursorId == null) {
+            // 처음 요청
+            results = reportedCommentRepository.findFirstPageByProgressOrderByReportedAtDesc(EProgress.EXECUTED, EProgress.DISMISSED, pageRequest);
+        } else {
+            // 2번째부터
+            results = reportedCommentRepository.findByProgressOrderByReportedAtDesc(cursorId, EProgress.EXECUTED, EProgress.DISMISSED, pageRequest);
+        }
+        List<ReportedComment> reportedComments = results.getContent();
+
+        // 신고 관련 dto
+        List<AdminCommentListDto> adminCommentListDtos = AdminCommentListDto.of(reportedComments);
+
+        // 페이징 정보 dto
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(adminCommentListDtos, cursorInfoDto);
+    } // 신고 처리 완료 리스트 조회 (오래된순)
+
     @Transactional
     public ReportedCommentDto executeReport(ExecuteReportedComment executeReportedComment, Long adminId) {
         ReportedComment reportedComment = reportedCommentRepository.findById(executeReportedComment.reportedCommentId())
