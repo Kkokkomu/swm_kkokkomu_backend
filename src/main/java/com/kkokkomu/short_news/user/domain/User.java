@@ -155,14 +155,18 @@ public class User {
     }
 
     public void executeAboutComment() {
-        log.info(String.valueOf(this.reportedCnt));
         this.reportedCnt++;
-        log.info(String.valueOf(this.reportedCnt));
-
+        log.info("{} reported cnt {}", this.nickname, this.reportedCnt);
 
         if (this.reportedCnt >= 3) {
-            this.bannedStartAt = LocalDateTime.now();
-            this.bannedEndAt = LocalDateTime.now().plusDays(3);
+            if (this.bannedEndAt.isBefore(LocalDateTime.now())) {
+                // 현재 차단 상태가 아니면 새롭게 3일 차단
+                this.bannedStartAt = LocalDateTime.now();
+                this.bannedEndAt = LocalDateTime.now().plusDays(3);
+            } else {
+                // 이미 차단 상태였다면 기존 날짜에서 누적
+                this.bannedEndAt = this.bannedEndAt.plusDays(3);
+            }
 
             this.reportedCnt = 0;
         }
