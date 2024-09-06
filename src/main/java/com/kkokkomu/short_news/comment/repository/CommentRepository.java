@@ -19,6 +19,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     SELECT c FROM Comment c 
     WHERE c.news.id = :newsId 
     AND c.id < :cursorId 
+    AND c.parent IS NULL
     ORDER BY c.editedAt DESC, c.id DESC
     """)
     Page<Comment> findByNewsIdAndIdLessThanOrderByEditedAtDescGuest(
@@ -32,6 +33,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("""
     SELECT c FROM Comment c 
     WHERE c.news.id = :newsId 
+    AND c.parent IS NULL
     ORDER BY c.editedAt DESC, c.id DESC
     """)
     Page<Comment> findFirstPageByNewsIdOrderByEditedAtDescGuest(
@@ -46,6 +48,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     WHERE c.news.id = :newsId 
     AND c.id < :cursorId 
     AND hu.id IS NULL
+    AND c.parent IS NULL
     ORDER BY c.editedAt DESC, c.id DESC
     """)
     Page<Comment> findByNewsIdAndIdLessThanOrderByEditedAtDesc(
@@ -61,6 +64,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     LEFT JOIN HideUser hu ON hu.hidedUser = c.user AND hu.user = :user
     WHERE c.news.id = :newsId 
     AND hu.id IS NULL
+    AND c.parent IS NULL
     ORDER BY c.editedAt DESC, c.id DESC
     """)
     Page<Comment> findFirstPageByNewsIdOrderByEditedAtDesc(
