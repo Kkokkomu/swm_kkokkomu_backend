@@ -1,6 +1,7 @@
 package com.kkokkomu.short_news.user.service;
 
 import com.kkokkomu.short_news.core.constant.Constant;
+import com.kkokkomu.short_news.core.oauth2.apple.AppleOAuthService;
 import com.kkokkomu.short_news.event.domain.ShareEvent;
 import com.kkokkomu.short_news.event.repository.ShareEventRepository;
 import com.kkokkomu.short_news.subscription.domain.Subscription;
@@ -48,6 +49,8 @@ public class AuthService {
     private final OAuth2Util oAuth2Util;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    private final AppleOAuthService appleOAuthService;
 
     @Transactional
     public JwtTokenDto socialRegister(String accessToken, SocialRegisterRequestDto socialRegisterRequestDto) {  // 소셜 로그인 후 회원 등록 및 토큰 발급
@@ -180,10 +183,10 @@ public class AuthService {
     private OAuth2UserInfo getOAuth2UserInfo(String provider, String accessToken){
         if (provider.equals(ELoginProvider.KAKAO.toString())){
             return oAuth2Util.getKakaoUserInfo(accessToken);
-//        } else if (provider.equals(ELoginProvider.GOOGLE.toString())) {
-//            return oAuth2Util.getGoogleUserInfo(accessToken);
-//        } else if (provider.equals(ELoginProvider.APPLE.toString())) {
-//            return appleOAuthService.getAppleUserInfo(accessToken);
+        } else if (provider.equals(ELoginProvider.GOOGLE.toString())) {
+            return oAuth2Util.getGoogleUserInfo(accessToken);
+        } else if (provider.equals(ELoginProvider.APPLE.toString())) {
+            return appleOAuthService.getAppleUserInfo(accessToken);
         }
         else {
             throw new CommonException(ErrorCode.INVALID_OAUTH2_PROVIDER);

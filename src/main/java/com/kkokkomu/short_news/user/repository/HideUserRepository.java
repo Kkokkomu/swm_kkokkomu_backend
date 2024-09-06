@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface HideUserRepository extends JpaRepository<HideUser, Long> {
     List<HideUser> findByUser(User user);
+
+    Boolean existsByUserAndHidedUser(User user, User hideUser);
 }
