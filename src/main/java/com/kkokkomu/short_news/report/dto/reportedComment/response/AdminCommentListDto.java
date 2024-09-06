@@ -1,0 +1,35 @@
+package com.kkokkomu.short_news.report.dto.reportedComment.response;
+
+import com.kkokkomu.short_news.comment.dto.comment.response.CommentDto;
+import com.kkokkomu.short_news.report.domain.ReportedComment;
+import com.kkokkomu.short_news.user.dto.user.response.CommentSummoryDto;
+import lombok.Builder;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Builder
+public record AdminCommentListDto(
+        CommentSummoryDto user,
+        CommentDto comment,
+        String reason,
+        String reportedAt
+) {
+    public static AdminCommentListDto of(ReportedComment reportedComment) {
+        return AdminCommentListDto.builder()
+                .user(CommentSummoryDto.of(reportedComment.getComment().getUser()))
+                .comment(CommentDto.of(reportedComment.getComment()))
+                .reason(reportedComment.getReason().toString())
+                .reportedAt(reportedComment.getReportedAt().toString())
+                .build();
+    }
+
+    public static List<AdminCommentListDto> of(List<ReportedComment> reportedComments) {
+        List<AdminCommentListDto> adminCommentListDtos = new ArrayList<>();
+        for (ReportedComment reportedComment : reportedComments) {
+            adminCommentListDtos.add(AdminCommentListDto.of(reportedComment));
+        }
+
+        return adminCommentListDtos;
+    }
+}

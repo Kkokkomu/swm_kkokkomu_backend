@@ -2,15 +2,26 @@ package com.kkokkomu.short_news.report.service;
 
 import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.comment.service.CommentLookupService;
+import com.kkokkomu.short_news.core.dto.CursorInfoDto;
+import com.kkokkomu.short_news.core.dto.CursorResponseDto;
+import com.kkokkomu.short_news.core.exception.CommonException;
+import com.kkokkomu.short_news.core.exception.ErrorCode;
+import com.kkokkomu.short_news.core.type.EProgress;
 import com.kkokkomu.short_news.report.domain.ReportedComment;
 import com.kkokkomu.short_news.report.dto.reportedComment.request.CreateReportedCommentDto;
+import com.kkokkomu.short_news.report.dto.reportedComment.response.AdminCommentListDto;
 import com.kkokkomu.short_news.report.dto.reportedComment.response.ReportedCommentDto;
 import com.kkokkomu.short_news.report.repository.ReportedCommentRepository;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -42,5 +53,39 @@ public class ReportedCommentService {
         writer.updateReportedCnt();
 
         return ReportedCommentDto.of(reportedComment);
-    }
+    } // 댓글 신고
+
+
+    /* 관리자 */
+
+    @Transactional(readOnly = true)
+    public CursorResponseDto<List<AdminCommentListDto>> findAllAdminComments(Long cursorId, int size) {
+
+        // 커서에 해당하는 신고 내역이 존재하는지 검사
+        if (cursorId != null && !reportedCommentRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        // size에 따른 페이지 요청 객체 생성
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 신고 리스트 조회
+        Page<ReportedComment> results;
+        if (cursorId == null) {
+            // 처음 요청
+            results = reportedCommentRepository.findFirstPageByProgressOrderByReportedAt(EProgress.UNEXECUTED, pageRequest);
+        } else {
+            // 2번째부터
+            results = reportedCommentRepository.findByProgressOrderByReportedAt(cursorId, EProgress.UNEXECUTED, pageRequest);
+        }
+        List<ReportedComment> reportedComments = results.getContent();
+
+        // 신고 관련 dto
+        List<AdminCommentListDto> adminCommentListDtos = AdminCommentListDto.of(reportedComments);
+
+        // 페이징 정보 dto
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(adminCommentListDtos, cursorInfoDto);
+    } // 신고 리스트 조회 (오래된순)
 }

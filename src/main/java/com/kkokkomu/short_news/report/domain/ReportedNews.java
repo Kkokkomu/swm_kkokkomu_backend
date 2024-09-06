@@ -1,6 +1,7 @@
 package com.kkokkomu.short_news.report.domain;
 
 import com.kkokkomu.short_news.core.type.ENewsReport;
+import com.kkokkomu.short_news.core.type.EProgress;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.user.domain.User;
 import jakarta.persistence.*;
@@ -31,11 +32,27 @@ public class ReportedNews {
     @Column(name = "reported_at", nullable = false)
     private LocalDateTime reportedAt; // 신고 일시
 
+    @Column(name = "progress", nullable = false)
+    private EProgress progress; // 처리 여부
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agent_id")
+    private User agent; // 담당자
+
+    @Column(name = "executed_at")
+    private LocalDateTime executedAt; // 처리 일시
+
     @Builder
     public ReportedNews(User reporter, News news, ENewsReport reason) {
         this.reporter = reporter;
         this.news = news;
         this.reason = reason;
         this.reportedAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 설정
+    }
+
+    public void execute(User admin) {
+        this.agent = admin;
+        this.executedAt = LocalDateTime.now();
+        this.progress = EProgress.EXECUTED;
     }
 }
