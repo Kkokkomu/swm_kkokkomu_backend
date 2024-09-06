@@ -79,6 +79,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     LEFT JOIN HideUser hu ON hu.hidedUser = c.user AND hu.user = :user
     WHERE c.news.id = :newsId 
     AND hu.id IS NULL
+    AND c.parent IS NULL
     GROUP BY c 
     HAVING (COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) < :cursorScore 
     OR ((COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) = :cursorScore AND c.id < :cursorId) 
@@ -101,6 +102,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     LEFT JOIN c.children children 
     LEFT JOIN HideUser hu ON hu.hidedUser = c.user AND hu.user = :user
     WHERE c.news.id = :newsId 
+    AND c.parent IS NULL
     AND hu.id IS NULL
     GROUP BY c 
     ORDER BY (COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) DESC, c.id DESC
@@ -119,6 +121,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     LEFT JOIN c.likes likes 
     LEFT JOIN c.children children 
     WHERE c.news.id = :newsId 
+    AND c.parent IS NULL
     GROUP BY c 
     HAVING (COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) < :cursorScore 
     OR ((COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) = :cursorScore AND c.id < :cursorId) 
@@ -140,6 +143,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     LEFT JOIN c.likes likes 
     LEFT JOIN c.children children 
     WHERE c.news.id = :newsId 
+    AND c.parent IS NULL
     GROUP BY c 
     ORDER BY (COUNT(children) * :replyWeight + COUNT(likes) * :likeWeight) DESC, c.id DESC
     """)
