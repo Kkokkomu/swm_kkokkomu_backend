@@ -1,7 +1,9 @@
 package com.kkokkomu.short_news.report.repository;
 
+import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.core.type.EProgress;
 import com.kkokkomu.short_news.report.domain.ReportedComment;
+import com.kkokkomu.short_news.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,4 +38,7 @@ public interface ReportedCommentRepository extends JpaRepository<ReportedComment
             @Param("progress") EProgress progress,
             Pageable pageable
     );
+
+    // 작성자랑 댓글로 신고내역 조회
+    Boolean existsByCommentAndReporter(Comment comment, User reporter);
 }

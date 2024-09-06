@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.user.controller;
 
+import com.kkokkomu.short_news.core.annotation.UserId;
 import com.kkokkomu.short_news.core.constant.Constant;
 import com.kkokkomu.short_news.user.dto.auth.request.SocialRegisterRequestDto;
 import com.kkokkomu.short_news.user.dto.auth.response.JwtTokenDto;
@@ -49,21 +50,22 @@ public class AuthController {
         return ResponseDto.ok(authService.authSocialLogin(accessToken, provider));
     }
 
-    @Operation(summary = "소셜 로그인 or 회원가입", description = "회원가입 필요시 access token만 반환, 로그인 완료시 access, refresh 둘 다 반환")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 완료, access token과 refresh token 반환",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "201", description = "회원가입 필요, access token만 반환",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseDto.class))),
-    })
-    @PostMapping("/login/admin/{provider}")
-    public ResponseDto<?> adminSocialLogin(@PathVariable String provider,
-                                          @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String accessToken) {
-        log.info("accessToken : " + accessToken);
-        return ResponseDto.ok(authService.authSocialLogin(accessToken, provider));
-    }
+//    @Operation(summary = "관리자 로그인", description = "회원가입 필요시 access token만 반환, 로그인 완료시 access, refresh 둘 다 반환")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "로그인 완료, access token과 refresh token 반환",
+//                    content = @Content(mediaType = "application/json",
+//                            schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCode = "201", description = "회원가입 필요, access token만 반환",
+//                    content = @Content(mediaType = "application/json",
+//                            schema = @Schema(implementation = ResponseDto.class))),
+//    })
+//    @PostMapping("/admin/login/{provider}")
+//    public ResponseDto<?> adminSocialLogin(@PathVariable String provider,
+//                                           @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String accessToken,
+//                                           @UserId Long userId) {
+//        log.info("accessToken : " + accessToken);
+//        return ResponseDto.ok(authService.adminSocialLogin(accessToken, provider));
+//    }
 
     @Operation(summary = "토큰 재발급")
     @PostMapping("/refresh")

@@ -40,6 +40,11 @@ public class ReportedCommentService {
 
         User writer = userLookupService.findUserById(comment.getUser().getId());
 
+        // 이미 신고한 댓글인지 검사
+        if (reportedCommentRepository.existsByCommentAndReporter(comment, reporter)) {
+            throw new CommonException(ErrorCode.DUPLICATED_REPORTED_COMMENT);
+        }
+
         // 생성
         ReportedComment reportedComment = reportedCommentRepository.save(
                 ReportedComment.builder()
