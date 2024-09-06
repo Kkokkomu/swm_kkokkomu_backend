@@ -397,6 +397,7 @@ public class CommentService {
                             .commentLikeCnt(commentLikeService.countByComment(reply))
                             .user(CommentSummoryDto.of(reply.getUser()))
                             .comment(CommentDto.of(reply))
+                            .userLike(userLike)
                             .build()
             );
         }
