@@ -1,7 +1,7 @@
 package com.kkokkomu.short_news.report.repository;
 
 import com.kkokkomu.short_news.comment.domain.Comment;
-import com.kkokkomu.short_news.core.type.EProgress;
+import com.kkokkomu.short_news.core.type.ECommentProgress;
 import com.kkokkomu.short_news.report.domain.ReportedComment;
 import com.kkokkomu.short_news.user.domain.User;
 import org.springframework.data.domain.Page;
@@ -23,7 +23,7 @@ public interface ReportedCommentRepository extends JpaRepository<ReportedComment
     """)
     Page<ReportedComment> findByProgressOrderByReportedAt(
             @Param("cursorId") Long cursorId,
-            @Param("progress") EProgress progress,
+            @Param("progress") ECommentProgress progress,
             Pageable pageable
     );
 
@@ -35,7 +35,7 @@ public interface ReportedCommentRepository extends JpaRepository<ReportedComment
     ORDER BY rc.reportedAt ASC, rc.id ASC
     """)
     Page<ReportedComment> findFirstPageByProgressOrderByReportedAt(
-            @Param("progress") EProgress progress,
+            @Param("progress") ECommentProgress progress,
             Pageable pageable
     );
 
@@ -48,8 +48,8 @@ public interface ReportedCommentRepository extends JpaRepository<ReportedComment
     """)
     Page<ReportedComment> findByProgressOrderByReportedAtDesc(
             @Param("cursorId") Long cursorId,
-            @Param("executed") EProgress executed,
-            @Param("unexecuted") EProgress unexecuted,
+            @Param("executed") ECommentProgress executed,
+            @Param("unexecuted") ECommentProgress unexecuted,
             Pageable pageable
     );
 
@@ -61,8 +61,8 @@ public interface ReportedCommentRepository extends JpaRepository<ReportedComment
     ORDER BY rc.reportedAt DESC, rc.id ASC
     """)
     Page<ReportedComment> findFirstPageByProgressOrderByReportedAtDesc(
-            @Param("executed") EProgress executed,
-            @Param("unexecuted") EProgress unexecuted,
+            @Param("executed") ECommentProgress executed,
+            @Param("unexecuted") ECommentProgress unexecuted,
             Pageable pageable
     );
 

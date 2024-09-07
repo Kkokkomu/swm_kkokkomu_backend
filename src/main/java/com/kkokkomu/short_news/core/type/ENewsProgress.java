@@ -3,11 +3,11 @@ package com.kkokkomu.short_news.core.type;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum EProgress {
+public enum ENewsProgress {
     UNEXECUTED("UNEXECUTED"),
     EXECUTING("EXECUTING"),
-    EXECUTED("EXECUTED"),
-    DISMISSED("DISMISSED");
+    BANISHED("BANISHED"),
+    DELETED("DELETED");
 
     private final String progressProvider;
 }

@@ -6,7 +6,7 @@ import com.kkokkomu.short_news.core.dto.CursorInfoDto;
 import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
-import com.kkokkomu.short_news.core.type.EProgress;
+import com.kkokkomu.short_news.core.type.ECommentProgress;
 import com.kkokkomu.short_news.report.domain.ReportedComment;
 import com.kkokkomu.short_news.report.dto.reportedComment.request.CreateReportedCommentDto;
 import com.kkokkomu.short_news.report.dto.reportedComment.request.ExecuteReportedComment;
@@ -73,10 +73,10 @@ public class ReportedCommentService {
         Page<ReportedComment> results;
         if (cursorId == null) {
             // 처음 요청
-            results = reportedCommentRepository.findFirstPageByProgressOrderByReportedAt(EProgress.UNEXECUTED, pageRequest);
+            results = reportedCommentRepository.findFirstPageByProgressOrderByReportedAt(ECommentProgress.UNEXECUTED, pageRequest);
         } else {
             // 2번째부터
-            results = reportedCommentRepository.findByProgressOrderByReportedAt(cursorId, EProgress.UNEXECUTED, pageRequest);
+            results = reportedCommentRepository.findByProgressOrderByReportedAt(cursorId, ECommentProgress.UNEXECUTED, pageRequest);
         }
         List<ReportedComment> reportedComments = results.getContent();
 
@@ -104,10 +104,10 @@ public class ReportedCommentService {
         Page<ReportedComment> results;
         if (cursorId == null) {
             // 처음 요청
-            results = reportedCommentRepository.findFirstPageByProgressOrderByReportedAtDesc(EProgress.EXECUTED, EProgress.DISMISSED, pageRequest);
+            results = reportedCommentRepository.findFirstPageByProgressOrderByReportedAtDesc(ECommentProgress.EXECUTED, ECommentProgress.DISMISSED, pageRequest);
         } else {
             // 2번째부터
-            results = reportedCommentRepository.findByProgressOrderByReportedAtDesc(cursorId, EProgress.EXECUTED, EProgress.DISMISSED, pageRequest);
+            results = reportedCommentRepository.findByProgressOrderByReportedAtDesc(cursorId, ECommentProgress.EXECUTED, ECommentProgress.DISMISSED, pageRequest);
         }
         List<ReportedComment> reportedComments = results.getContent();
 
@@ -125,7 +125,7 @@ public class ReportedCommentService {
         ReportedComment reportedComment = reportedCommentRepository.findById(executeReportedComment.reportedCommentId())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_COMMENT));
 
-        if (!reportedComment.getProgress().equals(EProgress.UNEXECUTED)) {
+        if (!reportedComment.getProgress().equals(ECommentProgress.UNEXECUTED)) {
             throw new CommonException(ErrorCode.ALREADY_EXECUTED_COMMENT);
         }
 
@@ -149,7 +149,7 @@ public class ReportedCommentService {
         ReportedComment reportedComment = reportedCommentRepository.findById(executeReportedComment.reportedCommentId())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_COMMENT));
 
-        if (!reportedComment.getProgress().equals(EProgress.UNEXECUTED)) {
+        if (!reportedComment.getProgress().equals(ECommentProgress.UNEXECUTED)) {
             throw new CommonException(ErrorCode.ALREADY_EXECUTED_COMMENT);
         }
 

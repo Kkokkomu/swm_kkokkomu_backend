@@ -28,7 +28,7 @@ public class AdminReportedCommentController {
     private final ReportedCommentService reportedCommentService;
 
 
-    @Operation(summary = "관리자 신고 리스트 조회")
+    @Operation(summary = "관리자 댓글 신고 리스트 조회")
     @GetMapping("/unexecuted")
     public ResponseDto<CursorResponseDto<List<AdminCommentListDto>>> readReportedComment(@RequestParam int size,
                                                                             @RequestParam(required = false) Long cursorId
