@@ -4,6 +4,7 @@ import com.kkokkomu.short_news.subscription.service.SubscriptionService;
 import com.kkokkomu.short_news.user.domain.ProfileImg;
 import com.kkokkomu.short_news.subscription.domain.Subscription;
 import com.kkokkomu.short_news.user.domain.User;
+import com.kkokkomu.short_news.user.dto.user.request.BanUserDto;
 import com.kkokkomu.short_news.user.dto.user.response.AdminUserDto;
 import com.kkokkomu.short_news.user.dto.user.response.MyPageDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
@@ -55,4 +56,15 @@ public class UserService {
 
         return AdminUserDto.of(users);
     } // 관리자 유저 리스트 조회
+
+    public AdminUserDto banUser(BanUserDto banUserDto, Long userId) {
+        User user = userLookupService.findUserById(userId);
+
+        user.banUser(banUserDto.day());
+
+        return AdminUserDto.of(user);
+    }
+    // 댓글 작성 금지 부여
+
+    // 댓글 작성 금지 부여 해제
 }

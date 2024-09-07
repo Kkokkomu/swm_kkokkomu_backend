@@ -171,4 +171,17 @@ public class User {
             this.reportedCnt = 0;
         }
     }
+
+    public void banUser(int day) {
+        log.info("{} banUser {}", this.nickname, day);
+
+        if (this.bannedEndAt == null || this.bannedEndAt.isBefore(LocalDateTime.now())) {
+            // 현재 차단 상태가 아니면 새롭게 3일 차단
+            this.bannedStartAt = LocalDateTime.now();
+            this.bannedEndAt = LocalDateTime.now().plusDays(day);
+        } else {
+            // 이미 차단 상태였다면 기존 날짜에서 누적
+            this.bannedEndAt = this.bannedEndAt.plusDays(day);
+        }
+    }
 }
