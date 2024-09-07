@@ -53,5 +53,35 @@ public class NewsLogService {
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(searchNewsDtos, cursorInfoDto);
-    }
+    } // 댓글 달았던 뉴스 조회
+
+    public CursorResponseDto<List<SearchNewsDto>> searchNewsWithReaction(Long userId, Long cursorId, int size) {
+        log.info("searchNewsWithReaction service");
+
+        User user = userLookupService.findUserById(userId);
+
+        // 커서 아이디에 해당하는 뉴스가 있는지 검사
+        if (cursorId != null && !newsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) {
+            // 최초
+            results = newsRepository.findFirstPageNewsByUserReactionsOrderByIdDesc(user, pageRequest);
+        } else {
+            // 그 이후
+            results = newsRepository.findNewsByUserReactionsAndIdLessThanOrderByIdDesc(user, cursorId, pageRequest);
+        }
+        news = results.getContent();
+
+        List<SearchNewsDto> searchNewsDtos = SearchNewsDto.of(news);
+
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(searchNewsDtos, cursorInfoDto);
+    } // 감정표현한 뉴스 조회
 }

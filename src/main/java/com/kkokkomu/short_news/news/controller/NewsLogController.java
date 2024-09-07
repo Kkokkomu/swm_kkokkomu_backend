@@ -38,4 +38,15 @@ public class NewsLogController {
         log.info("readCommentedNews controller");
         return ResponseDto.ok(newsLogService.searchNewsWithComment(userId, cursorId, size));
     }
+
+    @Operation(summary = "감정표현한 뉴스 조회")
+    @GetMapping("/reaction")
+    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> readReactionNews(
+            @UserId Long userId,
+            @RequestParam(value = "cursorId", required = false) Long cursorId,
+            @RequestParam("size") int size
+    ) {
+        log.info("readReactionNews controller");
+        return ResponseDto.ok(newsLogService.searchNewsWithReaction(userId, cursorId, size));
+    }
 }

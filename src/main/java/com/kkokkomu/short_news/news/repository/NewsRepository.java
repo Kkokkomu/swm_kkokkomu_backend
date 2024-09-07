@@ -45,6 +45,32 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             Pageable pageable
     );
 
+    // 감정표현했던 뉴스 조회
+    @Query("""
+    SELECT DISTINCT n FROM News n
+    JOIN n.reactions r
+    WHERE r.user = :user
+    AND n.id < :cursorId
+    ORDER BY n.id DESC
+    """)
+    Page<News> findNewsByUserReactionsAndIdLessThanOrderByIdDesc(
+            @Param("user") User user,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    // 감정표현했던 뉴스 최초 조회
+    @Query("""
+    SELECT DISTINCT n FROM News n
+    JOIN n.reactions r
+    WHERE r.user = :user
+    ORDER BY n.id DESC
+    """)
+    Page<News> findFirstPageNewsByUserReactionsOrderByIdDesc(
+            @Param("user") User user,
+            Pageable pageable
+    );
+
 
     /****************** 탐색화면 카테고리 필터 *************************/
 
