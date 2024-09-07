@@ -38,7 +38,7 @@ public class SearchNewsService {
     /* 탐색화면 */
     public CursorResponseDto<List<SearchNewsDto>> getLatestNewsFilteredByCategory(String category, Long cursorId, int size) {
 
-        log.info("getfilteredNews service");
+        log.info("getLatestNewsFilteredByCategory service");
 
         ECategory eCategory = ECategory.valueOf(category.toUpperCase());
 

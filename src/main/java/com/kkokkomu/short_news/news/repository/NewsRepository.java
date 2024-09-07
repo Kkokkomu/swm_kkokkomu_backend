@@ -19,6 +19,33 @@ public interface NewsRepository extends JpaRepository<News, Long> {
 
     /****************** 뉴스 시청 기록 *************************/
 
+    // 시청했던 뉴스 조회
+    @Query("""
+    SELECT DISTINCT n FROM News n
+    JOIN n.newsViewHists v
+    WHERE v.user = :user
+    AND n.id < :cursorId
+    ORDER BY n.id DESC
+    """)
+    Page<News> findNewsByUserViewHistoryAndIdLessThanOrderByIdDesc(
+            @Param("user") User user,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    // 시청했던 뉴스 최초 조회
+    @Query("""
+    SELECT DISTINCT n FROM News n
+    JOIN n.newsViewHists v
+    WHERE v.user = :user
+    ORDER BY n.id DESC
+    """)
+    Page<News> findFirstPageNewsByUserViewHistoryOrderByIdDesc(
+            @Param("user") User user,
+            Pageable pageable
+    );
+
+
     // 댓글을 달았던 뉴스 조회
     @Query("""
     SELECT DISTINCT n FROM News n
