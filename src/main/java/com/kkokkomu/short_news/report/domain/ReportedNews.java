@@ -24,7 +24,7 @@ public class ReportedNews {
     private User reporter; // Foreign key to User entity (신고한 유저)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "news_id", nullable = false)
+    @JoinColumn(name = "news_id")
     private News news; // Foreign key to News entity (신고된 뉴스)
 
     @Column(name = "reason", nullable = false)

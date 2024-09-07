@@ -20,7 +20,7 @@ public record AdminCommentListDto(
         return AdminCommentListDto.builder()
                 .id(reportedComment.getId())
                 .user(CommentSummoryDto.of(reportedComment.getComment().getUser()))
-                .comment(CommentDto.of(reportedComment.getComment()))
+                .comment(reportedComment.getComment() != null ? CommentDto.of(reportedComment.getComment()) : null)
                 .reason(reportedComment.getReason().toString())
                 .reportedAt(reportedComment.getReportedAt().toString())
                 .build();

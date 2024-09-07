@@ -26,10 +26,19 @@ public class AdminReportedNewsController {
 
     @Operation(summary = "관리자 뉴스 신고 리스트 조회")
     @GetMapping("/unexecuted")
-    public ResponseDto<CursorResponseDto<List<AdminReportedNewsDto>>> readReportedNews(@RequestParam int size,
+    public ResponseDto<CursorResponseDto<List<AdminReportedNewsDto>>> readUnexecutedReportedNews(@RequestParam int size,
                                                                                           @RequestParam(required = false) Long cursorId
     ) {
-        log.info("readReportedNews controller");
-        return ResponseDto.ok(reportedNewsService.findAdminReportedNews(cursorId, size));
+        log.info("readUnexecutedReportedNews controller");
+        return ResponseDto.ok(reportedNewsService.findUnexecutedAdminReportedNews(cursorId, size));
+    }
+
+    @Operation(summary = "관리자 뉴스 신고 처리완료 리스트 조회")
+    @GetMapping("/executed")
+    public ResponseDto<CursorResponseDto<List<AdminReportedNewsDto>>> readExecuedReportedNews(@RequestParam int size,
+                                                                                       @RequestParam(required = false) Long cursorId
+    ) {
+        log.info("readExecuedReportedNews controller");
+        return ResponseDto.ok(reportedNewsService.findExecutedAdminReportedNews(cursorId, size));
     }
 }

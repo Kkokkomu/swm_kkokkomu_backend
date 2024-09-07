@@ -23,7 +23,7 @@ public record AdminReportedNewsDto(
                 .reason(reportedNews.getReason().toString())
                 .createdAt(reportedNews.getReportedAt().toString())
                 .progress(reportedNews.getProgress().toString())
-                .news(NewsDto.of(reportedNews.getNews()))
+                .news(reportedNews.getNews() != null ? NewsDto.of(reportedNews.getNews()) : null)
                 .build();
     }
 

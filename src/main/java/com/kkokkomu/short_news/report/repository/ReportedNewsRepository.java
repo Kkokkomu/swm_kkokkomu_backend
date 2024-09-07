@@ -1,6 +1,7 @@
 package com.kkokkomu.short_news.report.repository;
 
 import com.kkokkomu.short_news.core.type.ECommentProgress;
+import com.kkokkomu.short_news.core.type.ENewsProgress;
 import com.kkokkomu.short_news.report.domain.ReportedComment;
 import com.kkokkomu.short_news.report.domain.ReportedNews;
 import org.springframework.data.domain.Page;
@@ -25,7 +26,6 @@ public interface ReportedNewsRepository extends JpaRepository<ReportedNews, Long
             Pageable pageable
     );
 
-
     // 오래된 순 신고된 뉴스 최초 페이지 조회 (커서 기반)
     @Query("""
     SELECT rn FROM ReportedNews rn
@@ -34,6 +34,33 @@ public interface ReportedNewsRepository extends JpaRepository<ReportedNews, Long
     """)
     Page<ReportedNews> findFirstPageByProgressOrderByReportedAt(
             @Param("progress") ECommentProgress progress,
+            Pageable pageable
+    );
+
+    // 최신순 처리완료 댓글 조회 (커서 기반)
+    @Query("""
+    SELECT rn FROM ReportedNews rn
+    WHERE rn.progress = :executed OR rn.progress = :unexecuted
+    AND rn.id < :cursorId
+    ORDER BY rn.reportedAt DESC, rn.id ASC
+    """)
+    Page<ReportedNews> findByProgressOrderByReportedAtDesc(
+            @Param("cursorId") Long cursorId,
+            @Param("executed") ENewsProgress executed,
+            @Param("dismissed") ENewsProgress dismissed,
+            Pageable pageable
+    );
+
+
+    // 최신순 처리완료 댓글 최초 페이지 조회 (커서 기반)
+    @Query("""
+    SELECT rn FROM ReportedNews rn
+    WHERE rn.progress = :executed OR rn.progress = :unexecuted
+    ORDER BY rn.reportedAt DESC, rn.id ASC
+    """)
+    Page<ReportedNews> findFirstPageByProgressOrderByReportedAtDesc(
+            @Param("executed") ENewsProgress executed,
+            @Param("dismissed") ENewsProgress dismissed,
             Pageable pageable
     );
 }

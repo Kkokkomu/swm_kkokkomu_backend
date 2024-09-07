@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 public enum ENewsProgress {
     UNEXECUTED("UNEXECUTED"),
     EXECUTING("EXECUTING"),
-    BANISHED("BANISHED"),
-    DELETED("DELETED");
+    EXECUTED("EXECUTED"),
+    DISMISSED("DISMISSED");
 
     private final String progressProvider;
 }

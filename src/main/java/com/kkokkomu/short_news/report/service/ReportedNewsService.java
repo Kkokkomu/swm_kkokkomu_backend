@@ -6,6 +6,7 @@ import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.ECommentProgress;
+import com.kkokkomu.short_news.core.type.ENewsProgress;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.service.NewsLookupService;
 import com.kkokkomu.short_news.report.domain.ReportedComment;
@@ -54,7 +55,9 @@ public class ReportedNewsService {
         return ReportedNewsDto.of(reportedNews);
     }
 
-    public CursorResponseDto<List<AdminReportedNewsDto>> findAdminReportedNews(Long cursorId, int size) {
+    /* 관리자 */
+
+    public CursorResponseDto<List<AdminReportedNewsDto>> findUnexecutedAdminReportedNews(Long cursorId, int size) {
         // 커서에 해당하는 신고 내역이 존재하는지 검사
         if (cursorId != null && !reportedNewsRepository.existsById(cursorId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
@@ -81,5 +84,34 @@ public class ReportedNewsService {
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(adminReportedNewsDtos, cursorInfoDto);
-    }
+    } // 관리자 뉴스 신고 내역 조회
+
+    public CursorResponseDto<List<AdminReportedNewsDto>> findExecutedAdminReportedNews(Long cursorId, int size) {
+        // 커서에 해당하는 신고 내역이 존재하는지 검사
+        if (cursorId != null && !reportedNewsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        // size에 따른 페이지 요청 객체 생성
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 신고 리스트 조회
+        Page<ReportedNews> results;
+        if (cursorId == null) {
+            // 처음 요청
+            results = reportedNewsRepository.findFirstPageByProgressOrderByReportedAtDesc(ENewsProgress.EXECUTED, ENewsProgress.DISMISSED, pageRequest);
+        } else {
+            // 2번째부터
+            results = reportedNewsRepository.findByProgressOrderByReportedAtDesc(cursorId, ENewsProgress.EXECUTED, ENewsProgress.DISMISSED, pageRequest);
+        }
+        List<ReportedNews> reportedNews = results.getContent();
+
+        // 신고 관련 dto
+        List<AdminReportedNewsDto> adminReportedNewsDtos = AdminReportedNewsDto.of(reportedNews);
+
+        // 페이징 정보 dto
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(adminReportedNewsDtos, cursorInfoDto);
+    } // 관리자 뉴스 신고 처리완료 내역 조회
 }
