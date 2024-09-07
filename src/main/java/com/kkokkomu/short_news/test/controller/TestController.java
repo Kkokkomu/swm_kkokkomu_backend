@@ -3,7 +3,6 @@ package com.kkokkomu.short_news.test.controller;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
-import com.kkokkomu.short_news.news.service.NewsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/test")
 public class TestController {
-    private final NewsService newsService;
 
     @Operation(summary = "테스트 hello world")
     @GetMapping("")
