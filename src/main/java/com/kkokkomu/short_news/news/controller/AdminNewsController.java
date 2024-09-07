@@ -2,7 +2,9 @@ package com.kkokkomu.short_news.news.controller;
 
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.news.dto.news.request.CreateGenerateNewsDto;
+import com.kkokkomu.short_news.news.dto.news.request.UpdateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.response.GenerateNewsDto;
+import com.kkokkomu.short_news.news.dto.news.response.NewsDto;
 import com.kkokkomu.short_news.news.service.AdminNewsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +28,11 @@ public class AdminNewsController {
     public ResponseDto<List<GenerateNewsDto>> generateNews(@RequestBody CreateGenerateNewsDto createGenerateNewsDto) {
         log.info("generateNews controller");
         return ResponseDto.ok(adminNewsService.generateNews(createGenerateNewsDto));
+    }
+
+    @PostMapping("")
+    public ResponseDto<NewsDto> updateNews(@RequestBody UpdateNewsDto updateNewsDto) {
+        log.info("updateNews controller");
+        return ResponseDto.ok(adminNewsService.updateNews(updateNewsDto));
     }
 }

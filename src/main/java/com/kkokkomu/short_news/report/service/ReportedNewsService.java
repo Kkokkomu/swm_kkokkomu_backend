@@ -8,6 +8,7 @@ import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.ECommentProgress;
 import com.kkokkomu.short_news.core.type.ENewsProgress;
 import com.kkokkomu.short_news.news.domain.News;
+import com.kkokkomu.short_news.news.dto.news.response.NewsDto;
 import com.kkokkomu.short_news.news.service.NewsLookupService;
 import com.kkokkomu.short_news.report.domain.ReportedComment;
 import com.kkokkomu.short_news.report.domain.ReportedNews;

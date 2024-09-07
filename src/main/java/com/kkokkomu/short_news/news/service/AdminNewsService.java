@@ -11,6 +11,7 @@ import com.kkokkomu.short_news.keyword.service.NewsKeywordService;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.dto.news.request.CreateGenerateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.request.RequestGenerateNewsDto;
+import com.kkokkomu.short_news.news.dto.news.request.UpdateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.response.*;
 import com.kkokkomu.short_news.news.repository.NewsRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class AdminNewsService {
     private final NewsKeywordService newsKeywordService;
 
     private final CategoryUtil categoryUtil;
+    private final NewsLookupService newsLookupService;
 
     /* 관리자 */
     @jakarta.transaction.Transactional
@@ -167,15 +169,24 @@ public class AdminNewsService {
         return generateNewsDtos;
     } // 영상 생성 api
 
-    // 뉴스 리스트 조회
+    public NewsDto updateNews(UpdateNewsDto updateNewsDto) {
+        News news = newsLookupService.findNewsById(updateNewsDto.id());
 
+        news.update(
+                updateNewsDto.shortformUrl() != null ? updateNewsDto.shortformUrl() : news.getShortformUrl(),
+                updateNewsDto.youtubeUrl() != null ? updateNewsDto.youtubeUrl() : news.getYoutubeUrl(),
+                updateNewsDto.instagramUrl() != null ? updateNewsDto.instagramUrl() : news.getInstagramUrl(),
+                updateNewsDto.relatedUrl() != null ? updateNewsDto.relatedUrl() : news.getRelatedUrl(),
+                updateNewsDto.thumbnail() != null ? updateNewsDto.thumbnail() : news.getThumbnail(),
+                updateNewsDto.title() != null ? updateNewsDto.title() : news.getTitle(),
+                updateNewsDto.summary() != null ? updateNewsDto.summary() : news.getSummary(),
+                updateNewsDto.category() != null ? updateNewsDto.category() : news.getCategory()
+        );
 
+        news = newsRepository.save(news);
 
-    // 영상 가리기
-
-    // 영상 삭제
-
-    // 영상 정보 수정
+        return NewsDto.of(news);
+    } // 뉴스 수정
 
     // 영상 처리 내역 조회
 }
