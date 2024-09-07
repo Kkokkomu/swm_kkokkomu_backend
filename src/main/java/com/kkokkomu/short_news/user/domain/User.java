@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.user.domain;
 
+import com.kkokkomu.short_news.core.constant.Constant;
 import com.kkokkomu.short_news.core.oauth2.OAuth2UserInfo;
 import com.kkokkomu.short_news.core.type.ELoginProvider;
 import com.kkokkomu.short_news.core.type.ESex;
@@ -196,5 +197,16 @@ public class User {
         this.nickname = nickname;
         this.birthday = birthday;
         this.sex = sex;
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now().plusDays(Constant.MEMBER_INFO_RETENTION_PERIOD);
+    }
+
+    public void hardDelete() {
+        this.nickname = "탈퇴한 사용자";
+        this.birthday = null;
+        this.sex = null;
     }
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import static com.kkokkomu.short_news.core.constant.Constant.DEFAULT_PROFILE;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -44,5 +46,10 @@ public class ProfileImg {
     @PreUpdate
     protected void onUpdate() {
         this.editedAt = LocalDateTime.now(); // 업데이트 시 변경 시간 갱신
+    }
+
+    public void putDefaultImg() {
+        this.imgUrl = DEFAULT_PROFILE;
+        this.resizeUrl = DEFAULT_PROFILE;
     }
 }

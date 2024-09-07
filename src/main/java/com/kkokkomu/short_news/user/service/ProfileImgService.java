@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Objects;
+
+import static com.kkokkomu.short_news.core.constant.Constant.DEFAULT_PROFILE;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,7 +27,7 @@ public class ProfileImgService {
     public ProfileImg findProfileImgByUser(User user) {
         return profileImgRepository.findByUser(user)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_PROFILE_IMG));
-    }
+    } // 유저로부터 프로필 이미지 조회
 
     public ProfileImg putProfileImg(MultipartFile profileImg, User user) {
         // 기존 프사 전부 삭제
@@ -39,5 +43,13 @@ public class ProfileImgService {
                         .user(user)
                         .build()
         );
-    }
+    } // 새 프사 업로드
+
+    public void toDefaultProfileImg(User user) {
+        ProfileImg profileImg = findProfileImgByUser(user);
+
+        if (!Objects.equals(profileImg.getImgUrl(), DEFAULT_PROFILE)) {
+            profileImg.putDefaultImg();
+        }
+    } // 프로필 이미지 디폴트 이미지로 변경
 }

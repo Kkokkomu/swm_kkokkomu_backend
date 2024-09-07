@@ -1,6 +1,8 @@
 package com.kkokkomu.short_news.user.service;
 
 import com.kkokkomu.short_news.core.config.service.S3Service;
+import com.kkokkomu.short_news.keyword.service.UserKeywordService;
+import com.kkokkomu.short_news.news.service.NewsViewHistService;
 import com.kkokkomu.short_news.subscription.service.SubscriptionService;
 import com.kkokkomu.short_news.user.domain.ProfileImg;
 import com.kkokkomu.short_news.subscription.domain.Subscription;
@@ -27,11 +29,12 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
 
+    private final UserKeywordService userKeywordService;
+    private final UserCategoryService userCategoryService;
+    private final NewsViewHistService newsViewHistService;
     private final UserLookupService userLookupService;
-
     private final SubscriptionService subscriptionService;
     private final ProfileImgService profileImgService;
-    private final S3Service s3Service;
 
     public MyPageDto readMyPageInfo(Long userId) {
         User user = userLookupService.findUserById(userId);
@@ -68,12 +71,39 @@ public class UserService {
         );
 
         return UserDto.of(user);
-    }
+    } // 유저 프로필 정보 업데이트
 
     @Transactional(readOnly = true)
     public UserDto getUserProfile(Long userId) {
         User user = userLookupService.findUserById(userId);
         return UserDto.of(user);
+    } // 유저 프로필 정보 조회
+
+    public void softDeleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        user.softDelete();
+        userRepository.save(user);
+    }
+
+    public void hardDeleteUser(User user) {
+        log.info("Hard Delete user: {}", user);
+
+        // 프로필 이미지 디폴트 이미지로 변경
+        profileImgService.toDefaultProfileImg(user);
+
+        // 시청기록 삭제
+        newsViewHistService.deleteAllByUser(user);
+
+        // 유저 카테고리 삭제
+        userCategoryService.deleteAllByUser(user);
+
+        // 유저 키워드 매핑 삭제
+        userKeywordService.deleteAllByUser(user);
+
+        // 유저 hard delete 처리
+        user.hardDelete();
+        userRepository.save(user);
     }
 
     /* 관리자 */
