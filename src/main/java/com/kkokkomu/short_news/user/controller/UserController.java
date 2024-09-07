@@ -40,4 +40,11 @@ public class UserController {
         log.info("updateUser controller userId = {}", userId);
         return ResponseDto.ok(userService.updateUserProfile(userId, updateUserDto, image));
     }
+
+    @Operation(summary = "유저 프로필 정보 조회")
+    @GetMapping("")
+    public ResponseDto<UserDto> readUser(@Parameter(hidden = true) @UserId Long userId) {
+        log.info("readUser controller userId = {}", userId);
+        return ResponseDto.ok(userService.getUserProfile(userId));
+    }
 }

@@ -70,6 +70,12 @@ public class UserService {
         return UserDto.of(user);
     }
 
+    @Transactional(readOnly = true)
+    public UserDto getUserProfile(Long userId) {
+        User user = userLookupService.findUserById(userId);
+        return UserDto.of(user);
+    }
+
     /* 관리자 */
 
     public List<AdminUserDto> findAllUser() {
