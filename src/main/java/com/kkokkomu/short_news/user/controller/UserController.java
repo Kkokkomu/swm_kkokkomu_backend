@@ -2,14 +2,18 @@ package com.kkokkomu.short_news.user.controller;
 
 import com.kkokkomu.short_news.core.annotation.UserId;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
+import com.kkokkomu.short_news.user.dto.user.request.UpdateUserDto;
 import com.kkokkomu.short_news.user.dto.user.response.MyPageDto;
+import com.kkokkomu.short_news.user.dto.user.response.UserDto;
 import com.kkokkomu.short_news.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "유저")
 @RestController
@@ -24,5 +28,16 @@ public class UserController {
     public ResponseDto<MyPageDto> readMyPageInfo(@Parameter(hidden = true) @UserId Long userId) {
         log.info("readMyPageInfo controller userId = {}", userId);
         return ResponseDto.ok(userService.readMyPageInfo(userId));
+    }
+
+    @Operation(summary = "유저 정보 수정")
+    @PutMapping("")
+    public ResponseDto<UserDto> updateUser(
+            @Parameter(hidden = true) @UserId Long userId,
+            @RequestPart(value = "image") MultipartFile image,
+            @RequestPart(value = "contents") @Valid UpdateUserDto updateUserDto
+    ) {
+        log.info("updateUser controller userId = {}", userId);
+        return ResponseDto.ok(userService.updateUserProfile(userId, updateUserDto, image));
     }
 }

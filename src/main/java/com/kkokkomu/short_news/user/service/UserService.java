@@ -1,18 +1,23 @@
 package com.kkokkomu.short_news.user.service;
 
+import com.kkokkomu.short_news.core.config.service.S3Service;
 import com.kkokkomu.short_news.subscription.service.SubscriptionService;
 import com.kkokkomu.short_news.user.domain.ProfileImg;
 import com.kkokkomu.short_news.subscription.domain.Subscription;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.dto.user.request.BanUserDto;
+import com.kkokkomu.short_news.user.dto.user.request.UpdateUserDto;
 import com.kkokkomu.short_news.user.dto.user.response.AdminUserDto;
 import com.kkokkomu.short_news.user.dto.user.response.MyPageDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
+import com.kkokkomu.short_news.user.dto.user.response.UserDto;
 import com.kkokkomu.short_news.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,6 +31,7 @@ public class UserService {
 
     private final SubscriptionService subscriptionService;
     private final ProfileImgService profileImgService;
+    private final S3Service s3Service;
 
     public MyPageDto readMyPageInfo(Long userId) {
         User user = userLookupService.findUserById(userId);
@@ -47,6 +53,21 @@ public class UserService {
                 .premiumEndDate(endDate)
                 .profileImg(profileImg.getImgUrl())
                 .build();
+    } // 마이페이지 정보 조회
+
+    @Transactional
+    public UserDto updateUserProfile(Long userId, UpdateUserDto userDto, MultipartFile profileImg) {
+        User user = userLookupService.findUserById(userId);
+
+        profileImgService.putProfileImg(profileImg, user);
+
+        user.updateProfile(
+                userDto.nickname(),
+                userDto.birthday(),
+                userDto.sex()
+        );
+
+        return UserDto.of(user);
     }
 
     /* 관리자 */

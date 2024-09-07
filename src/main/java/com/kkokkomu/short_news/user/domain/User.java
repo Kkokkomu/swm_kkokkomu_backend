@@ -191,4 +191,10 @@ public class User {
         this.bannedStartAt = null;
         this.bannedEndAt = null;
     }
+
+    public void updateProfile(String nickname, LocalDate birthday, ESex sex) {
+        this.nickname = nickname;
+        this.birthday = birthday;
+        this.sex = sex;
+    }
 }

@@ -2,7 +2,7 @@ package com.kkokkomu.short_news.core.scheduler;
 
 import com.kkokkomu.short_news.news.dto.news.request.CreateGenerateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.response.GenerateNewsDto;
-import com.kkokkomu.short_news.core.service.MailService;
+import com.kkokkomu.short_news.core.config.service.MailService;
 import com.kkokkomu.short_news.news.service.AdminNewsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
