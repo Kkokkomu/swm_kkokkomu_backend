@@ -15,6 +15,7 @@ import com.kkokkomu.short_news.report.dto.reportedComment.request.CreateReported
 import com.kkokkomu.short_news.report.dto.reportedComment.response.AdminCommentListDto;
 import com.kkokkomu.short_news.report.dto.reportedComment.response.ReportedCommentDto;
 import com.kkokkomu.short_news.report.dto.reportedNews.request.CreatedReportedNewsDto;
+import com.kkokkomu.short_news.report.dto.reportedNews.request.ExecuteReportedNews;
 import com.kkokkomu.short_news.report.dto.reportedNews.response.AdminReportedNewsDto;
 import com.kkokkomu.short_news.report.dto.reportedNews.response.ReportedNewsDto;
 import com.kkokkomu.short_news.report.repository.ReportedNewsRepository;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -57,6 +59,7 @@ public class ReportedNewsService {
 
     /* 관리자 */
 
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<AdminReportedNewsDto>> findUnexecutedAdminReportedNews(Long cursorId, int size) {
         // 커서에 해당하는 신고 내역이 존재하는지 검사
         if (cursorId != null && !reportedNewsRepository.existsById(cursorId)) {
@@ -70,10 +73,10 @@ public class ReportedNewsService {
         Page<ReportedNews> results;
         if (cursorId == null) {
             // 처음 요청
-            results = reportedNewsRepository.findFirstPageByProgressOrderByReportedAt(ECommentProgress.UNEXECUTED, pageRequest);
+            results = reportedNewsRepository.findFirstPageByProgressOrderByReportedAt(ENewsProgress.UNEXECUTED, pageRequest);
         } else {
             // 2번째부터
-            results = reportedNewsRepository.findByProgressOrderByReportedAt(cursorId, ECommentProgress.UNEXECUTED, pageRequest);
+            results = reportedNewsRepository.findByProgressOrderByReportedAt(cursorId, ENewsProgress.UNEXECUTED, pageRequest);
         }
         List<ReportedNews> reportedNews = results.getContent();
 
@@ -86,6 +89,7 @@ public class ReportedNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(adminReportedNewsDtos, cursorInfoDto);
     } // 관리자 뉴스 신고 내역 조회
 
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<AdminReportedNewsDto>> findExecutedAdminReportedNews(Long cursorId, int size) {
         // 커서에 해당하는 신고 내역이 존재하는지 검사
         if (cursorId != null && !reportedNewsRepository.existsById(cursorId)) {
@@ -114,4 +118,28 @@ public class ReportedNewsService {
 
         return CursorResponseDto.fromEntityAndPageInfo(adminReportedNewsDtos, cursorInfoDto);
     } // 관리자 뉴스 신고 처리완료 내역 조회
+
+    public AdminReportedNewsDto executeReportedNews(ExecuteReportedNews executeReportedNews, Long adminId) {
+        ReportedNews reportedNews = reportedNewsRepository.findById(executeReportedNews.reportedNewsId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_NEWS));
+
+        if (!reportedNews.getProgress().equals(ENewsProgress.UNEXECUTED.UNEXECUTED)) {
+            throw new CommonException(ErrorCode.ALREADY_EXECUTED_NEWS);
+        }
+
+        User adminUser = userLookupService.findUserById(adminId);
+
+        // 신고 내역 처리 완료
+        reportedNews.execute(adminUser);
+
+        // 뉴스 삭제전 외래키 null처리
+        Long newsId = reportedNews.getNews().getId();
+        reportedNews.updateNewsNull();
+        reportedNewsRepository.save(reportedNews);
+
+        // 뉴스 삭제
+        newsLookupService.deleteNewsById(newsId);
+
+        return AdminReportedNewsDto.of(reportedNews);
+    }
 }

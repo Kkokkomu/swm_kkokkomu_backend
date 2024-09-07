@@ -139,8 +139,13 @@ public class ReportedCommentService {
         // 신고 내역 처리 완료
         reportedComment.execute(adminUser);
 
+        // 댓글 삭제 전 외래키 null 처리
+        Long commentId = reportedComment.getComment().getId();
+        reportedComment.updateCommentNull();
+        reportedCommentRepository.save(reportedComment);
+
         // 댓글 삭제
-        commentLookupService.deleteCommentById(reportedComment.getComment().getId());
+        commentLookupService.deleteCommentById(commentId);
 
         return ReportedCommentDto.of(reportedComment);
     } // 댓글 신고 처리

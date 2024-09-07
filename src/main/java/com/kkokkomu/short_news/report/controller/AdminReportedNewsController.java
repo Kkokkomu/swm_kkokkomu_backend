@@ -1,18 +1,17 @@
 package com.kkokkomu.short_news.report.controller;
 
+import com.kkokkomu.short_news.core.annotation.UserId;
 import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.report.dto.reportedComment.response.AdminCommentListDto;
+import com.kkokkomu.short_news.report.dto.reportedNews.request.ExecuteReportedNews;
 import com.kkokkomu.short_news.report.dto.reportedNews.response.AdminReportedNewsDto;
 import com.kkokkomu.short_news.report.service.ReportedNewsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,5 +39,14 @@ public class AdminReportedNewsController {
     ) {
         log.info("readExecuedReportedNews controller");
         return ResponseDto.ok(reportedNewsService.findExecutedAdminReportedNews(cursorId, size));
+    }
+
+    @Operation(summary = "관리자 뉴스 신고 처리")
+    @PostMapping("/execute")
+    public ResponseDto<AdminReportedNewsDto> executeReportedNews(@RequestBody ExecuteReportedNews executeReportedNews,
+                                                                 @UserId Long adminId
+    ) {
+        log.info("executeReportedNews controller");
+        return ResponseDto.ok(reportedNewsService.executeReportedNews(executeReportedNews, adminId));
     }
 }

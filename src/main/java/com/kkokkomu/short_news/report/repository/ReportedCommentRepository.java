@@ -42,14 +42,14 @@ public interface ReportedCommentRepository extends JpaRepository<ReportedComment
     // 최신순 처리완료 댓글 조회 (커서 기반)
     @Query("""
     SELECT rc FROM ReportedComment rc
-    WHERE rc.progress = :executed OR rc.progress = :unexecuted
+    WHERE rc.progress = :executed OR rc.progress = :dismissed
     AND rc.id < :cursorId
     ORDER BY rc.reportedAt DESC, rc.id ASC
     """)
     Page<ReportedComment> findByProgressOrderByReportedAtDesc(
             @Param("cursorId") Long cursorId,
             @Param("executed") ECommentProgress executed,
-            @Param("unexecuted") ECommentProgress unexecuted,
+            @Param("dismissed") ECommentProgress dismissed,
             Pageable pageable
     );
 
@@ -57,12 +57,12 @@ public interface ReportedCommentRepository extends JpaRepository<ReportedComment
     // 최신순 처리완료 댓글 최초 페이지 조회 (커서 기반)
     @Query("""
     SELECT rc FROM ReportedComment rc
-    WHERE rc.progress = :executed OR rc.progress = :unexecuted
+    WHERE rc.progress = :executed OR rc.progress = :dismissed
     ORDER BY rc.reportedAt DESC, rc.id ASC
     """)
     Page<ReportedComment> findFirstPageByProgressOrderByReportedAtDesc(
             @Param("executed") ECommentProgress executed,
-            @Param("unexecuted") ECommentProgress unexecuted,
+            @Param("dismissed") ECommentProgress dismissed,
             Pageable pageable
     );
 

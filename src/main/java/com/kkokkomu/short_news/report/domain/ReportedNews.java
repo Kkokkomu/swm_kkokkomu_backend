@@ -48,6 +48,17 @@ public class ReportedNews {
         this.reporter = reporter;
         this.news = news;
         this.reason = reason;
+        this.progress = ENewsProgress.UNEXECUTED;
         this.reportedAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 설정
+    }
+
+    public void execute(User admin) {
+        this.reporter = admin;
+        this.reportedAt = LocalDateTime.now();
+        this.progress = ENewsProgress.EXECUTED;
+    }
+
+    public void updateNewsNull() {
+        this.news = null;
     }
 }

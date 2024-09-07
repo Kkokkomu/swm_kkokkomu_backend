@@ -22,7 +22,7 @@ public interface ReportedNewsRepository extends JpaRepository<ReportedNews, Long
     """)
     Page<ReportedNews> findByProgressOrderByReportedAt(
             @Param("cursorId") Long cursorId,
-            @Param("progress") ECommentProgress progress,
+            @Param("progress") ENewsProgress progress,
             Pageable pageable
     );
 
@@ -33,14 +33,14 @@ public interface ReportedNewsRepository extends JpaRepository<ReportedNews, Long
     ORDER BY rn.reportedAt ASC, rn.id ASC
     """)
     Page<ReportedNews> findFirstPageByProgressOrderByReportedAt(
-            @Param("progress") ECommentProgress progress,
+            @Param("progress") ENewsProgress progress,
             Pageable pageable
     );
 
     // 최신순 처리완료 댓글 조회 (커서 기반)
     @Query("""
     SELECT rn FROM ReportedNews rn
-    WHERE rn.progress = :executed OR rn.progress = :unexecuted
+    WHERE rn.progress = :executed OR rn.progress = :dismissed
     AND rn.id < :cursorId
     ORDER BY rn.reportedAt DESC, rn.id ASC
     """)
@@ -55,7 +55,7 @@ public interface ReportedNewsRepository extends JpaRepository<ReportedNews, Long
     // 최신순 처리완료 댓글 최초 페이지 조회 (커서 기반)
     @Query("""
     SELECT rn FROM ReportedNews rn
-    WHERE rn.progress = :executed OR rn.progress = :unexecuted
+    WHERE rn.progress = :executed OR rn.progress = :dismissed
     ORDER BY rn.reportedAt DESC, rn.id ASC
     """)
     Page<ReportedNews> findFirstPageByProgressOrderByReportedAtDesc(

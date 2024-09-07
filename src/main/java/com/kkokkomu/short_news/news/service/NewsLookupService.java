@@ -8,4 +8,6 @@ public interface NewsLookupService {
     News findNewsById(Long newsId);
 
     Boolean existNewsById(Long newsId);
+
+    void deleteNewsById(Long newsId);
 }

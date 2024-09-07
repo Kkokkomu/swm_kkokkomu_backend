@@ -38,7 +38,8 @@ public enum ErrorCode {
     DUPLICATED_HIDE_USER("40027", HttpStatus.BAD_REQUEST, "이미 차단한 유저입니다."),
     DUPLICATED_REPORTED_COMMENT("40028", HttpStatus.BAD_REQUEST, "이미 신고한 댓글입니다."),
     BANNED_USER_COMMENT("40029", HttpStatus.BAD_REQUEST, "댓글 기능이 정지된 유저입니다."),
-    ALREADY_EXECUTED_COMMENT("40030", HttpStatus.BAD_REQUEST, "이미 처리된 댓글입니다."),
+    ALREADY_EXECUTED_COMMENT("40030", HttpStatus.BAD_REQUEST, "이미 처리된 댓글 신고입니다."),
+    ALREADY_EXECUTED_NEWS("40031", HttpStatus.BAD_REQUEST, "이미 처리된 뉴스 신고입니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
@@ -75,6 +76,7 @@ public enum ErrorCode {
     NOT_FOUND_HIDE_USER("40415", HttpStatus.NOT_FOUND, "신고 유저 내역이 존재하지 않습니다."),
     NOT_FOUND_REPORTED_COMMENT("40416", HttpStatus.NOT_FOUND, "신고 댓글 내역이 존재하지 않습니다."),
     NOT_FOUND_ADMIN("40417", HttpStatus.NOT_FOUND, "해당 관리자가 존재하지 않습니다."),
+    NOT_FOUND_REPORTED_NEWS("40418", HttpStatus.NOT_FOUND, "신고 뉴스 내역이 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),

@@ -63,4 +63,8 @@ public class ReportedComment {
         this.executedAt = LocalDateTime.now();
         this.progress = ECommentProgress.DISMISSED;
     }
+
+    public void updateCommentNull() {
+        this.comment = null;
+    }
 }
