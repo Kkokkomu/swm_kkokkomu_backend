@@ -8,6 +8,7 @@ import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.user.repository.UserCategoryRepository;
 import com.kkokkomu.short_news.core.type.ECategory;
+import com.kkokkomu.short_news.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class UserCategoryService {
     private final UserCategoryRepository userCategoryRepository;
 
     private final UserLookupService userLookupService;
+    private final UserRepository userRepository;
 
     @Transactional
     public String updateUserCategory(Long userId, UpdateUserCategoryDto updateUserCategoryDto) {
@@ -93,6 +95,12 @@ public class UserCategoryService {
 
         return "";
     } // 유저 카테고리 업데이트
+
+    @Transactional
+    public void deleteAllByUser(User user) {
+        log.info("UserCategoryService deleteAllByUser start");
+        userCategoryRepository.deleteAllByUser(user);
+    }
 
     public CategoryByUserDto findUserCategoryByUserId(Long userId) {
         User user = userLookupService.findUserById(userId);

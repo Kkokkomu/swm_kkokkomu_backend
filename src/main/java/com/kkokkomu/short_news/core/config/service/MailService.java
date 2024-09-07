@@ -1,4 +1,4 @@
-package com.kkokkomu.short_news.core.service;
+package com.kkokkomu.short_news.core.config.service;
 
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;

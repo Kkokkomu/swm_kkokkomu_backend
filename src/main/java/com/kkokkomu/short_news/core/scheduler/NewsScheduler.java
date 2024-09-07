@@ -2,8 +2,8 @@ package com.kkokkomu.short_news.core.scheduler;
 
 import com.kkokkomu.short_news.news.dto.news.request.CreateGenerateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.response.GenerateNewsDto;
-import com.kkokkomu.short_news.core.service.MailService;
-import com.kkokkomu.short_news.news.service.NewsService;
+import com.kkokkomu.short_news.core.config.service.MailService;
+import com.kkokkomu.short_news.news.service.AdminNewsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class NewsScheduler {
-    private final NewsService newsService;
+    private final AdminNewsService adminNewsService;
     private final MailService mailService;
 
     @Scheduled(cron = "0 0 8 * * *") // 매일 아침 8시
@@ -28,7 +28,7 @@ public class NewsScheduler {
                 .count_sports(2)
                 .build();
 
-        List<GenerateNewsDto> generateNewsDtos = newsService.generateNews(createGenerateNewsDto);
+        List<GenerateNewsDto> generateNewsDtos = adminNewsService.generateNews(createGenerateNewsDto);
 
         log.info("generateNewsDtos: {}", generateNewsDtos);
 
@@ -38,6 +38,7 @@ public class NewsScheduler {
             if (generateNewsDto.newsDto() != null) {
                 content.append("<p> Title: ").append(generateNewsDto.newsDto().title()).append("</p>");
                 content.append("<p> URL: ").append(generateNewsDto.newsDto().shortformUrl()).append("</p>");
+                content.append("<p> origin: ").append(generateNewsDto.newsDto().relatedUrl()).append("</p>");
             }
 
             if (generateNewsDto.keywords() != null && !generateNewsDto.keywords().isEmpty()) {

@@ -64,6 +64,7 @@ jobs:
             docker stop web || true
             docker rm web || true
             docker rmi ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest || true # 이전 이미지를 삭제
+            docker volume prune -f # 사용되지 않는 볼륨 삭제
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker pull ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest
             docker run -d --name web --network my_network -p 80:8080 \

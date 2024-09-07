@@ -2,6 +2,7 @@ package com.kkokkomu.short_news.news.repository;
 
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.core.type.ECategory;
+import com.kkokkomu.short_news.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,88 @@ import java.util.List;
 public interface NewsRepository extends JpaRepository<News, Long> {
     @Query("select n from News n order by n.createdAt desc ")
     Page<News> findAllCreatedAtDesc(Pageable pageable);
+
+    /****************** 뉴스 시청 기록 *************************/
+
+    // 시청했던 뉴스 조회
+    @Query("""
+    SELECT DISTINCT n FROM News n
+    JOIN n.newsViewHists v
+    WHERE v.user = :user
+    AND n.id < :cursorId
+    ORDER BY n.id DESC
+    """)
+    Page<News> findNewsByUserViewHistoryAndIdLessThanOrderByIdDesc(
+            @Param("user") User user,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    // 시청했던 뉴스 최초 조회
+    @Query("""
+    SELECT DISTINCT n FROM News n
+    JOIN n.newsViewHists v
+    WHERE v.user = :user
+    ORDER BY n.id DESC
+    """)
+    Page<News> findFirstPageNewsByUserViewHistoryOrderByIdDesc(
+            @Param("user") User user,
+            Pageable pageable
+    );
+
+
+    // 댓글을 달았던 뉴스 조회
+    @Query("""
+    SELECT DISTINCT n FROM News n
+    JOIN n.comments c
+    WHERE c.user = :user
+    AND n.id < :cursorId
+    ORDER BY n.id DESC
+    """)
+    Page<News> findNewsByUserCommentsAndIdLessThanOrderByIdDesc(
+            @Param("user") User user,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    // 댓글을 달았던 뉴스 최초 조회
+    @Query("""
+    SELECT DISTINCT n FROM News n
+    JOIN n.comments c
+    WHERE c.user = :user
+    ORDER BY n.id DESC
+    """)
+    Page<News> findFirstPageNewsByUserCommentsOrderByIdDesc(
+            @Param("user") User user,
+            Pageable pageable
+    );
+
+    // 감정표현했던 뉴스 조회
+    @Query("""
+    SELECT DISTINCT n FROM News n
+    JOIN n.reactions r
+    WHERE r.user = :user
+    AND n.id < :cursorId
+    ORDER BY n.id DESC
+    """)
+    Page<News> findNewsByUserReactionsAndIdLessThanOrderByIdDesc(
+            @Param("user") User user,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    // 감정표현했던 뉴스 최초 조회
+    @Query("""
+    SELECT DISTINCT n FROM News n
+    JOIN n.reactions r
+    WHERE r.user = :user
+    ORDER BY n.id DESC
+    """)
+    Page<News> findFirstPageNewsByUserReactionsOrderByIdDesc(
+            @Param("user") User user,
+            Pageable pageable
+    );
+
 
     /****************** 탐색화면 카테고리 필터 *************************/
 

@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.user.service;
 
+import com.kkokkomu.short_news.core.config.service.S3Service;
 import com.kkokkomu.short_news.user.domain.ProfileImg;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.core.exception.CommonException;
@@ -8,6 +9,12 @@ import com.kkokkomu.short_news.user.repository.ProfileImgRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Objects;
+
+import static com.kkokkomu.short_news.core.constant.Constant.DEFAULT_PROFILE;
 
 @Service
 @RequiredArgsConstructor
@@ -15,8 +22,34 @@ import org.springframework.stereotype.Service;
 public class ProfileImgService {
     private final ProfileImgRepository profileImgRepository;
 
+    private final S3Service s3Service;
+
     public ProfileImg findProfileImgByUser(User user) {
         return profileImgRepository.findByUser(user)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_PROFILE_IMG));
-    }
+    } // 유저로부터 프로필 이미지 조회
+
+    public ProfileImg putProfileImg(MultipartFile profileImg, User user) {
+        // 기존 프사 전부 삭제
+        profileImgRepository.deleteAllByUser(user);
+
+        // 새로운 프사 s3 업로드
+        String profileImgUrl = s3Service.putUserProfile(profileImg, user.getId());
+
+        return profileImgRepository.save(
+                ProfileImg.builder()
+                        .imgUrl(profileImgUrl)
+                        .resizeUrl(profileImgUrl)
+                        .user(user)
+                        .build()
+        );
+    } // 새 프사 업로드
+
+    public void toDefaultProfileImg(User user) {
+        ProfileImg profileImg = findProfileImgByUser(user);
+
+        if (!Objects.equals(profileImg.getImgUrl(), DEFAULT_PROFILE)) {
+            profileImg.putDefaultImg();
+        }
+    } // 프로필 이미지 디폴트 이미지로 변경
 }
