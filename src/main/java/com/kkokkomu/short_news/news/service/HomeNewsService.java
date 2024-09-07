@@ -5,6 +5,7 @@ import com.kkokkomu.short_news.core.dto.PagingResponseDto;
 import com.kkokkomu.short_news.core.type.EHomeFilter;
 import com.kkokkomu.short_news.keyword.service.NewsKeywordService;
 import com.kkokkomu.short_news.news.domain.News;
+import com.kkokkomu.short_news.news.dto.news.request.SharedCntDto;
 import com.kkokkomu.short_news.news.dto.news.response.*;
 import com.kkokkomu.short_news.news.dto.newsReaction.response.NewReactionByUserDto;
 import com.kkokkomu.short_news.news.dto.newsReaction.response.ReactionCntDto;
@@ -107,4 +108,13 @@ public class HomeNewsService {
                 .keywords(keywords)
                 .build();
     } // 뉴스 정보 조회
+
+    public NewsDto updateSharedCnt(SharedCntDto sharedCntDto) {
+        News news = newsLookupService.findNewsById(sharedCntDto.newsId());
+
+        news.updateSharedCnt();
+        newsRepository.save(news);
+
+        return NewsDto.of(news);
+    } // 공유 수 증가
 }

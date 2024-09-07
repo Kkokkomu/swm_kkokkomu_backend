@@ -102,4 +102,8 @@ public class News {
     public void incrementViewCnt() {
         this.viewCnt += 1;
     }
+
+    public void updateSharedCnt() {
+        this.sharedCnt++;
+    }
 }
