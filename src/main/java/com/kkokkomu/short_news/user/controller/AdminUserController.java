@@ -39,4 +39,13 @@ public class AdminUserController {
         log.info("banUser controller");
         return ResponseDto.ok(userService.banUser(banUser, userId));
     }
+
+    @Operation(summary = "관리자 유저 댓글 제한 해제")
+    @PutMapping("/clear")
+    public ResponseDto<AdminUserDto> clearUser(
+            @UserId Long userId
+            ) {
+        log.info("clearUser controller");
+        return ResponseDto.ok(userService.clearUser(userId));
+    }
 }

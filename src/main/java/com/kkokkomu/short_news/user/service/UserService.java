@@ -63,8 +63,13 @@ public class UserService {
         user.banUser(banUserDto.day());
 
         return AdminUserDto.of(user);
-    }
-    // 댓글 작성 금지 부여
+    } // 댓글 작성 금지 부여
 
-    // 댓글 작성 금지 부여 해제
+    public AdminUserDto clearUser(Long userId) {
+        User user = userLookupService.findUserById(userId);
+
+        user.clearUser();
+
+        return AdminUserDto.of(user);
+    } // 댓글 작성 금지 부여 해제
 }

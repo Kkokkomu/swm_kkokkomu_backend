@@ -184,4 +184,11 @@ public class User {
             this.bannedEndAt = this.bannedEndAt.plusDays(day);
         }
     }
+
+    public void clearUser() {
+        log.info("{} clearUser", this.nickname);
+
+        this.bannedStartAt = null;
+        this.bannedEndAt = null;
+    }
 }
