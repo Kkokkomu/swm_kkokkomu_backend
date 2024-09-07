@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,6 +21,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByNickname(String nickname);
 
     Optional<User> findByEmail(String email);
+
+    @Query("SELECT  u FROM User u order by u.id")
+    List<User> findAllAscId();
 
     @Query("SELECT u FROM User u WHERE u.email = :email AND u.role = :role")
     Optional<User> findByEmailAndRole(String email, EUserRole role);

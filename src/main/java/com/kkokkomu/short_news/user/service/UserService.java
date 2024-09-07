@@ -4,6 +4,7 @@ import com.kkokkomu.short_news.subscription.service.SubscriptionService;
 import com.kkokkomu.short_news.user.domain.ProfileImg;
 import com.kkokkomu.short_news.subscription.domain.Subscription;
 import com.kkokkomu.short_news.user.domain.User;
+import com.kkokkomu.short_news.user.dto.user.response.AdminUserDto;
 import com.kkokkomu.short_news.user.dto.user.response.MyPageDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
@@ -11,6 +12,8 @@ import com.kkokkomu.short_news.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -44,4 +47,12 @@ public class UserService {
                 .profileImg(profileImg.getImgUrl())
                 .build();
     }
+
+    /* 관리자 */
+
+    public List<AdminUserDto> findAllUser() {
+        List<User> users = userRepository.findAllAscId();
+
+        return AdminUserDto.of(users);
+    } // 관리자 유저 리스트 조회
 }
