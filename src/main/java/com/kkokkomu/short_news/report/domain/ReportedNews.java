@@ -58,6 +58,12 @@ public class ReportedNews {
         this.progress = ENewsProgress.EXECUTED;
     }
 
+    public void dismiss(User admin) {
+        this.reporter = admin;
+        this.reportedAt = LocalDateTime.now();
+        this.progress = ENewsProgress.DISMISSED;
+    }
+
     public void updateNewsNull() {
         this.news = null;
     }

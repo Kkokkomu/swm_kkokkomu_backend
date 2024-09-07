@@ -12,6 +12,7 @@ import com.kkokkomu.short_news.news.service.NewsLookupService;
 import com.kkokkomu.short_news.report.domain.ReportedComment;
 import com.kkokkomu.short_news.report.domain.ReportedNews;
 import com.kkokkomu.short_news.report.dto.reportedComment.request.CreateReportedCommentDto;
+import com.kkokkomu.short_news.report.dto.reportedComment.request.ExecuteReportedComment;
 import com.kkokkomu.short_news.report.dto.reportedComment.response.AdminCommentListDto;
 import com.kkokkomu.short_news.report.dto.reportedComment.response.ReportedCommentDto;
 import com.kkokkomu.short_news.report.dto.reportedNews.request.CreatedReportedNewsDto;
@@ -119,11 +120,12 @@ public class ReportedNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(adminReportedNewsDtos, cursorInfoDto);
     } // 관리자 뉴스 신고 처리완료 내역 조회
 
+    @Transactional(readOnly = true)
     public AdminReportedNewsDto executeReportedNews(ExecuteReportedNews executeReportedNews, Long adminId) {
         ReportedNews reportedNews = reportedNewsRepository.findById(executeReportedNews.reportedNewsId())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_NEWS));
 
-        if (!reportedNews.getProgress().equals(ENewsProgress.UNEXECUTED.UNEXECUTED)) {
+        if (!reportedNews.getProgress().equals(ENewsProgress.UNEXECUTED)) {
             throw new CommonException(ErrorCode.ALREADY_EXECUTED_NEWS);
         }
 
@@ -141,5 +143,23 @@ public class ReportedNewsService {
         newsLookupService.deleteNewsById(newsId);
 
         return AdminReportedNewsDto.of(reportedNews);
-    }
+    } // 관리자 뉴스 처리 완료
+
+    @Transactional(readOnly = true)
+    public AdminReportedNewsDto dismissReport(ExecuteReportedNews executeReportedNews, Long adminId) {
+        ReportedNews reportedNews = reportedNewsRepository.findById(executeReportedNews.reportedNewsId())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_NEWS));
+        log.info(reportedNews.getProgress().toString());
+
+        if (!reportedNews.getProgress().equals(ENewsProgress.UNEXECUTED)) {
+            throw new CommonException(ErrorCode.ALREADY_EXECUTED_NEWS);
+        }
+
+        User adminUser = userLookupService.findUserById(adminId);
+
+        // 신고 내역 기각 처리 완료
+        reportedNews.dismiss(adminUser);
+
+        return AdminReportedNewsDto.of(reportedNews);
+    } // 관리자 뉴스 처리 기각
 }

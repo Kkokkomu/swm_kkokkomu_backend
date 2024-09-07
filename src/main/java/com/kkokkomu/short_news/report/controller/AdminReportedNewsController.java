@@ -49,4 +49,13 @@ public class AdminReportedNewsController {
         log.info("executeReportedNews controller");
         return ResponseDto.ok(reportedNewsService.executeReportedNews(executeReportedNews, adminId));
     }
+
+    @Operation(summary = "관리자 뉴스 신고 기각 처리")
+    @PostMapping("/dismiss")
+    public ResponseDto<AdminReportedNewsDto> dismissReportedNews(@RequestBody ExecuteReportedNews executeReportedNews,
+                                                                 @UserId Long adminId
+    ) {
+        log.info("dismissReportedNews controller");
+        return ResponseDto.ok(reportedNewsService.dismissReport(executeReportedNews, adminId));
+    }
 }
