@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ProfileImgRepository extends JpaRepository<ProfileImg, Long> {
     Optional<ProfileImg> findByUser(User user);
+
+    void deleteAllByUser(User user);
 }

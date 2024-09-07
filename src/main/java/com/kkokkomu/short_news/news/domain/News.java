@@ -2,6 +2,7 @@ package com.kkokkomu.short_news.news.domain;
 
 import com.kkokkomu.short_news.core.type.ECategory;
 import com.kkokkomu.short_news.comment.domain.Comment;
+import com.kkokkomu.short_news.keyword.domain.NewsKeyword;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -60,6 +61,12 @@ public class News {
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NewsReaction> reactions; // 감정표현
 
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NewsViewHist> newsViewHists; // 뉴스 시청 기록
+
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NewsKeyword> newsKeywords; // 뉴스 키워드 매핑
+
     @Builder
     public News(String shortformUrl, String youtubeUrl, String instagramUrl, String relatedUrl, String thumbnail, String title, String summary, ECategory category) {
         this.shortformUrl = shortformUrl;
@@ -94,5 +101,9 @@ public class News {
 
     public void incrementViewCnt() {
         this.viewCnt += 1;
+    }
+
+    public void updateSharedCnt() {
+        this.sharedCnt++;
     }
 }

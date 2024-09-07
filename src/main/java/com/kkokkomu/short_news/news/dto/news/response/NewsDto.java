@@ -6,6 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record NewsDto(
+        Long id,
         String shortformUrl, // 숏폼 URL
         String youtubeUrl, // YouTube URL
         String instagramUrl, // Instagram URL
@@ -21,6 +22,7 @@ public record NewsDto(
 ) {
     static public NewsDto of(News news) {
         return NewsDto.builder()
+                .id(news.getId())
                 .shortformUrl(news.getShortformUrl())
                 .youtubeUrl(news.getYoutubeUrl())
                 .instagramUrl(news.getInstagramUrl())

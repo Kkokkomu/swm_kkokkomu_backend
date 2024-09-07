@@ -75,6 +75,12 @@ public class UserKeywordService {
     } // 유저 키워드 삭제
 
     @Transactional
+    public void deleteAllByUser(User user) {
+        log.info("UserKeywordService deleteAllByUser start");
+        userKeywordRepository.deleteAllByUser(user);
+    }
+
+    @Transactional
     public List<UserKeywordDto> getUserKeywords(Long userId) {
         log.info("getUserKeywords start");
 

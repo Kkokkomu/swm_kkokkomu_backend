@@ -11,6 +11,10 @@ import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +33,18 @@ public class CommentController {
     /* 댓글 */
 
     @Operation(summary = "댓글 추가")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "{\n" +
+                    "    \"success\": false,\n" +
+                    "    \"data\": null,\n" +
+                    "    \"error\": {\n" +
+                    "        \"code\": \"40029\",\n" +
+                    "        \"message\": \"댓글 기능이 정지된 유저입니다.\"\n" +
+                    "    }\n" +
+                    "}",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseDto.class))),
+    })
     @PostMapping("")
     public ResponseDto<CommentDto> addComment(@Parameter(hidden = true) @UserId Long userId,
                                               @RequestBody CreateCommentDto createCommentDto) {

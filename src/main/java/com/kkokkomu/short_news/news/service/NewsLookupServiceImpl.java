@@ -22,4 +22,9 @@ public class NewsLookupServiceImpl implements NewsLookupService{
     public Boolean existNewsById(Long newsId) {
         return newsRepository.existsById(newsId);
     }
+
+    @Override
+    public void deleteNewsById(Long newsId) {
+        newsRepository.deleteById(newsId);
+    }
 }

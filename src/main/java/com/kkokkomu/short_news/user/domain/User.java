@@ -1,11 +1,14 @@
 package com.kkokkomu.short_news.user.domain;
 
+import com.kkokkomu.short_news.core.constant.Constant;
 import com.kkokkomu.short_news.core.oauth2.OAuth2UserInfo;
 import com.kkokkomu.short_news.core.type.ELoginProvider;
 import com.kkokkomu.short_news.core.type.ESex;
 import com.kkokkomu.short_news.core.type.EUserRole;
 import jakarta.persistence.*;
 import lombok.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,6 +20,7 @@ import java.util.List;
 @Table(name = "user")
 public class User {
 
+    private static final Logger log = LoggerFactory.getLogger(User.class);
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Primary key
@@ -151,7 +155,58 @@ public class User {
         this.role = EUserRole.USER;
     }
 
-    public void updateReportedCnt() {
+    public void executeAboutComment() {
         this.reportedCnt++;
+        log.info("{} reported cnt {}", this.nickname, this.reportedCnt);
+
+        if (this.reportedCnt >= 3) {
+            if (this.bannedEndAt == null || this.bannedEndAt.isBefore(LocalDateTime.now())) {
+                // 현재 차단 상태가 아니면 새롭게 3일 차단
+                this.bannedStartAt = LocalDateTime.now();
+                this.bannedEndAt = LocalDateTime.now().plusDays(3);
+            } else {
+                // 이미 차단 상태였다면 기존 날짜에서 누적
+                this.bannedEndAt = this.bannedEndAt.plusDays(3);
+            }
+
+            this.reportedCnt = 0;
+        }
+    }
+
+    public void banUser(int day) {
+        log.info("{} banUser {}", this.nickname, day);
+
+        if (this.bannedEndAt == null || this.bannedEndAt.isBefore(LocalDateTime.now())) {
+            // 현재 차단 상태가 아니면 새롭게 3일 차단
+            this.bannedStartAt = LocalDateTime.now();
+            this.bannedEndAt = LocalDateTime.now().plusDays(day);
+        } else {
+            // 이미 차단 상태였다면 기존 날짜에서 누적
+            this.bannedEndAt = this.bannedEndAt.plusDays(day);
+        }
+    }
+
+    public void clearUser() {
+        log.info("{} clearUser", this.nickname);
+
+        this.bannedStartAt = null;
+        this.bannedEndAt = null;
+    }
+
+    public void updateProfile(String nickname, LocalDate birthday, ESex sex) {
+        this.nickname = nickname;
+        this.birthday = birthday;
+        this.sex = sex;
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now().plusDays(Constant.MEMBER_INFO_RETENTION_PERIOD);
+    }
+
+    public void hardDelete() {
+        this.nickname = "탈퇴한 사용자";
+        this.birthday = null;
+        this.sex = null;
     }
 }

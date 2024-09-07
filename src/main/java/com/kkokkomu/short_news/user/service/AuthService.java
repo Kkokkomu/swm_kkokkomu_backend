@@ -140,6 +140,33 @@ public class AuthService {
         return processUserLogin(oAuth2UserInfoDto, ELoginProvider.valueOf(loginProvider));
     }
 
+//    public Object adminSocialLogin(String accessToken, String provider) {
+//        String token = refineToken(accessToken);
+//        Long userId = jwtUtil.getUserIdFromToken(token);
+//
+//        // 해당 유저가 존재하는지 검사
+//        userRepository.findById(userId)
+//                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+//
+//        // 해당 유저가 ADMIN ROLE을 가지고 있는지 검사
+//        User user = userRepository.findByIdAndRole(userId, EUserRole.ADMIN)
+//                .orElseThrow(() -> new CommonException(ErrorCode.INVALID_ADMIN_ROLE));
+//
+//        // 회원 탈퇴 여부 확인
+//        if (user.getIsDeleted()) {
+//            throw new CommonException(ErrorCode.DELETED_USER_ERROR);
+//        }
+//
+//        // provider가 일치하는지 검사
+//        if (user.getLoginProvider().equals(provider)) {
+//            throw new CommonException(ErrorCode.INVALID_PROVIDER);
+//        }
+//
+//        JwtTokenDto jwtToken = jwtUtil.generateToken(userId, EUserRole.ADMIN);
+//        userRepository.updateRefreshTokenAndLoginStatus(user.getId(), jwtToken.refreshToken(), true);
+//        return jwtToken;
+//    }
+
     private Object processUserLogin(OAuth2UserInfo oAuth2UserInfo, ELoginProvider provider) {
         Optional<User> user = userRepository.findByEmailAndRole(oAuth2UserInfo.email(), EUserRole.USER);
         // 회원 탈퇴 여부 확인
