@@ -13,7 +13,6 @@ import com.kkokkomu.short_news.news.dto.news.request.CreateGenerateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.request.RequestGenerateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.response.*;
 import com.kkokkomu.short_news.news.repository.NewsRepository;
-import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -167,4 +166,15 @@ public class AdminNewsService {
 
         return generateNewsDtos;
     } // 영상 생성 api
+
+    // 뉴스 리스트 조회
+
+
+    // 영상 가리기
+
+    // 영상 삭제
+
+    // 영상 정보 수정
+
+    // 영상 처리 내역 조회
 }

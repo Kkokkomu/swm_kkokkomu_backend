@@ -38,6 +38,7 @@ public class NewsScheduler {
             if (generateNewsDto.newsDto() != null) {
                 content.append("<p> Title: ").append(generateNewsDto.newsDto().title()).append("</p>");
                 content.append("<p> URL: ").append(generateNewsDto.newsDto().shortformUrl()).append("</p>");
+                content.append("<p> origin: ").append(generateNewsDto.newsDto().relatedUrl()).append("</p>");
             }
 
             if (generateNewsDto.keywords() != null && !generateNewsDto.keywords().isEmpty()) {

@@ -3,7 +3,6 @@ package com.kkokkomu.short_news.news.service;
 import com.kkokkomu.short_news.core.dto.PageInfoDto;
 import com.kkokkomu.short_news.core.dto.PagingResponseDto;
 import com.kkokkomu.short_news.core.type.EHomeFilter;
-import com.kkokkomu.short_news.core.util.CategoryUtil;
 import com.kkokkomu.short_news.keyword.service.NewsKeywordService;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.dto.news.response.*;
