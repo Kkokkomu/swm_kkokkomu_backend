@@ -103,6 +103,18 @@ public class CommentController {
     /* 대댓글 */
 
     @Operation(summary = "대댓글 추가")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "{\n" +
+                    "    \"success\": false,\n" +
+                    "    \"data\": null,\n" +
+                    "    \"error\": {\n" +
+                    "        \"code\": \"40029\",\n" +
+                    "        \"message\": \"댓글 기능이 정지된 유저입니다.\"\n" +
+                    "    }\n" +
+                    "}",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseDto.class))),
+    })
     @PostMapping("/reply")
     public ResponseDto<ReplyDto> addReply(@Parameter(hidden = true) @UserId Long userId,
                                           @RequestBody CreateReplyDto createReplyDto) {

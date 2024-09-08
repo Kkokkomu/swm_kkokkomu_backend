@@ -312,6 +312,11 @@ public class CommentService {
         log.info("createReply service");
         User user = userLookupService.findUserById(userId);
 
+        // 차단된 유저인지 검사
+        if (user.getBannedEndAt() != null && user.getBannedEndAt().isAfter(LocalDateTime.now())) {
+            throw new CommonException(ErrorCode.BANNED_USER_COMMENT);
+        }
+
         News news = newsLookupService.findNewsById(createReplyDto.newsId());
 
         Comment parent = commentRepository.findById(createReplyDto.commentId())
