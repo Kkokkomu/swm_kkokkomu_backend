@@ -34,7 +34,7 @@ public class NewsReactionService {
 
         News news = newsLookupService.findNewsById(createNewsReactionDto.newsId());
 
-        if (newsReactionRepository.existsByNewsIdAndUserIdAndReaction(news.getId(), user.getId(), createNewsReactionDto.reaction())) {
+        if (newsReactionRepository.existsByNewsIdAndUserId(news.getId(), user.getId())) {
             throw new CommonException(ErrorCode.DUPLICATED_NEWS_REACTION);
         }
 
