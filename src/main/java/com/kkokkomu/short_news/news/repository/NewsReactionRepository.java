@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface NewsReactionRepository extends JpaRepository<NewsReaction, Long> {
     Long countByNewsIdAndReaction(Long newsId, ENewsReaction reaction);
 
-    Boolean existsByNewsIdAndUserIdAndReaction(Long newsId, Long userId, ENewsReaction reaction);
+    Boolean existsByNewsIdAndUserId(Long newsId, Long userId);
 
     void deleteByNewsAndUserAndReaction(News news, User user, ENewsReaction reaction);
 }
