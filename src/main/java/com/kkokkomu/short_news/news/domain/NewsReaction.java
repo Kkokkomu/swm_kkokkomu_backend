@@ -37,4 +37,8 @@ public class NewsReaction {
         this.news = news;
         this.reaction = reaction;
     }
+
+    public void updateReaction(ENewsReaction reaction) {
+        this.reaction = reaction;
+    }
 }
