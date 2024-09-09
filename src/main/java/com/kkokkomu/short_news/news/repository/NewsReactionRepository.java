@@ -13,5 +13,9 @@ public interface NewsReactionRepository extends JpaRepository<NewsReaction, Long
 
     Boolean existsByNewsIdAndUserId(Long newsId, Long userId);
 
+    Boolean existsByNewsIdAndUserIdAndReaction(Long newsId, Long userId, ENewsReaction reaction);
+
+    NewsReaction findByNewsAndUser(News news, User user);
+
     void deleteByNewsAndUserAndReaction(News news, User user, ENewsReaction reaction);
 }
