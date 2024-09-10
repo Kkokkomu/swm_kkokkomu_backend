@@ -35,7 +35,9 @@ public class Constant {
             "/oauth2/login/apple",
 
             // 홈화면
-            "/news/list/guest",
+            "/home/news/list/guest",
+            "/home/news/info",
+            "/home/news/shared",
 
             //댓글
             "/comment/latest/guest",
@@ -46,7 +48,7 @@ public class Constant {
             "/news/filter",
 
             //뉴스 검색
-            "/news/search/guest"
+            "/search/news/guest"
     );
     public static final String DEFAULT_PROFILE = "https://kkm-config.s3.ap-northeast-2.amazonaws.com/profile.png";
 

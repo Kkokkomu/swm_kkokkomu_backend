@@ -34,7 +34,7 @@ public class NewsReactionService {
 
         News news = newsLookupService.findNewsById(createNewsReactionDto.newsId());
 
-        if (newsReactionRepository.existsByNewsIdAndUserIdAndReaction(news.getId(), user.getId(), createNewsReactionDto.reaction())) {
+        if (newsReactionRepository.existsByNewsIdAndUserId(news.getId(), user.getId())) {
             throw new CommonException(ErrorCode.DUPLICATED_NEWS_REACTION);
         }
 
@@ -48,6 +48,25 @@ public class NewsReactionService {
 
         return NewsReactionDto.of(newsReaction);
     } // 뉴스 감정표현 생성
+
+    public NewsReactionDto updateNewsReaction(Long userId, CreateNewsReactionDto createNewsReactionDto) {
+        log.info("updateNewsReaction service");
+
+        // 유저랑 뉴스 유효성 체크
+        User user = userLookupService.findUserById(userId);
+
+        News news = newsLookupService.findNewsById(createNewsReactionDto.newsId());
+
+        // 감정표현 객체 조회 및 업데이트
+        NewsReaction newsReaction = newsReactionRepository.findByNewsAndUser(news, user)
+                        .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS_REACTION));
+
+        newsReaction.updateReaction(createNewsReactionDto.reaction());
+
+        NewsReaction save = newsReactionRepository.save(newsReaction);
+
+        return NewsReactionDto.of(save);
+    } // 뉴스 감정표현 수정
 
     @Transactional
     public String deleteNewsReaction(Long userId, Long newsId, String reaction) {

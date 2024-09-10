@@ -28,6 +28,14 @@ public class NewsReactionController {
         return ResponseDto.ok(newsReactionService.createNewsReaction(userId, createNewsReactionDto));
     }
 
+    @Operation(summary = "뉴스 감정표현 수정")
+    @PutMapping("")
+    public ResponseDto<NewsReactionDto> updateNewsReaction(@Parameter(hidden = true) @UserId Long userId,
+                                                        @RequestBody CreateNewsReactionDto createNewsReactionDto) {
+        log.info("updateNewsReaction controller");
+        return ResponseDto.ok(newsReactionService.updateNewsReaction(userId, createNewsReactionDto));
+    }
+
     @Operation(summary = "뉴스 감정표현 삭제")
     @DeleteMapping("")
     public ResponseDto<String> removeNewsReaction(@Parameter(hidden = true) @UserId Long userId,
