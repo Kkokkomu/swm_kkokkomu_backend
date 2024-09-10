@@ -47,6 +47,11 @@ public class ReportedNewsService {
 
         News news = newsLookupService.findNewsById(createdReportedNewsDto.newsId());
 
+        // 이미 신고한 뉴스인지 검사
+        if (reportedNewsRepository.existsByNewsAndReporter(news, reporter)) {
+            throw new CommonException(ErrorCode.DUPLICATED_REPORTED_NEWS);
+        }
+
         // 생성
         ReportedNews reportedNews = reportedNewsRepository.save(
                 ReportedNews.builder()
