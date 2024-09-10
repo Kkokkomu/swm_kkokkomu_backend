@@ -7,6 +7,8 @@ import com.kkokkomu.short_news.core.type.ENewsReaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface NewsReactionRepository extends JpaRepository<NewsReaction, Long> {
     Long countByNewsIdAndReaction(Long newsId, ENewsReaction reaction);
@@ -15,7 +17,7 @@ public interface NewsReactionRepository extends JpaRepository<NewsReaction, Long
 
     Boolean existsByNewsIdAndUserIdAndReaction(Long newsId, Long userId, ENewsReaction reaction);
 
-    NewsReaction findByNewsAndUser(News news, User user);
+    Optional<NewsReaction> findByNewsAndUser(News news, User user);
 
     void deleteByNewsAndUserAndReaction(News news, User user, ENewsReaction reaction);
 }

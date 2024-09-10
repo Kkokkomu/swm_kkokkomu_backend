@@ -36,6 +36,8 @@ public class Constant {
 
             // 홈화면
             "/home/news/list/guest",
+            "/home/news/info",
+            "/home/news/shared",
 
             //댓글
             "/comment/latest/guest",

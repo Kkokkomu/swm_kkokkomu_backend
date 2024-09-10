@@ -40,6 +40,7 @@ public enum ErrorCode {
     BANNED_USER_COMMENT("40029", HttpStatus.BAD_REQUEST, "댓글 기능이 정지된 유저입니다."),
     ALREADY_EXECUTED_COMMENT("40030", HttpStatus.BAD_REQUEST, "이미 처리된 댓글 신고입니다."),
     ALREADY_EXECUTED_NEWS("40031", HttpStatus.BAD_REQUEST, "이미 처리된 뉴스 신고입니다."),
+    DUPLICATED_REPORTED_NEWS("40032", HttpStatus.BAD_REQUEST, "이미 신고한 뉴스입니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
