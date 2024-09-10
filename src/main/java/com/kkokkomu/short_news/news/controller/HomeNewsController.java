@@ -57,4 +57,11 @@ public class HomeNewsController {
         log.info("updateSharedCnt controller");
         return ResponseDto.ok(homeNewsService.updateSharedCnt(sharedCntDto));
     }
+
+    @Operation(summary = "뉴스 관심 없음")
+    @PostMapping("/not-interested")
+    public ResponseDto<NewsDto> updateNotInterested(@RequestBody SharedCntDto sharedCntDto) {
+        log.info("updateNotInterested controller");
+        return ResponseDto.ok(homeNewsService.updateNotInterested(sharedCntDto));
+    }
 }

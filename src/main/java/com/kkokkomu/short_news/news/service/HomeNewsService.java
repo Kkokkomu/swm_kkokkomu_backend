@@ -117,4 +117,10 @@ public class HomeNewsService {
 
         return NewsDto.of(news);
     } // 공유 수 증가
+
+    public NewsDto updateNotInterested(SharedCntDto sharedCntDto) {
+        News news = newsLookupService.findNewsById(sharedCntDto.newsId());
+
+        return NewsDto.of(news);
+    } // 관심없음 표시
 }
