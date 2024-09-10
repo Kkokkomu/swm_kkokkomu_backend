@@ -58,7 +58,8 @@ public class NewsReactionService {
         News news = newsLookupService.findNewsById(createNewsReactionDto.newsId());
 
         // 감정표현 객체 조회 및 업데이트
-        NewsReaction newsReaction = newsReactionRepository.findByNewsAndUser(news, user);
+        NewsReaction newsReaction = newsReactionRepository.findByNewsAndUser(news, user)
+                        .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS_REACTION));
 
         newsReaction.updateReaction(createNewsReactionDto.reaction());
 
