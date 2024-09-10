@@ -22,9 +22,9 @@ public class UserCategoryController {
 
     @Operation(summary = "유저 카테고리 업데이트")
     @PutMapping("")
-    public ResponseDto<String> updateUserCategory(@RequestBody UpdateUserCategoryDto updateUserCategoryDto) {
+    public ResponseDto<String> updateUserCategory(@UserId Long userId, @RequestBody UpdateUserCategoryDto updateUserCategoryDto) {
         log.info("update category : {}", updateUserCategoryDto);
-        return ResponseDto.ok(userCategoryService.updateUserCategory(1L, updateUserCategoryDto));
+        return ResponseDto.ok(userCategoryService.updateUserCategory(userId, updateUserCategoryDto));
     }
 
     @Operation(summary = "유저 카테고리 조회")
