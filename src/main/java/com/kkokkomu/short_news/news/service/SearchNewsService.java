@@ -8,9 +8,10 @@ import com.kkokkomu.short_news.core.type.ECategory;
 import com.kkokkomu.short_news.core.util.CategoryUtil;
 import com.kkokkomu.short_news.keyword.service.NewsKeywordService;
 import com.kkokkomu.short_news.news.domain.News;
-import com.kkokkomu.short_news.news.dto.news.response.SearchNewsDto;
+import com.kkokkomu.short_news.news.dto.news.response.*;
+import com.kkokkomu.short_news.news.dto.newsReaction.response.NewReactionByUserDto;
+import com.kkokkomu.short_news.news.dto.newsReaction.response.ReactionCntDto;
 import com.kkokkomu.short_news.news.repository.NewsRepository;
-import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,8 @@ public class SearchNewsService {
     private final NewsRepository newsRepository;
 
     private final NewsLookupService newsLookupService;
+    private final NewsKeywordService newsKeywordService;
+    private final NewsReactionService newsReactionService;
 
     private final CategoryUtil categoryUtil;
 
@@ -159,6 +162,42 @@ public class SearchNewsService {
 
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 인기순 뉴스 검색
+
+    @Transactional(readOnly = true)
+    public NewsInfoDto readNewsInfo(Long userId, Long newsId) {
+        News news = newsLookupService.findNewsById(newsId);
+
+        // 각 감정표현 별 갯수
+        ReactionCntDto reactionCntDto = newsReactionService.countNewsReaction(news.getId());
+
+        // 유저 감정표현 여부
+        NewReactionByUserDto newReactionByUserDto = newsReactionService.checkNewsReaction(userId, news.getId());
+
+        // 키워드
+        List<String> keywords = newsKeywordService.getStrKeywordListByNewsId(newsId);
+
+        return NewsInfoDto.builder()
+                .info(NewsWithKeywordDto.of(news))
+                .userReaction(newReactionByUserDto)
+                .reactionCnt(reactionCntDto)
+                .build();
+    } // 로그인 뉴스 정보 조회
+
+    @Transactional(readOnly = true)
+    public GuestNewsInfoDto guestReadNewsInfo(Long newsId) {
+        News news = newsLookupService.findNewsById(newsId);
+
+        // 각 감정표현 별 갯수
+        ReactionCntDto reactionCntDto = newsReactionService.countNewsReaction(news.getId());
+
+        // 키워드
+        List<String> keywords = newsKeywordService.getStrKeywordListByNewsId(newsId);
+
+        return GuestNewsInfoDto.builder()
+                .info(NewsWithKeywordDto.of(news))
+                .reactionCnt(reactionCntDto)
+                .build();
+    } // 비로그인 뉴스 정보 조회
 
     // cursorScore 계산 메서드
     private double calculateScore(News news) {
