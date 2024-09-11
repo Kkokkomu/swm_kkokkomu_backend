@@ -1,8 +1,12 @@
 package com.kkokkomu.short_news.news.controller;
 
+import com.kkokkomu.short_news.core.annotation.UserId;
 import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.core.type.EHomeFilter;
+import com.kkokkomu.short_news.news.dto.news.response.GuestNewsInfoDto;
+import com.kkokkomu.short_news.news.dto.news.response.NewsInfoDto;
+import com.kkokkomu.short_news.news.dto.news.response.NewsWithKeywordDto;
 import com.kkokkomu.short_news.news.dto.news.response.SearchNewsDto;
 import com.kkokkomu.short_news.news.service.SearchNewsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,15 +31,30 @@ public class SearchNewsController {
 
     @Operation(summary = "탐색 화면 카테고리 필터 조회")
     @GetMapping("/filter")
-    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> readFilteredNews(@Parameter(description = "popular | politics | economy | social | entertain | sports | living | world | it") @RequestParam String category,
+    public ResponseDto<CursorResponseDto<List<NewsInfoDto>>> readFilteredNews(@Parameter(description = "popular | politics | economy | social | entertain | sports | living | world | it") @RequestParam String category,
                                                                                 @RequestParam(required = false) Long cursorId,
-                                                                                @RequestParam int size) {
+                                                                                @RequestParam int size,
+                                                                                @UserId Long userId) {
         log.info("readFilteredNews controller");
 
         if (category.equals("popular")) {
-            return ResponseDto.ok(searchNewsService.getPopularNewsFilteredByCategory(cursorId, size));
+            return ResponseDto.ok(searchNewsService.getPopularNewsFilteredByCategory(cursorId, size, userId));
         } else {
-            return ResponseDto.ok(searchNewsService.getLatestNewsFilteredByCategory(category, cursorId, size));
+            return ResponseDto.ok(searchNewsService.getLatestNewsFilteredByCategory(category, cursorId, size, userId));
+        }
+    }
+
+    @Operation(summary = "비로그인 탐색 화면 카테고리 필터 조회")
+    @GetMapping("/filter/guest")
+    public ResponseDto<CursorResponseDto<List<GuestNewsInfoDto>>> readGuestFilteredNews(@Parameter(description = "popular | politics | economy | social | entertain | sports | living | world | it") @RequestParam String category,
+                                                                                @RequestParam(required = false) Long cursorId,
+                                                                                @RequestParam int size) {
+        log.info("readGuestFilteredNews controller");
+
+        if (category.equals("popular")) {
+            return ResponseDto.ok(searchNewsService.getGuestPopularNewsFilteredByCategory(cursorId, size));
+        } else {
+            return ResponseDto.ok(searchNewsService.getGuestLatestNewsFilteredByCategory(category, cursorId, size));
         }
     }
 
@@ -45,7 +64,8 @@ public class SearchNewsController {
                                                                           @RequestParam String text,
                                                                           @RequestParam EHomeFilter filter,
                                                                           @RequestParam(required = false) Long cursorId,
-                                                                          @RequestParam int size) {
+                                                                          @RequestParam int size,
+                                                                          @UserId Long userId) {
         log.info("searchNews controller");
 
         if (filter == EHomeFilter.LATEST) {
@@ -61,7 +81,8 @@ public class SearchNewsController {
                                                                                @RequestParam String text,
                                                                                @RequestParam EHomeFilter filter,
                                                                                @RequestParam(required = false) Long cursorId,
-                                                                               @RequestParam int size) {
+                                                                               @RequestParam int size,
+                                                                               @UserId Long userId) {
         log.info("guestSearchNews controller");
 
         if (filter == EHomeFilter.LATEST) {
@@ -69,5 +90,20 @@ public class SearchNewsController {
         } else {
             return ResponseDto.ok(searchNewsService.searchPopularNews(category, text, cursorId, size));
         }
+    }
+
+    @Operation(summary = "뉴스 정보 조회")
+    @GetMapping("/info")
+    public ResponseDto<NewsInfoDto> readNewsInfo(@UserId Long userId,
+                                                 @RequestParam Long newsId) {
+        log.info("readNewsInfo controller");
+        return ResponseDto.ok(searchNewsService.readNewsInfo(userId, newsId));
+    }
+
+    @Operation(summary = "비로그인 뉴스 정보 조회")
+    @GetMapping("/info/guest")
+    public ResponseDto<GuestNewsInfoDto> GuestReadNewsInfo(@RequestParam Long newsId) {
+        log.info("GuestReadNewsInfo controller");
+        return ResponseDto.ok(searchNewsService.guestReadNewsInfo(newsId));
     }
 }
