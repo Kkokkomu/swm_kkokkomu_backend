@@ -45,7 +45,7 @@ public class Constant {
             "/comment/reply/oldest/guest",
 
             //뉴스 탐색
-            "/news/filter",
+            "/search/news/filter",
 
             //뉴스 검색
             "/search/news/guest"
