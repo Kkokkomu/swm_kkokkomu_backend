@@ -132,7 +132,14 @@ GROUP BY n.id, n.shortform_url, n.youtube_url, n.instagram_url, n.thumbnail,
 HAVING popularityScore < :cursorScore
    OR (popularityScore = :cursorScore AND n.id < :cursorId)
 ORDER BY popularityScore DESC, n.id DESC
-""", nativeQuery = true)
+""",
+            countQuery = """
+SELECT COUNT(DISTINCT n.id)
+FROM news n
+LEFT JOIN comment c ON n.id = c.news_id
+LEFT JOIN news_reaction r ON n.id = r.news_id
+""",
+            nativeQuery = true)
     Page<News> findByPopularityLessThan(
             @Param("viewWeight") double viewWeight,
             @Param("commentWeight") double commentWeight,
@@ -158,7 +165,14 @@ GROUP BY n.id, n.shortform_url, n.youtube_url, n.instagram_url, n.thumbnail,
          n.view_cnt, n.title, n.summary, n.shared_cnt, n.category, 
          n.created_at, n.edited_at, n.related_url
 ORDER BY popularityScore DESC, n.id DESC
-""", nativeQuery = true)
+""",
+            countQuery = """
+SELECT COUNT(DISTINCT n.id)
+FROM news n
+LEFT JOIN comment c ON n.id = c.news_id
+LEFT JOIN news_reaction r ON n.id = r.news_id
+""",
+            nativeQuery = true)
     Page<News> findFirstPageByPopularity(
             @Param("viewWeight") double viewWeight,
             @Param("commentWeight") double commentWeight,
@@ -167,6 +181,7 @@ ORDER BY popularityScore DESC, n.id DESC
             @Param("dateWeight") double dateWeight,
             Pageable pageable
     );
+
 
     /****************** 뉴스 검색 *************************/
     // 최신순 검색
