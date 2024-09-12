@@ -121,13 +121,13 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     SELECT n.* FROM news n
     LEFT JOIN comment c ON n.id = c.news_id
     LEFT JOIN news_reaction r ON n.id = r.news_id
-    WHERE (n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
-    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) < :cursorScore
-    OR ((n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
-    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) = :cursorScore AND n.id < :cursorId)
+    WHERE (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.shared_cnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) < :cursorScore
+    OR ((n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.shared_cnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) = :cursorScore AND n.id < :cursorId)
     GROUP BY n.id
-    ORDER BY (n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
-    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
+    ORDER BY (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.shared_cnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
     """, nativeQuery = true)
     Page<News> findByPopularityLessThan(
             @Param("viewWeight") double viewWeight,
@@ -146,8 +146,8 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     LEFT JOIN comment c ON n.id = c.news_id
     LEFT JOIN news_reaction r ON n.id = r.news_id
     GROUP BY n.id
-    ORDER BY (n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
-    TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
+    ORDER BY (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.shared_cnt * :shareWeight +
+    TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
     """, nativeQuery = true)
     Page<News> findFirstPageByPopularity(
             @Param("viewWeight") double viewWeight,
