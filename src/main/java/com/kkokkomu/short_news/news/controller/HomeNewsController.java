@@ -5,10 +5,9 @@ import com.kkokkomu.short_news.core.dto.PagingResponseDto;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.core.type.EHomeFilter;
 import com.kkokkomu.short_news.news.dto.news.request.SharedCntDto;
-import com.kkokkomu.short_news.news.dto.news.response.GuestNewsListDto;
+import com.kkokkomu.short_news.news.dto.news.response.GuestNewsInfoDto;
 import com.kkokkomu.short_news.news.dto.news.response.NewsDto;
 import com.kkokkomu.short_news.news.dto.news.response.NewsInfoDto;
-import com.kkokkomu.short_news.news.dto.news.response.NewsListDto;
 import com.kkokkomu.short_news.news.service.HomeNewsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,7 +28,7 @@ public class HomeNewsController {
 
     @Operation(summary = "뉴스 리스트 조회")
     @GetMapping("/list")
-    public ResponseDto<PagingResponseDto<List<NewsListDto>>> readNewsList(@Parameter(hidden = true) @UserId Long userId,
+    public ResponseDto<PagingResponseDto<List<NewsInfoDto>>> readNewsList(@Parameter(hidden = true) @UserId Long userId,
                                                                           @Parameter(description = "politics, economy, social, entertain, sports, living, world, it를 , 로 구분", example = "social,world") @RequestParam String category,
                                                                           @RequestParam EHomeFilter filter,
                                                                           @RequestParam int page, @RequestParam int size) {
@@ -39,17 +38,12 @@ public class HomeNewsController {
 
     @Operation(summary = "비로그인 뉴스 리스트 조회")
     @GetMapping("/list/guest")
-    public ResponseDto<PagingResponseDto<List<GuestNewsListDto>>> guestReadNewsList(@RequestParam int page, @RequestParam int size) {
+    public ResponseDto<PagingResponseDto<List<GuestNewsInfoDto>>> guestReadNewsList(@RequestParam int page, @RequestParam int size) {
         log.info("guestReadNewsList controller");
         return ResponseDto.ok(homeNewsService.guestReadNewsList(page, size));
     }
 
-    @Operation(summary = "뉴스 정보 조회")
-    @GetMapping("/info")
-    public ResponseDto<NewsInfoDto> readNewsInfo(@RequestParam Long newsId) {
-        log.info("readNewsInfo controller");
-        return ResponseDto.ok(homeNewsService.readNewsInfo(newsId));
-    }
+
 
     @Operation(summary = "뉴스 공유 수 증가")
     @PostMapping("/shared")

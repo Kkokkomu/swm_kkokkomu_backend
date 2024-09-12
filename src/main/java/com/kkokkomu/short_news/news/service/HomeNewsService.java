@@ -3,7 +3,6 @@ package com.kkokkomu.short_news.news.service;
 import com.kkokkomu.short_news.core.dto.PageInfoDto;
 import com.kkokkomu.short_news.core.dto.PagingResponseDto;
 import com.kkokkomu.short_news.core.type.EHomeFilter;
-import com.kkokkomu.short_news.keyword.service.NewsKeywordService;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.dto.news.request.SharedCntDto;
 import com.kkokkomu.short_news.news.dto.news.response.*;
@@ -29,12 +28,12 @@ public class HomeNewsService {
     private final NewsRepository newsRepository;
 
     private final UserLookupService userLookupService;
-    private final NewsKeywordService newsKeywordService;
     private final NewsReactionService newsReactionService;
     private final NewsLookupService newsLookupService;
 
     /* 홈화면 */
-    public PagingResponseDto<List<NewsListDto>> readNewsList(Long userId, String category, EHomeFilter filter, int page, int size) {
+    @Transactional(readOnly = true)
+    public PagingResponseDto<List<NewsInfoDto>> readNewsList(Long userId, String category, EHomeFilter filter, int page, int size) {
         User user = userLookupService.findUserById(userId);
 
         // 일단 최신순으로 조회
@@ -43,12 +42,8 @@ public class HomeNewsService {
         List<News> news = results.getContent();
         PageInfoDto pageInfo = PageInfoDto.fromPageInfo(results);
 
-        List<NewsListDto> newsListDtos = new ArrayList<>();
+        List<NewsInfoDto> newsListDtos = new ArrayList<>();
         for (News newsItem : news) {
-
-            // 뉴스 url 및 기본 정보
-            NewsSummaryDto newsSummaryDto = NewsSummaryDto.of(newsItem);
-
             // 각 감정표현 별 갯수
             ReactionCntDto reactionCntDto = newsReactionService.countNewsReaction(newsItem.getId());
 
@@ -57,8 +52,8 @@ public class HomeNewsService {
 
             // dto 생성
             newsListDtos.add(
-                    NewsListDto.builder()
-                            .shortformList(newsSummaryDto)
+                    NewsInfoDto.builder()
+                            .info(NewsWithKeywordDto.of(newsItem))
                             .reactionCnt(reactionCntDto)
                             .userReaction(newReactionByUserDto)
                             .build()
@@ -68,26 +63,23 @@ public class HomeNewsService {
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
     } // 숏폼 리스트 조회
 
-    public PagingResponseDto<List<GuestNewsListDto>> guestReadNewsList(int page, int size) {
+    @Transactional(readOnly = true)
+    public PagingResponseDto<List<GuestNewsInfoDto>> guestReadNewsList(int page, int size) {
         // 일단 최신순으로 조회
         Page<News> results = newsRepository.findAllCreatedAtDesc(PageRequest.of(page, size));
 
         List<News> news = results.getContent();
         PageInfoDto pageInfo = PageInfoDto.fromPageInfo(results);
 
-        List<GuestNewsListDto> newsListDtos = new ArrayList<>();
+        List<GuestNewsInfoDto> newsListDtos = new ArrayList<>();
         for (News newsItem : news) {
-
-            // 뉴스 url 및 기본 정보
-            NewsSummaryDto newsSummaryDto = NewsSummaryDto.of(newsItem);
-
             // 각 감정표현 별 갯수
             ReactionCntDto reactionCntDto = newsReactionService.countNewsReaction(newsItem.getId());
 
             // dto 생성
             newsListDtos.add(
-                    GuestNewsListDto.builder()
-                            .shortformList(newsSummaryDto)
+                    GuestNewsInfoDto.builder()
+                            .info(NewsWithKeywordDto.of(newsItem))
                             .reactionCnt(reactionCntDto)
                             .build()
             );
@@ -96,18 +88,7 @@ public class HomeNewsService {
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
     } // 비로그인 숏폼 리스트 조회
 
-    @Transactional(readOnly = true)
-    public NewsInfoDto readNewsInfo(Long newsId) {
-        News news = newsLookupService.findNewsById(newsId);
 
-        // 키워드
-        List<String> keywords = newsKeywordService.getStrKeywordListByNewsId(newsId);
-
-        return NewsInfoDto.builder()
-                .news(NewsDto.of(news))
-                .keywords(keywords)
-                .build();
-    } // 뉴스 정보 조회
 
     public NewsDto updateSharedCnt(SharedCntDto sharedCntDto) {
         News news = newsLookupService.findNewsById(sharedCntDto.newsId());

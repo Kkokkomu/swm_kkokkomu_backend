@@ -45,10 +45,13 @@ public class Constant {
             "/comment/reply/oldest/guest",
 
             //뉴스 탐색
-            "/news/filter",
+            "/search/news/filter/guest",
 
             //뉴스 검색
-            "/search/news/guest"
+            "/search/news/guest",
+
+            //뉴스 정보 조회
+            "/search/news/info/guest"
     );
     public static final String DEFAULT_PROFILE = "https://kkm-config.s3.ap-northeast-2.amazonaws.com/profile.png";
 
