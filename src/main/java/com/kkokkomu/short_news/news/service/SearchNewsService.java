@@ -39,6 +39,7 @@ public class SearchNewsService {
     private final CategoryUtil categoryUtil;
 
     /* 탐색화면 */
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<NewsInfoDto>> getLatestNewsFilteredByCategory(String category, Long cursorId, int size, Long userId) {
 
         log.info("getLatestNewsFilteredByCategory service");
@@ -68,6 +69,7 @@ public class SearchNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(newsInfoDtos, cursorInfoDto);
     } // 탐색 화면 카테고리 필터 최신순
 
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<NewsInfoDto>> getPopularNewsFilteredByCategory(Long cursorId, int size, Long userId) {
 
         log.info("getPopularNewsFilteredByCategory service");
@@ -99,6 +101,7 @@ public class SearchNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(newsInfoDtos, cursorInfoDto);
     } // 탐색 화면 카테고리 필터 인기순
 
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<GuestNewsInfoDto>> getGuestLatestNewsFilteredByCategory(String category, Long cursorId, int size) {
 
         log.info("getGuestLatestNewsFilteredByCategory service");
@@ -128,6 +131,7 @@ public class SearchNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(newsInfoDtos, cursorInfoDto);
     } // 비로그인 탐색 화면 카테고리 필터 최신순
 
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<GuestNewsInfoDto>> getGuestPopularNewsFilteredByCategory(Long cursorId, int size) {
 
         log.info("getGuestPopularNewsFilteredByCategory service");
@@ -190,7 +194,6 @@ public class SearchNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 최신순 뉴스 검색
 
-    @Transactional(readOnly = true)
     public CursorResponseDto<List<SearchNewsDto>> searchPopularNews(String category, String text, Long cursorId, int size) {
         log.info("searchPopularNews service");
 
@@ -223,14 +226,12 @@ public class SearchNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 인기순 뉴스 검색
 
-    @Transactional(readOnly = true)
     public NewsInfoDto readNewsInfo(Long userId, Long newsId) {
         News news = newsLookupService.findNewsById(newsId);
 
         return getNewsInfo(news, userId);
     } // 로그인 뉴스 정보 조회
 
-    @Transactional(readOnly = true)
     public GuestNewsInfoDto guestReadNewsInfo(Long newsId) {
         News news = newsLookupService.findNewsById(newsId);
 
@@ -250,7 +251,7 @@ public class SearchNewsService {
         return score;
     }
 
-    private NewsInfoDto getNewsInfo(News news, Long userId) {
+    public NewsInfoDto getNewsInfo(News news, Long userId) {
         // 각 감정표현 별 갯수
         ReactionCntDto reactionCntDto = newsReactionService.countNewsReaction(news.getId());
 
@@ -264,7 +265,7 @@ public class SearchNewsService {
                 .build();
     }
 
-    private List<NewsInfoDto> getNewsInfo(List<News> newsList, Long userId) {
+    public List<NewsInfoDto> getNewsInfo(List<News> newsList, Long userId) {
         List<NewsInfoDto> newsInfoDtos = new ArrayList<>();
 
         for (News news : newsList) {
@@ -276,7 +277,7 @@ public class SearchNewsService {
         return newsInfoDtos;
     }
 
-    private GuestNewsInfoDto getGuestNewsInfo(News news) {
+    public GuestNewsInfoDto getGuestNewsInfo(News news) {
         // 각 감정표현 별 갯수
         ReactionCntDto reactionCntDto = newsReactionService.countNewsReaction(news.getId());
 
@@ -286,7 +287,7 @@ public class SearchNewsService {
                 .build();
     }
 
-    private List<GuestNewsInfoDto> getGuestNewsInfo(List<News> newsList) {
+    public List<GuestNewsInfoDto> getGuestNewsInfo(List<News> newsList) {
         List<GuestNewsInfoDto> newsInfoDtos = new ArrayList<>();
 
         for (News news : newsList) {
