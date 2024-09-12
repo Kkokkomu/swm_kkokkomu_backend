@@ -142,7 +142,7 @@ ORDER BY popularityScore DESC, n.id DESC
             Pageable pageable
     );
 
-    // 첫 페이지 인기순 필터 쿼리
+    // 초기 페이지 인기순 필터 쿼리
     @Query(value = """
 SELECT n.id, n.shortform_url, n.youtube_url, n.instagram_url, n.thumbnail, 
        n.view_cnt, n.title, n.summary, n.shared_cnt, n.category, 
