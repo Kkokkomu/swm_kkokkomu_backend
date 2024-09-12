@@ -119,8 +119,8 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     // 인기순 필터 쿼리
     @Query(value = """
     SELECT n.* FROM news n
-    LEFT JOIN comments c ON n.id = c.news_id
-    LEFT JOIN reactions r ON n.id = r.news_id
+    LEFT JOIN comment c ON n.id = c.news_id
+    LEFT JOIN news_reaction r ON n.id = r.news_id
     WHERE (n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
     TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) < :cursorScore
     OR ((n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
@@ -143,8 +143,8 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     // 첫 페이지 인기순 필터 쿼리
     @Query(value = """
     SELECT n.* FROM news n
-    LEFT JOIN comments c ON n.id = c.news_id
-    LEFT JOIN reactions r ON n.id = r.news_id
+    LEFT JOIN comment c ON n.id = c.news_id
+    LEFT JOIN news_reaction r ON n.id = r.news_id
     GROUP BY n.id
     ORDER BY (n.viewCnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.sharedCnt * :shareWeight +
     TIMESTAMPDIFF(DAY, n.createdAt, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
