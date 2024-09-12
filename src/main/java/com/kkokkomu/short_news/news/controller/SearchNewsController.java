@@ -34,7 +34,7 @@ public class SearchNewsController {
     public ResponseDto<CursorResponseDto<List<NewsInfoDto>>> readFilteredNews(@Parameter(description = "popular | politics | economy | social | entertain | sports | living | world | it") @RequestParam String category,
                                                                                 @RequestParam(required = false) Long cursorId,
                                                                                 @RequestParam int size,
-                                                                                @UserId Long userId) {
+                                                                                @Parameter(hidden = true) @UserId Long userId) {
         log.info("readFilteredNews controller");
 
         if (category.equals("popular")) {
@@ -65,7 +65,7 @@ public class SearchNewsController {
                                                                           @RequestParam EHomeFilter filter,
                                                                           @RequestParam(required = false) Long cursorId,
                                                                           @RequestParam int size,
-                                                                          @UserId Long userId) {
+                                                                          @Parameter(hidden = true) @UserId Long userId) {
         log.info("searchNews controller");
 
         if (filter == EHomeFilter.LATEST) {
@@ -82,7 +82,7 @@ public class SearchNewsController {
                                                                                @RequestParam EHomeFilter filter,
                                                                                @RequestParam(required = false) Long cursorId,
                                                                                @RequestParam int size,
-                                                                               @UserId Long userId) {
+                                                                               @Parameter(hidden = true) @UserId Long userId) {
         log.info("guestSearchNews controller");
 
         if (filter == EHomeFilter.LATEST) {

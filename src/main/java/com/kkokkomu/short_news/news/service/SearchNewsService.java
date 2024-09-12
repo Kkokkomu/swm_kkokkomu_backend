@@ -126,7 +126,7 @@ public class SearchNewsService {
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(newsInfoDtos, cursorInfoDto);
-    } // 탐색 화면 카테고리 필터 최신순
+    } // 비로그인 탐색 화면 카테고리 필터 최신순
 
     public CursorResponseDto<List<GuestNewsInfoDto>> getGuestPopularNewsFilteredByCategory(Long cursorId, int size) {
 
@@ -157,7 +157,7 @@ public class SearchNewsService {
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(newsInfoDtos, cursorInfoDto);
-    } // 탐색 화면 카테고리 필터 인기순
+    } // 비로그인 탐색 화면 카테고리 필터 인기순
 
     public CursorResponseDto<List<SearchNewsDto>> searchLatestNews(String category, String text, Long cursorId, int size) {
         log.info("searchLatestNews service");
