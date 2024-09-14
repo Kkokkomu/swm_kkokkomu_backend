@@ -107,7 +107,7 @@ public class News {
         this.sharedCnt++;
     }
 
-    public void updateViewCnt() {
-        this.viewCnt++;
+    public void updateViewCnt(int viewCnt) {
+        this.viewCnt += viewCnt;
     }
 }

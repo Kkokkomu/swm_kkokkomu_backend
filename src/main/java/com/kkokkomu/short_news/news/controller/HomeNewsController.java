@@ -45,7 +45,7 @@ public class HomeNewsController {
 
 
 
-    @Operation(summary = "뉴스 공유 수 증가")
+    @Operation(summary = "뉴스 공유수 증가")
     @PostMapping("/shared")
     public ResponseDto<NewsDto> updateSharedCnt(@RequestBody SharedCntDto sharedCntDto) {
         log.info("updateSharedCnt controller");
@@ -57,5 +57,12 @@ public class HomeNewsController {
     public ResponseDto<NewsDto> updateNotInterested(@RequestBody SharedCntDto sharedCntDto) {
         log.info("updateNotInterested controller");
         return ResponseDto.ok(homeNewsService.updateNotInterested(sharedCntDto));
+    }
+
+    @Operation(summary = "뉴스 조회수 증가")
+    @PostMapping("/view")
+    public ResponseDto<String> increaseViewCnt(@RequestBody SharedCntDto sharedCntDto) {
+        log.info("increaseViewCnt controller");
+        return ResponseDto.ok(homeNewsService.increaseNewsView(sharedCntDto));
     }
 }

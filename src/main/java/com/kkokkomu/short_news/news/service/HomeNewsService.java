@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.news.service;
 
+import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.core.dto.PageInfoDto;
 import com.kkokkomu.short_news.core.dto.PagingResponseDto;
 import com.kkokkomu.short_news.core.type.EHomeFilter;
@@ -30,6 +31,8 @@ public class HomeNewsService {
     private final UserLookupService userLookupService;
     private final NewsReactionService newsReactionService;
     private final NewsLookupService newsLookupService;
+
+    private final RedisService redisService;
 
     /* 홈화면 */
     @Transactional(readOnly = true)
@@ -105,4 +108,19 @@ public class HomeNewsService {
         return NewsDto.of(news);
     } // 관심없음 표시
 
+    public String increaseNewsView(SharedCntDto sharedCntDto) {
+        redisService.incrementViewCount(sharedCntDto.newsId());
+        Integer viewCount = redisService.getViewCount(sharedCntDto.newsId());
+        return "조회수: " + viewCount;
+    }
+
+    public void updateViewCnt() {
+        List<News> newsList = newsRepository.findAll();
+        for (News news : newsList) {
+            Long newsId = news.getId();
+            int redisViewCount = redisService.getViewCount(newsId);
+            news.updateViewCnt(redisViewCount); // DB의 조회수 업데이트
+            newsRepository.save(news);
+        }
+    }
 }
