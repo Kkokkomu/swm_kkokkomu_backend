@@ -1,11 +1,15 @@
 package com.kkokkomu.short_news.core.scheduler;
 
+import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.dto.news.request.CreateGenerateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.response.GenerateNewsDto;
 import com.kkokkomu.short_news.core.config.service.MailService;
 import com.kkokkomu.short_news.news.service.AdminNewsService;
 import com.kkokkomu.short_news.news.service.HomeNewsService;
+import com.kkokkomu.short_news.news.service.NewsViewHistService;
+import com.kkokkomu.short_news.user.domain.User;
+import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,6 +25,8 @@ public class NewsScheduler {
     private final AdminNewsService adminNewsService;
     private final HomeNewsService homeNewsService;
     private final MailService mailService;
+    private final UserLookupService userLookupService;
+    private final NewsViewHistService newsViewHistService;
 
     @Scheduled(cron = "0 0 8 * * *") // 매일 아침 8시
     public void generateNewsAt8AM() {
@@ -64,8 +70,18 @@ public class NewsScheduler {
         
     } // 뉴스 생성
 
-    @Scheduled(fixedRate = 3600000) // 1시간 마다
+    @Scheduled(fixedRate = 600000) // 10분 마다
     public void syncViewCountToDatabase() {
+        log.info("syncViewCountToDatabase");
         homeNewsService.updateViewCnt();
     } // 뉴스 조회수 동기화
+
+    @Scheduled(cron = "0 0 4 * * ?") // 매일 새벽 4시에 실행
+    public void syncAllUsersViewHistory() {
+        log.info("syncAllUsersViewHistory");
+        List<User> users = userLookupService.findAll();
+        for (User user : users) {
+            newsViewHistService.updateNewsHist(user.getId());
+        }
+    } // 모든 유저에 대해 시청기록 동기화
 }

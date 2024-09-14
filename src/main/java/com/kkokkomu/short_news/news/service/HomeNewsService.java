@@ -108,13 +108,20 @@ public class HomeNewsService {
         return NewsDto.of(news);
     } // 관심없음 표시
 
-    public String increaseNewsView(SharedCntDto sharedCntDto) {
+    public String increaseNewsView(SharedCntDto sharedCntDto, Long userId) {
+
+        // 레디스 조회수 ++
         redisService.incrementViewCount(sharedCntDto.newsId());
         Integer viewCount = redisService.getViewCount(sharedCntDto.newsId());
+
+        // 시청기록 저장
+        redisService.saveNewsViewHistory(userId, sharedCntDto.newsId());
+
         return "조회수: " + viewCount;
-    }
+    } // 뉴스 조회
 
     public void updateViewCnt() {
+        log.info("updateViewCnt");
         List<News> newsList = newsRepository.findAll();
         for (News news : newsList) {
             Long newsId = news.getId();
@@ -122,5 +129,5 @@ public class HomeNewsService {
             news.updateViewCnt(redisViewCount); // DB의 조회수 업데이트
             newsRepository.save(news);
         }
-    }
+    } // 조회수 DB 동기화
 }

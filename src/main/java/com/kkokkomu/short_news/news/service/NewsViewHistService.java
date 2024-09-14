@@ -33,7 +33,7 @@ public class NewsViewHistService {
     }
 
     @Transactional
-    public void syncViewHistoryFromRedisToDb(Long userId) {
+    public void updateNewsHist(Long userId) {
         Set<Long> newsIds = redisService.getNewsViewHistory(userId);
         if (newsIds != null && !newsIds.isEmpty()) {
             User user = userLookupService.findUserById(userId);

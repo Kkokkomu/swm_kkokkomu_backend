@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -27,5 +29,10 @@ public class UserLookupServiceImpl implements UserLookupService {
     public User findAdminUser(Long userId) {
         return userRepository.findByIdAndRole(userId, EUserRole.ADMIN)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ADMIN));
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 }

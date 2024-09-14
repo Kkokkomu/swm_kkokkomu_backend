@@ -61,8 +61,9 @@ public class HomeNewsController {
 
     @Operation(summary = "뉴스 조회수 증가")
     @PostMapping("/view")
-    public ResponseDto<String> increaseViewCnt(@RequestBody SharedCntDto sharedCntDto) {
+    public ResponseDto<String> increaseViewCnt(@RequestBody SharedCntDto sharedCntDto,
+                                               @Parameter(hidden = true) @UserId Long userId) {
         log.info("increaseViewCnt controller");
-        return ResponseDto.ok(homeNewsService.increaseNewsView(sharedCntDto));
+        return ResponseDto.ok(homeNewsService.increaseNewsView(sharedCntDto, userId));
     }
 }
