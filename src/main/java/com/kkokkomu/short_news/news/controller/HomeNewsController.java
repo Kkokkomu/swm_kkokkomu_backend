@@ -31,7 +31,7 @@ public class HomeNewsController {
     public ResponseDto<PagingResponseDto<List<NewsInfoDto>>> readNewsList(@Parameter(hidden = true) @UserId Long userId,
                                                                           @RequestParam(required = false) Long cursorId,
                                                                           @RequestParam EHomeFilter filter,
-                                                                          @RequestParam int page, @RequestParam int size) {
+                                                                          @RequestParam int size) {
         log.info("readNewsList controller");
 
         if (filter.equals(EHomeFilter.RECOMMEND)) {
