@@ -39,9 +39,16 @@ public class NewsViewHistService {
             User user = userLookupService.findUserById(userId);
             for (Object newsIdObj : newsIds) {
                 Long newsId = Long.valueOf(newsIdObj.toString());
-                News news = newsLookupService.findNewsById(newsId);
-                NewsViewHist newsViewHist = new NewsViewHist(user, news, LocalDateTime.now());
-                newsViewHistRepository.save(newsViewHist);
+
+                // 이미 저장된 기록이 없다면 저장
+                if (!newsViewHistRepository.existsByUserIdAndNewsId(userId, newsId)) {
+                    News news = newsLookupService.findNewsById(newsId);
+                    NewsViewHist newsViewHist = NewsViewHist.builder()
+                            .news(news)
+                            .user(user)
+                            .build();
+                    newsViewHistRepository.save(newsViewHist);
+                }
             }
 
             // Redis에서 시청 기록 삭제

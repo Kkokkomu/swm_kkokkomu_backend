@@ -31,9 +31,9 @@ public class NewsViewHist {
     private LocalDateTime viewDate; // 시청 일자
 
     @Builder
-    public NewsViewHist(User user, News news, LocalDateTime viewDate) {
+    public NewsViewHist(User user, News news) {
         this.user = user;
         this.news = news;
-        this.viewDate = viewDate;
+        this.viewDate = LocalDateTime.now();
     }
 }
