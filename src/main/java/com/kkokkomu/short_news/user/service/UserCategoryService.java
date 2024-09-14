@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -24,7 +25,6 @@ public class UserCategoryService {
     private final UserCategoryRepository userCategoryRepository;
 
     private final UserLookupService userLookupService;
-    private final UserRepository userRepository;
 
     @Transactional
     public String updateUserCategory(Long userId, UpdateUserCategoryDto updateUserCategoryDto) {
@@ -146,6 +146,14 @@ public class UserCategoryService {
                 .it(it)
                 .sports(sports)
                 .build();
+    } // 유저 카테고리 조회
+
+    public List<ECategory> findAllCategoriesByUserId(Long userId) {
+        List<UserCategory> categoryList = userCategoryRepository.findAllByUserId(userId);
+
+        return categoryList.stream()
+                .map(UserCategory::getCategory)
+                .collect(Collectors.toList());
     }
 
     private UserCategory createUserCategory(User user, ECategory category) {

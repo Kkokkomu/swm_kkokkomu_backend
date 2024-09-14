@@ -3,14 +3,19 @@ package com.kkokkomu.short_news.news.service;
 import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.core.dto.PageInfoDto;
 import com.kkokkomu.short_news.core.dto.PagingResponseDto;
+import com.kkokkomu.short_news.core.exception.CommonException;
+import com.kkokkomu.short_news.core.exception.ErrorCode;
+import com.kkokkomu.short_news.core.type.ECategory;
 import com.kkokkomu.short_news.core.type.EHomeFilter;
 import com.kkokkomu.short_news.news.domain.News;
+import com.kkokkomu.short_news.news.domain.NewsViewHist;
 import com.kkokkomu.short_news.news.dto.news.request.SharedCntDto;
 import com.kkokkomu.short_news.news.dto.news.response.*;
 import com.kkokkomu.short_news.news.dto.newsReaction.response.NewReactionByUserDto;
 import com.kkokkomu.short_news.news.dto.newsReaction.response.ReactionCntDto;
 import com.kkokkomu.short_news.news.repository.NewsRepository;
 import com.kkokkomu.short_news.user.domain.User;
+import com.kkokkomu.short_news.user.service.UserCategoryService;
 import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,62 +36,70 @@ public class HomeNewsService {
     private final UserLookupService userLookupService;
     private final NewsReactionService newsReactionService;
     private final NewsLookupService newsLookupService;
+    private final NewsViewHistService newsViewHistService;
+    private final SearchNewsService searchNewsService;
+    private final UserCategoryService userCategoryService;
 
     private final RedisService redisService;
 
     /* 홈화면 */
     @Transactional(readOnly = true)
-    public PagingResponseDto<List<NewsInfoDto>> readNewsList(Long userId, String category, EHomeFilter filter, int page, int size) {
+    public PagingResponseDto<List<NewsInfoDto>> readNewsList(Long userId, Long cursorId, int size) {
         User user = userLookupService.findUserById(userId);
 
-        // 일단 최신순으로 조회
-        Page<News> results = newsRepository.findAllCreatedAtDesc(PageRequest.of(page, size));
+        // 커서 아이디에 해당하는 뉴스가 있는지 검사
+        if (cursorId != null && !newsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
 
-        List<News> news = results.getContent();
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 유저가 설정했던 카테고리 조회
+        List<ECategory> categories = userCategoryService.findAllCategoriesByUserId(userId);
+
+        // 최신순으로 조회
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) {
+            // 뉴스 조회 기록 캐싱 동기화
+            newsViewHistService.updateNewsHist(userId);
+
+            results = newsRepository.findFirstPageByCategoryAndNotViewedByUser(categories, userId, pageRequest);
+        } else {
+            results = newsRepository.findByCategoryAndIdLessThanAndNotViewedByUser(categories, cursorId, userId, pageRequest);
+        }
+
+        // 뉴스 결과물 기반으로 반환
+        news = results.getContent();
         PageInfoDto pageInfo = PageInfoDto.fromPageInfo(results);
 
-        List<NewsInfoDto> newsListDtos = new ArrayList<>();
-        for (News newsItem : news) {
-            // 각 감정표현 별 갯수
-            ReactionCntDto reactionCntDto = newsReactionService.countNewsReaction(newsItem.getId());
-
-            // 유저 감정표현 여부
-            NewReactionByUserDto newReactionByUserDto = newsReactionService.checkNewsReaction(userId, newsItem.getId());
-
-            // dto 생성
-            newsListDtos.add(
-                    NewsInfoDto.builder()
-                            .info(NewsWithKeywordDto.of(newsItem))
-                            .reactionCnt(reactionCntDto)
-                            .userReaction(newReactionByUserDto)
-                            .build()
-            );
-        }
+        List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(news, userId);
 
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
     } // 숏폼 리스트 조회
 
     @Transactional(readOnly = true)
-    public PagingResponseDto<List<GuestNewsInfoDto>> guestReadNewsList(int page, int size) {
-        // 일단 최신순으로 조회
-        Page<News> results = newsRepository.findAllCreatedAtDesc(PageRequest.of(page, size));
+    public PagingResponseDto<List<GuestNewsInfoDto>> guestReadNewsList(Long cursorId, int size) {
+        // 커서 아이디에 해당하는 뉴스가 있는지 검사
+        if (cursorId != null && !newsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
 
-        List<News> news = results.getContent();
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 최신순으로 조회
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) {
+            results = newsRepository.guestFindFirstPageByCategoryAndNotViewedByUser(pageRequest);
+        } else {
+            results = newsRepository.guestFindByCategoryAndIdLessThanAndNotViewedByUser(cursorId, pageRequest);
+        }
+
+        news = results.getContent();
         PageInfoDto pageInfo = PageInfoDto.fromPageInfo(results);
 
-        List<GuestNewsInfoDto> newsListDtos = new ArrayList<>();
-        for (News newsItem : news) {
-            // 각 감정표현 별 갯수
-            ReactionCntDto reactionCntDto = newsReactionService.countNewsReaction(newsItem.getId());
-
-            // dto 생성
-            newsListDtos.add(
-                    GuestNewsInfoDto.builder()
-                            .info(NewsWithKeywordDto.of(newsItem))
-                            .reactionCnt(reactionCntDto)
-                            .build()
-            );
-        }
+        List<GuestNewsInfoDto> newsListDtos = searchNewsService.getGuestNewsInfo(news);
 
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
     } // 비로그인 숏폼 리스트 조회
