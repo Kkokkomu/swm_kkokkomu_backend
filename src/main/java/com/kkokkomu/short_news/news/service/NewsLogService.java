@@ -22,6 +22,7 @@ import java.util.List;
 @Slf4j
 public class NewsLogService {
     private final NewsRepository newsRepository;
+    private final NewsViewHistService newsViewHistService;
     private final UserLookupService userLookupService;
 
     public CursorResponseDto<List<SearchNewsDto>> getNewsWithComment(Long userId, Long cursorId, int size) {
@@ -35,6 +36,9 @@ public class NewsLogService {
         }
 
         PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 캐싱 히스토리 db 동기화
+        newsViewHistService.updateNewsHist(userId);
 
         List<News> news;
         Page<News> results;
@@ -66,6 +70,9 @@ public class NewsLogService {
 
         PageRequest pageRequest = PageRequest.of(0, size);
 
+        // 캐싱 히스토리 db 동기화
+        newsViewHistService.updateNewsHist(userId);
+
         List<News> news;
         Page<News> results;
         if (cursorId == null) {
@@ -95,6 +102,9 @@ public class NewsLogService {
         }
 
         PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 캐싱 히스토리 db 동기화
+        newsViewHistService.updateNewsHist(userId);
 
         List<News> news;
         Page<News> results;
