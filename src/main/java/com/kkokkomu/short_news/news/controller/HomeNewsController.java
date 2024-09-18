@@ -29,23 +29,30 @@ public class HomeNewsController {
     @Operation(summary = "뉴스 리스트 조회")
     @GetMapping("/list")
     public ResponseDto<PagingResponseDto<List<NewsInfoDto>>> readNewsList(@Parameter(hidden = true) @UserId Long userId,
-                                                                          @Parameter(description = "politics, economy, social, entertain, sports, living, world, it를 , 로 구분", example = "social,world") @RequestParam String category,
+                                                                          @RequestParam(required = false) Long cursorId,
                                                                           @RequestParam EHomeFilter filter,
-                                                                          @RequestParam int page, @RequestParam int size) {
+                                                                          @RequestParam int size) {
         log.info("readNewsList controller");
-        return ResponseDto.ok(homeNewsService.readNewsList(userId, category, filter, page, size));
+
+        if (filter.equals(EHomeFilter.RECOMMEND)) {
+            return ResponseDto.ok(homeNewsService.readNewsList(userId, cursorId, size));
+        } else {
+            return ResponseDto.ok(homeNewsService.readNewsList(userId, cursorId, size));
+        }
     }
 
     @Operation(summary = "비로그인 뉴스 리스트 조회")
     @GetMapping("/list/guest")
-    public ResponseDto<PagingResponseDto<List<GuestNewsInfoDto>>> guestReadNewsList(@RequestParam int page, @RequestParam int size) {
+    public ResponseDto<PagingResponseDto<List<GuestNewsInfoDto>>> guestReadNewsList(@RequestParam(required = false) Long cursorId,
+                                                                                    @RequestParam int size) {
         log.info("guestReadNewsList controller");
-        return ResponseDto.ok(homeNewsService.guestReadNewsList(page, size));
+
+        return ResponseDto.ok(homeNewsService.guestReadNewsList(cursorId, size));
     }
 
 
 
-    @Operation(summary = "뉴스 공유 수 증가")
+    @Operation(summary = "뉴스 공유수 증가")
     @PostMapping("/shared")
     public ResponseDto<NewsDto> updateSharedCnt(@RequestBody SharedCntDto sharedCntDto) {
         log.info("updateSharedCnt controller");
@@ -57,5 +64,20 @@ public class HomeNewsController {
     public ResponseDto<NewsDto> updateNotInterested(@RequestBody SharedCntDto sharedCntDto) {
         log.info("updateNotInterested controller");
         return ResponseDto.ok(homeNewsService.updateNotInterested(sharedCntDto));
+    }
+
+    @Operation(summary = "뉴스 조회수 증가")
+    @PostMapping("/view")
+    public ResponseDto<String> increaseViewCnt(@RequestBody SharedCntDto sharedCntDto,
+                                               @Parameter(hidden = true) @UserId Long userId) {
+        log.info("increaseViewCnt controller");
+        return ResponseDto.ok(homeNewsService.increaseNewsView(sharedCntDto, userId));
+    }
+
+    @Operation(summary = "비로그인 뉴스 조회수 증가")
+    @PostMapping("/view/guest")
+    public ResponseDto<String> guestIncreaseViewCnt(@RequestBody SharedCntDto sharedCntDto) {
+        log.info("guestIncreaseViewCnt controller");
+        return ResponseDto.ok(homeNewsService.guestIncreaseNewsView(sharedCntDto));
     }
 }

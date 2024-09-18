@@ -14,8 +14,49 @@ import java.util.List;
 
 @Repository
 public interface NewsRepository extends JpaRepository<News, Long> {
-    @Query("select n from News n order by n.createdAt desc ")
-    Page<News> findAllCreatedAtDesc(Pageable pageable);
+    /****************** 뉴스 홈화면 *************************/
+//    @Query("select n from News n order by n.createdAt desc ")
+//    Page<News> findAllCreatedAtDesc(Pageable pageable);
+
+    // 카테고리별 최신순 홈화면 뉴스 조회
+    @Query("SELECT n FROM News n " +
+            "WHERE n.category IN :categories " +
+            "AND n.id < :cursorId " +
+            "AND n.id NOT IN (SELECT h.news.id FROM NewsViewHist h WHERE h.user.id = :userId) " +
+            "ORDER BY n.id DESC")
+    Page<News> findByCategoryAndIdLessThanAndNotViewedByUser(
+            @Param("categories") List<ECategory> category,
+            @Param("cursorId") Long cursorId,
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
+
+    // 카테고리별 최신순 홈화면 뉴스 초기 페이지 조회
+    @Query("SELECT n FROM News n " +
+            "WHERE n.category IN :categories " +
+            "AND n.id NOT IN (SELECT h.news.id FROM NewsViewHist h WHERE h.user.id = :userId) " +
+            "ORDER BY n.id DESC")
+    Page<News> findFirstPageByCategoryAndNotViewedByUser(
+            @Param("categories") List<ECategory> category,
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
+
+    // 비로그인 카테고리별 최신순 홈화면 뉴스 조회
+    @Query("SELECT n FROM News n " +
+            "WHERE n.id < :cursorId " +
+            "ORDER BY n.id DESC")
+    Page<News> guestFindByCategoryAndIdLessThanAndNotViewedByUser(
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    // 비로그인 카테고리별 최신순 홈화면 뉴스 초기 페이지 조회
+    @Query("SELECT n FROM News n " +
+            "ORDER BY n.id DESC")
+    Page<News> guestFindFirstPageByCategoryAndNotViewedByUser(
+            Pageable pageable
+    );
 
     /****************** 뉴스 시청 기록 *************************/
 
