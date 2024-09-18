@@ -43,7 +43,7 @@ public class HomeNewsService {
     private final RedisService redisService;
 
     /* 홈화면 */
-    @Transactional(readOnly = true)
+    @Transactional
     public PagingResponseDto<List<NewsInfoDto>> readNewsList(Long userId, Long cursorId, int size) {
         User user = userLookupService.findUserById(userId);
 
@@ -78,7 +78,7 @@ public class HomeNewsService {
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
     } // 숏폼 리스트 조회
 
-    @Transactional(readOnly = true)
+    @Transactional
     public PagingResponseDto<List<GuestNewsInfoDto>> guestReadNewsList(Long cursorId, int size) {
         // 커서 아이디에 해당하는 뉴스가 있는지 검사
         if (cursorId != null && !newsRepository.existsById(cursorId)) {
