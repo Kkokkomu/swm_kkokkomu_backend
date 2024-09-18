@@ -226,12 +226,14 @@ public class SearchNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 인기순 뉴스 검색
 
+    @Transactional(readOnly = true)
     public NewsInfoDto readNewsInfo(Long userId, Long newsId) {
         News news = newsLookupService.findNewsById(newsId);
 
         return getNewsInfo(news, userId);
     } // 로그인 뉴스 정보 조회
 
+    @Transactional(readOnly = true)
     public GuestNewsInfoDto guestReadNewsInfo(Long newsId) {
         News news = newsLookupService.findNewsById(newsId);
 
