@@ -133,6 +133,15 @@ public class HomeNewsService {
         return "조회수: " + viewCount;
     } // 뉴스 조회
 
+    public String guestIncreaseNewsView(SharedCntDto sharedCntDto) {
+
+        // 레디스 조회수 ++
+        redisService.incrementViewCount(sharedCntDto.newsId());
+        Integer viewCount = redisService.getViewCount(sharedCntDto.newsId());
+
+        return "조회수: " + viewCount;
+    } // 비로그인 뉴스 조회
+
     public void updateViewCnt() {
         log.info("updateViewCnt");
         List<News> newsList = newsRepository.findAll();
