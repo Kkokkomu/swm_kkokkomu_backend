@@ -27,6 +27,11 @@ public class RedisService {
         return count != null ? Integer.parseInt(count) : 0;
     }
 
+    public void resetViewCount(Long newsId) {
+        String key = NEWS_VIEW_COUNT_PREFIX + newsId;
+        redisTemplate.opsForValue().set(key, "0");
+    }
+
     // 뉴스 시청기록
     private static final String VIEW_HISTORY_PREFIX = "news:viewHistory:";
 

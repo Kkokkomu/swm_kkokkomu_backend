@@ -150,6 +150,7 @@ public class HomeNewsService {
             int redisViewCount = redisService.getViewCount(newsId);
             news.updateViewCnt(redisViewCount); // DB의 조회수 업데이트
             newsRepository.save(news);
+            redisService.resetViewCount(newsId);
         }
     } // 조회수 DB 동기화
 }
