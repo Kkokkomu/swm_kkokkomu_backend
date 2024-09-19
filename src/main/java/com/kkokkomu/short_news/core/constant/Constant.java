@@ -38,7 +38,7 @@ public class Constant {
             "/home/news/list/guest",
             "/home/news/info",
             "/home/news/shared",
-            "home/news/view/guest",
+            "/home/news/view/guest",
 
             //댓글
             "/comment/latest/guest",
