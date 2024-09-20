@@ -35,6 +35,7 @@ public class NewsViewHistService {
     @Transactional
     public void updateNewsHist(Long userId) {
         Set<Long> newsIds = redisService.getNewsViewHistory(userId);
+        log.info(newsIds.size() + String.valueOf(newsIds.isEmpty()) + " new news history");
         if (newsIds != null && !newsIds.isEmpty()) {
             User user = userLookupService.findUserById(userId);
             for (Object newsIdObj : newsIds) {
