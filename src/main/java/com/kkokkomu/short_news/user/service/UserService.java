@@ -68,6 +68,15 @@ public class UserService {
     } // 유저 프로필 정보 업데이트
 
     @Transactional
+    public UserDto updateUserProfileImgDefault(Long userId) {
+        User user = userLookupService.findUserById(userId);
+
+        profileImgService.putProfileImgDefault(user);
+
+        return UserDto.of(user);
+    } // 유저 프로필 정보 업데이트
+
+    @Transactional
     public UserDto updateUserProfile(Long userId, UpdateUserDto userDto) {
         User user = userLookupService.findUserById(userId);
 

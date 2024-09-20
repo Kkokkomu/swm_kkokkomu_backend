@@ -30,7 +30,7 @@ public class UserController {
         return ResponseDto.ok(userService.readMyPageInfo(userId));
     }
 
-    @Operation(summary = "유저 프로필 이미지 수정")
+    @Operation(summary = "유저 프로필 이미지 설정")
     @PutMapping("/img")
     public ResponseDto<UserDto> updateUserProfile(
             @Parameter(hidden = true) @UserId Long userId,
@@ -38,6 +38,15 @@ public class UserController {
     ) {
         log.info("updateUserProfile controller userId = {}", userId);
         return ResponseDto.ok(userService.updateUserProfileImg(userId, image));
+    }
+
+    @Operation(summary = "유저 기본 프로필 이미지로 설정")
+    @PutMapping("/img/default")
+    public ResponseDto<UserDto> updateUserProfileDefault(
+            @Parameter(hidden = true) @UserId Long userId
+    ) {
+        log.info("updateUserProfile controller userId = {}", userId);
+        return ResponseDto.ok(userService.updateUserProfileImgDefault(userId));
     }
 
     @Operation(summary = "유저 정보 수정")
