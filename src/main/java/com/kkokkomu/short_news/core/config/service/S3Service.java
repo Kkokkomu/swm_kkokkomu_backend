@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.core.config.service;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
 import com.kkokkomu.short_news.core.exception.CommonException;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @Slf4j
 @Service
@@ -52,5 +55,25 @@ public class S3Service {
             log.error(e.getMessage());
             throw new CommonException(ErrorCode.S3_PROCESSING_ERROR);
         }
+    } // 프로필 이미지 업로드
+
+    public void deleteUserProfileByUrl(String fileUrl) {
+        try {
+            URL url = new URL(fileUrl);
+            String s3Key = url.getPath().substring(1); // URL에서 첫 '/'를 제거하여 S3 객체 키 추출
+            String bucketName = url.getHost().split("\\.")[0]; // 호스트명에서 첫 부분이 버킷 이름
+
+            s3Client.deleteObject(bucketName, s3Key);
+            log.info("Deleted " + s3Key + " from S3 bucket: " + bucketName);
+
+        } catch (MalformedURLException e) {
+            log.error("Invalid URL provided", e);
+            throw new CommonException(ErrorCode.S3_PROCESSING_ERROR);
+        } catch (AmazonServiceException e) {
+            log.error("Error occurred while deleting the file from S3", e);
+            throw new CommonException(ErrorCode.S3_PROCESSING_ERROR);
+        }
     }
+    // 프로필 이미지 삭제
+
 }

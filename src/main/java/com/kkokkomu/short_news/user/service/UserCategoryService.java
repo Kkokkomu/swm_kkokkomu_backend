@@ -149,6 +149,7 @@ public class UserCategoryService {
     } // 유저 카테고리 조회
 
     public List<ECategory> findAllCategoriesByUserId(Long userId) {
+        log.info("UserCategoryService findAllCategoriesByUser start");
         List<UserCategory> categoryList = userCategoryRepository.findAllByUserId(userId);
 
         return categoryList.stream()

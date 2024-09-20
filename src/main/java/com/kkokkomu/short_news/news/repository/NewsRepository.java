@@ -22,23 +22,19 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     @Query("SELECT n FROM News n " +
             "WHERE n.category IN :categories " +
             "AND n.id < :cursorId " +
-            "AND n.id NOT IN (SELECT h.news.id FROM NewsViewHist h WHERE h.user.id = :userId) " +
             "ORDER BY n.id DESC")
     Page<News> findByCategoryAndIdLessThanAndNotViewedByUser(
             @Param("categories") List<ECategory> category,
             @Param("cursorId") Long cursorId,
-            @Param("userId") Long userId,
             Pageable pageable
     );
 
     // 카테고리별 최신순 홈화면 뉴스 초기 페이지 조회
     @Query("SELECT n FROM News n " +
             "WHERE n.category IN :categories " +
-            "AND n.id NOT IN (SELECT h.news.id FROM NewsViewHist h WHERE h.user.id = :userId) " +
             "ORDER BY n.id DESC")
     Page<News> findFirstPageByCategoryAndNotViewedByUser(
             @Param("categories") List<ECategory> category,
-            @Param("userId") Long userId,
             Pageable pageable
     );
 

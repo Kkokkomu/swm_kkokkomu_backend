@@ -52,4 +52,10 @@ public class ProfileImg {
         this.imgUrl = DEFAULT_PROFILE;
         this.resizeUrl = DEFAULT_PROFILE;
     }
+
+    public void updateImg(String imgUrl) {
+        this.imgUrl = imgUrl;
+        this.resizeUrl = imgUrl;
+        this.editedAt = LocalDateTime.now();
+    }
 }

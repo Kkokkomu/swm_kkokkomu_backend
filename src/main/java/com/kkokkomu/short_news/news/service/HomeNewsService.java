@@ -61,19 +61,27 @@ public class HomeNewsService {
         List<News> news;
         Page<News> results;
         if (cursorId == null) {
+            log.info("cursorId is null");
             // 뉴스 조회 기록 캐싱 동기화
             newsViewHistService.updateNewsHist(userId);
 
-            results = newsRepository.findFirstPageByCategoryAndNotViewedByUser(categories, userId, pageRequest);
+            results = newsRepository.findFirstPageByCategoryAndNotViewedByUser(categories, pageRequest);
         } else {
-            results = newsRepository.findByCategoryAndIdLessThanAndNotViewedByUser(categories, cursorId, userId, pageRequest);
+            log.info("cursorId is " + cursorId);
+            results = newsRepository.findByCategoryAndIdLessThanAndNotViewedByUser(categories, cursorId, pageRequest);
         }
+
+        log.info("results: " + results);
 
         // 뉴스 결과물 기반으로 반환
         news = results.getContent();
         PageInfoDto pageInfo = PageInfoDto.fromPageInfo(results);
 
+        log.info("pageInfo: " + pageInfo);
+
         List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(news, userId);
+
+        log.info("newsListDtos: " + newsListDtos);
 
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
     } // 숏폼 리스트 조회
@@ -104,13 +112,14 @@ public class HomeNewsService {
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
     } // 비로그인 숏폼 리스트 조회
 
-
-
     public NewsDto updateSharedCnt(SharedCntDto sharedCntDto) {
         News news = newsLookupService.findNewsById(sharedCntDto.newsId());
 
         news.updateSharedCnt();
         newsRepository.save(news);
+
+        // 레디스 반영
+        redisService.incrementRankingByShare(sharedCntDto.newsId());
 
         return NewsDto.of(news);
     } // 공유 수 증가
@@ -124,7 +133,7 @@ public class HomeNewsService {
     public String increaseNewsView(SharedCntDto sharedCntDto, Long userId) {
 
         // 레디스 조회수 ++
-        redisService.incrementViewCount(sharedCntDto.newsId());
+        redisService.incrementRankingByView(sharedCntDto.newsId());
         Integer viewCount = redisService.getViewCount(sharedCntDto.newsId());
 
         // 시청기록 저장
@@ -136,7 +145,7 @@ public class HomeNewsService {
     public String guestIncreaseNewsView(SharedCntDto sharedCntDto) {
 
         // 레디스 조회수 ++
-        redisService.incrementViewCount(sharedCntDto.newsId());
+        redisService.incrementRankingByView(sharedCntDto.newsId());
         Integer viewCount = redisService.getViewCount(sharedCntDto.newsId());
 
         return "조회수: " + viewCount;
@@ -150,6 +159,7 @@ public class HomeNewsService {
             int redisViewCount = redisService.getViewCount(newsId);
             news.updateViewCnt(redisViewCount); // DB의 조회수 업데이트
             newsRepository.save(news);
+            redisService.resetViewCount(newsId);
         }
     } // 조회수 DB 동기화
 }

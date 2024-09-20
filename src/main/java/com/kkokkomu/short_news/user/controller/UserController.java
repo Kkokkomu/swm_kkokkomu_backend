@@ -30,15 +30,33 @@ public class UserController {
         return ResponseDto.ok(userService.readMyPageInfo(userId));
     }
 
+    @Operation(summary = "유저 프로필 이미지 설정")
+    @PutMapping("/img")
+    public ResponseDto<UserDto> updateUserProfile(
+            @Parameter(hidden = true) @UserId Long userId,
+            @RequestPart(value = "image") MultipartFile image
+    ) {
+        log.info("updateUserProfile controller userId = {}", userId);
+        return ResponseDto.ok(userService.updateUserProfileImg(userId, image));
+    }
+
+    @Operation(summary = "유저 기본 프로필 이미지로 설정")
+    @PutMapping("/img/default")
+    public ResponseDto<UserDto> updateUserProfileDefault(
+            @Parameter(hidden = true) @UserId Long userId
+    ) {
+        log.info("updateUserProfile controller userId = {}", userId);
+        return ResponseDto.ok(userService.updateUserProfileImgDefault(userId));
+    }
+
     @Operation(summary = "유저 정보 수정")
     @PutMapping("")
     public ResponseDto<UserDto> updateUser(
             @Parameter(hidden = true) @UserId Long userId,
-            @RequestPart(value = "image") MultipartFile image,
             @RequestPart(value = "contents") @Valid UpdateUserDto updateUserDto
     ) {
         log.info("updateUser controller userId = {}", userId);
-        return ResponseDto.ok(userService.updateUserProfile(userId, updateUserDto, image));
+        return ResponseDto.ok(userService.updateUserProfile(userId, updateUserDto));
     }
 
     @Operation(summary = "유저 프로필 정보 조회")
