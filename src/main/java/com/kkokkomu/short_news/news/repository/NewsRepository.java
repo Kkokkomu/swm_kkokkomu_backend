@@ -26,7 +26,6 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     Page<News> findByCategoryAndIdLessThanAndNotViewedByUser(
             @Param("categories") List<ECategory> category,
             @Param("cursorId") Long cursorId,
-            @Param("userId") Long userId,
             Pageable pageable
     );
 
@@ -36,7 +35,6 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             "ORDER BY n.id DESC")
     Page<News> findFirstPageByCategoryAndNotViewedByUser(
             @Param("categories") List<ECategory> category,
-            @Param("userId") Long userId,
             Pageable pageable
     );
 
