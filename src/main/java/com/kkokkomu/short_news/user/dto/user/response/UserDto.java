@@ -12,7 +12,8 @@ public record UserDto(
         String sex,
         String birthday,
         String createdAt,
-        String editedAt
+        String editedAt,
+        String profileEditedAt
 ) {
     public static UserDto of(User user) {
         return UserDto.builder()
@@ -24,6 +25,7 @@ public record UserDto(
                 .birthday(user.getBirthday().toString())
                 .createdAt(user.getCreatedAt().toString())
                 .editedAt(user.getEditedAt().toString())
+                .profileEditedAt(user.getProfileImgs().get(0).getEditedAt().toString())
                 .build();
     }
 }
