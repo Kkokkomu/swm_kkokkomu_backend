@@ -59,10 +59,17 @@ public class UserService {
     } // 마이페이지 정보 조회
 
     @Transactional
-    public UserDto updateUserProfile(Long userId, UpdateUserDto userDto, MultipartFile profileImg) {
+    public UserDto updateUserProfileImg(Long userId, MultipartFile profileImg) {
         User user = userLookupService.findUserById(userId);
 
         profileImgService.putProfileImg(profileImg, user);
+
+        return UserDto.of(user);
+    } // 유저 프로필 정보 업데이트
+
+    @Transactional
+    public UserDto updateUserProfile(Long userId, UpdateUserDto userDto) {
+        User user = userLookupService.findUserById(userId);
 
         user.updateProfile(
                 userDto.nickname(),

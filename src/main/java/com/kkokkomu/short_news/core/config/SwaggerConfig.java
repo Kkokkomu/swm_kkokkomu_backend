@@ -18,8 +18,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("MBTIgram Springdoc")
-                .description("Springdoc을 사용한 MBTIgram Swagger UI")
+                .title("NEWSnack Springdoc")
+                .description("NEWSnack Swagger Documentation")
                 .version("1.0.0");
     }
 }
