@@ -2,6 +2,7 @@ package com.kkokkomu.short_news.news.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.ECategory;
@@ -40,6 +41,7 @@ public class AdminNewsService {
 
     private final CategoryUtil categoryUtil;
     private final NewsLookupService newsLookupService;
+    private final RedisService redisService;
 
     /* 관리자 */
     @jakarta.transaction.Transactional
@@ -153,6 +155,9 @@ public class AdminNewsService {
                     summary,
                     category
             );
+
+            // 레디스 랭킹 초기화
+            redisService.normalizeScores();
 
             news = newsRepository.save(news);
 

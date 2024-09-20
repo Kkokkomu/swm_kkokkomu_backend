@@ -2,6 +2,7 @@ package com.kkokkomu.short_news.comment.service;
 
 import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.comment.dto.comment.response.*;
+import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.service.NewsLookupService;
 import com.kkokkomu.short_news.user.domain.User;
@@ -40,6 +41,7 @@ public class CommentService {
     private final UserLookupService userLookupService;
     private final CommentLikeService commentLikeService;
     private final NewsLookupService newsLookupService;
+    private final RedisService redisService;
 
     /* 댓글 */
 
@@ -63,6 +65,9 @@ public class CommentService {
                         .build()
         );
 
+        // 레디스 랭킹 반영
+        redisService.incrementRankingByComment(news.getId());
+
         return CommentDto.builder()
                 .id(comment.getId())
                 .newsId(createCommentDto.newsId())
@@ -72,12 +77,16 @@ public class CommentService {
                 .build();
     } // 댓글 생성
 
+    @Transactional
     public String deleteComment(Long commentId) {
         log.info("deleteComment service");
-        commentRepository.findById(commentId)
-                        .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_COMMENT));
 
         commentRepository.deleteById(commentId);
+
+        redisService.decreaseRankingByComment(comment.getNews().getId());
+
         return "success";
     } // 댓글 삭제
 

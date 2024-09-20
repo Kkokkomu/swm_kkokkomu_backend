@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.news.service;
 
+import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.domain.NewsReaction;
 import com.kkokkomu.short_news.user.domain.User;
@@ -26,6 +27,7 @@ public class NewsReactionService {
 
     private final UserLookupService userLookupService;
     private final NewsLookupService newsLookupService;
+    private final RedisService redisService;
 
     public NewsReactionDto createNewsReaction(Long userId, CreateNewsReactionDto createNewsReactionDto) {
         log.info("createNewsReaction service");
@@ -45,6 +47,9 @@ public class NewsReactionService {
                         .reaction(createNewsReactionDto.reaction())
                         .build()
         );
+
+        // 감정표현 레디스 랭킹 반영
+        redisService.incrementRankingByReaction(newsReaction.getId());
 
         return NewsReactionDto.of(newsReaction);
     } // 뉴스 감정표현 생성
@@ -79,6 +84,10 @@ public class NewsReactionService {
         // 해당 감정표현이 존재하면 삭제
         if (newsReactionRepository.existsByNewsIdAndUserIdAndReaction(news.getId(), user.getId(), newsReaction)) {
             newsReactionRepository.deleteByNewsAndUserAndReaction(news, user, newsReaction);
+
+            // 레디스 랭킹 반영
+            redisService.decreaseRankingByReaction(newsId);
+
             return "success";
         } else {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS_REACTION);
