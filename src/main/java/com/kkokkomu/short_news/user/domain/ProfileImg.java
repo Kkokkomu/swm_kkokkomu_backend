@@ -56,5 +56,6 @@ public class ProfileImg {
     public void updateImg(String imgUrl) {
         this.imgUrl = imgUrl;
         this.resizeUrl = imgUrl;
+        this.editedAt = LocalDateTime.now();
     }
 }
