@@ -64,9 +64,9 @@ public class HomeNewsService {
             // 뉴스 조회 기록 캐싱 동기화
             newsViewHistService.updateNewsHist(userId);
 
-            results = newsRepository.findFirstPageByCategoryAndNotViewedByUser(categories, userId, pageRequest);
+            results = newsRepository.findFirstPageByCategoryAndNotViewedByUser(categories, pageRequest);
         } else {
-            results = newsRepository.findByCategoryAndIdLessThanAndNotViewedByUser(categories, cursorId, userId, pageRequest);
+            results = newsRepository.findByCategoryAndIdLessThanAndNotViewedByUser(categories, cursorId, pageRequest);
         }
 
         // 뉴스 결과물 기반으로 반환
