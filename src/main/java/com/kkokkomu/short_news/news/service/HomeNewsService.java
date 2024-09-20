@@ -71,11 +71,17 @@ public class HomeNewsService {
             results = newsRepository.findByCategoryAndIdLessThanAndNotViewedByUser(categories, cursorId, pageRequest);
         }
 
+        log.info("results: " + results);
+
         // 뉴스 결과물 기반으로 반환
         news = results.getContent();
         PageInfoDto pageInfo = PageInfoDto.fromPageInfo(results);
 
+        log.info("pageInfo: " + pageInfo);
+
         List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(news, userId);
+
+        log.info("newsListDtos: " + newsListDtos);
 
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
     } // 숏폼 리스트 조회
