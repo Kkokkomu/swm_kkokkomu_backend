@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,7 +76,7 @@ public class RedisService {
             if (topScore != null) {
                 redisTemplate.opsForZSet().rangeWithScores(NEWS_RANKING_KEY, 0, -1).forEach(news -> {
                     Double currentScore = news.getScore();
-                    Long newsId = Long.valueOf(news.getValue());
+                    Long newsId = Long.valueOf(Objects.requireNonNull(news.getValue()));
                     // 현재 점수에서 최상위 점수를 빼기
                     redisTemplate.opsForZSet().add(NEWS_RANKING_KEY, String.valueOf(newsId), currentScore - topScore);
                 });
