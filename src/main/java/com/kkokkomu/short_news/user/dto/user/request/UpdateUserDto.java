@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public record UpdateUserDto(
         @Size(min = 1, max = 10)
-        @Pattern(regexp = "^(?=.*[가-힣A-Za-z])[가-힣A-Za-z\\s]*$", message = "올바른 닉네임 형식이 아닙니다.")
+        @Pattern(regexp = "^[0-9가-힣a-zA-Z]+$", message = "올바른 닉네임 형식이 아닙니다.")
         @NotNull String nickname,
         @NotNull LocalDate birthday,
         @NotNull ESex sex
