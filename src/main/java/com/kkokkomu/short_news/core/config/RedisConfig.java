@@ -13,7 +13,7 @@ public class RedisConfig {
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName("clustercfg.kkm-redis.rhiqa9.apn2.cache.amazonaws.com");
+        config.setHostName("kkm-prod.rhiqa9.ng.0001.apn2.cache.amazonaws.com");
         config.setPort(6379);
         return new LettuceConnectionFactory(config);
     }
