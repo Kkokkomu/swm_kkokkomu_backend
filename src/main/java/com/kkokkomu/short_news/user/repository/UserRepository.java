@@ -24,6 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByNickname(String nickname);
 
+    Boolean existsByNickname(String nickname);
+
     Optional<User> findByEmail(String email);
 
     @Query("SELECT  u FROM User u order by u.id")
