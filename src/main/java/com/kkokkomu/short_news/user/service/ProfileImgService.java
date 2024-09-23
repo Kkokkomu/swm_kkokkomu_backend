@@ -45,13 +45,17 @@ public class ProfileImgService {
         ProfileImg profileImg = profileImgRepository.findByUser(user)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_PROFILE_IMG));
 
-        // 기존 프사 삭제
-        s3Service.deleteUserProfileByUrl(profileImg.getImgUrl());
+        if (profileImg.getImgUrl().equals(DEFAULT_PROFILE)) {
+            return profileImg;
+        } else {
+            // 기존 프사 삭제
+            s3Service.deleteUserProfileByUrl(profileImg.getImgUrl());
 
-        // 기본 이미지로 변경
-        profileImg.updateImg(DEFAULT_PROFILE);
+            // 기본 이미지로 변경
+            profileImg.updateImg(DEFAULT_PROFILE);
 
-        return profileImgRepository.save(profileImg);
+            return profileImgRepository.save(profileImg);
+        }
     } // 기본 프사로 변경
 
     public void toDefaultProfileImg(User user) {

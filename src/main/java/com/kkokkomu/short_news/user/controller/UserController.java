@@ -53,7 +53,7 @@ public class UserController {
     @PutMapping("")
     public ResponseDto<UserDto> updateUser(
             @Parameter(hidden = true) @UserId Long userId,
-            @RequestPart(value = "contents") @Valid UpdateUserDto updateUserDto
+            @RequestBody @Valid UpdateUserDto updateUserDto
     ) {
         log.info("updateUser controller userId = {}", userId);
         return ResponseDto.ok(userService.updateUserProfile(userId, updateUserDto));
