@@ -78,12 +78,12 @@ public class UserService {
 
     @Transactional
     public UserDto updateUserProfile(Long userId, UpdateUserDto userDto) {
+        User user = userLookupService.findUserById(userId);
+
         // 닉네임 중복검사
-        if (userRepository.existsByNickname(userDto.nickname())) {
+        if (!user.getNickname().equals(userDto.nickname()) && userRepository.existsByNickname(userDto.nickname())) {
             throw new CommonException(ErrorCode.DUPLICATED_NICKNAME);
         }
-
-        User user = userLookupService.findUserById(userId);
 
         user.updateProfile(
                 userDto.nickname(),
