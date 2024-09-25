@@ -111,7 +111,12 @@ public class HomeNewsService {
         List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(news, userId);
 
         // 페이지 정보 계산 (isLast 판단 포함)
-        boolean isLast = news.size() < size;
+        boolean isLast = news.size() <= size;
+        if (!isLast) {
+            // 마지막 아이템을 제거하여 실제 페이지 사이즈를 유지
+            newsIds.remove(newsIds.size() - 1);
+        }
+
         PageInfoDto pageInfo = new PageInfoDto(0,size,0, isLast);
 
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);

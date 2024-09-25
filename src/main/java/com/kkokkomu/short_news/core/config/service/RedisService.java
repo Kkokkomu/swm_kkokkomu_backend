@@ -4,6 +4,8 @@ import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.ECategory;
 import com.kkokkomu.short_news.news.domain.News;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -19,6 +21,7 @@ import static com.kkokkomu.short_news.core.constant.RedisConstant.*;
 @Service
 public class RedisService {
 
+    private static final Logger log = LoggerFactory.getLogger(RedisService.class);
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
@@ -135,15 +138,17 @@ public class RedisService {
     }
 
     public List<Long> getNewsIdsForMultipleCategories(List<ECategory> categories, Long cursorId, int size) {
+        log.info("getNewsIdsForMultipleCategories");
         Map<Long, Double> newsScores = new HashMap<>();
         for (ECategory category : categories) {
             String rankingKey = "news:ranking:" + category.name().toLowerCase();
             Set<ZSetOperations.TypedTuple<String>> newsIdsWithScores = redisTemplate.opsForZSet()
-                    .reverseRangeByScoreWithScores(rankingKey, cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, Double.NEGATIVE_INFINITY, 0, size);
+                    .reverseRangeByScoreWithScores(rankingKey, cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, Double.NEGATIVE_INFINITY, 0, size+1);
 
             newsIdsWithScores.forEach(idWithScore ->
                     newsScores.put(Long.parseLong(idWithScore.getValue()), idWithScore.getScore()));
         }
+        log.info("newsScores {}",newsScores.size());
 
         // 정렬하고 상위 N개만 반환
         return newsScores.entrySet().stream()
