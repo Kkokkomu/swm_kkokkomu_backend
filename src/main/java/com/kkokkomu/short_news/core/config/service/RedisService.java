@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.kkokkomu.short_news.core.constant.Constant.*;
+import static com.kkokkomu.short_news.core.constant.RedisConstant.*;
 
 @Service
 public class RedisService {
@@ -22,8 +23,6 @@ public class RedisService {
     /****** 뉴스 랭킹 ******/
 
     // 뉴스 랭킹 키 패턴
-    private static final String NEWS_RANKING_KEY = "news:ranking:%s";
-    private static final String GLOBAL_RANKING_KEY = "news:ranking:global";
 
     // 뉴스 조회수 증가 및 랭킹 업데이트
     public void incrementRankingByView(News news) {
@@ -97,6 +96,14 @@ public class RedisService {
         increaseScore(news.getId(), SHARE_WEIGHT, globalKey);
     }
 
+    // 특정 뉴스 글로벌 랭킹
+    public Double getGlobalNewsScore(Long newsId) {
+        String key = GLOBAL_RANKING_KEY;
+        String newsIdStr = String.valueOf(newsId);
+        Double score = redisTemplate.opsForZSet().score(key, newsIdStr);
+        return score;
+    }
+
     // 최상위 뉴스 점수 감소 로직
     public void normalizeScores() {
         Set<ZSetOperations.TypedTuple<String>> topNews = redisTemplate.opsForZSet().reverseRangeWithScores(GLOBAL_RANKING_KEY, 0, 0);
@@ -112,9 +119,14 @@ public class RedisService {
         }
     }
 
-    /****** 뉴스 조회수 ******/
+    // 글로벌 랭킹 보드 반환
+    public Set<String> getGlocalNewsRanking(Double cursorScore, int size) {
+        return (cursorScore == null) ?
+                redisTemplate.opsForZSet().reverseRange(GLOBAL_RANKING_KEY, 0, size - 1) :
+                redisTemplate.opsForZSet().reverseRangeByScore(GLOBAL_RANKING_KEY, 0, cursorScore, 0, size);
+    }
 
-    private static final String NEWS_VIEW_COUNT_PREFIX = "news:viewCount:";
+    /****** 뉴스 조회수 ******/
 
     public void incrementViewCount(Long newsId) {
         String key = NEWS_VIEW_COUNT_PREFIX + newsId;
@@ -134,7 +146,6 @@ public class RedisService {
 
     /****** 뉴스 시청기록 ******/
 
-    private static final String VIEW_HISTORY_PREFIX = "news:viewHistory:";
 
     public void saveNewsViewHistory(Long userId, Long newsId) {
         String key = VIEW_HISTORY_PREFIX + userId;
