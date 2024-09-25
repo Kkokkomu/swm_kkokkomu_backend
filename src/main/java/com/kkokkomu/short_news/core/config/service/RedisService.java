@@ -121,7 +121,7 @@ public class RedisService {
     }
 
     // 글로벌 랭킹 보드 반환
-    public Set<String> getGlocalNewsRanking(Double cursorScore, int size) {
+    public Set<String> getGlobalNewsRanking(Double cursorScore, int size) {
         return (cursorScore == null) ?
                 redisTemplate.opsForZSet().reverseRange(GLOBAL_RANKING_KEY, 0, size - 1) :
                 redisTemplate.opsForZSet().reverseRangeByScore(GLOBAL_RANKING_KEY, 0, cursorScore, 0, size);
