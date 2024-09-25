@@ -66,7 +66,7 @@ public class CommentService {
         );
 
         // 레디스 랭킹 반영
-        redisService.incrementRankingByComment(news.getId());
+        redisService.incrementRankingByComment(news);
 
         return CommentDto.builder()
                 .id(comment.getId())
@@ -85,7 +85,7 @@ public class CommentService {
 
         commentRepository.deleteById(commentId);
 
-        redisService.decreaseRankingByComment(comment.getNews().getId());
+        redisService.decreaseRankingByComment(comment.getNews());
 
         return "success";
     } // 댓글 삭제

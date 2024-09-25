@@ -49,7 +49,7 @@ public class NewsReactionService {
         );
 
         // 감정표현 레디스 랭킹 반영
-        redisService.incrementRankingByReaction(newsReaction.getId());
+        redisService.incrementRankingByReaction(news);
 
         return NewsReactionDto.of(newsReaction);
     } // 뉴스 감정표현 생성
@@ -86,7 +86,7 @@ public class NewsReactionService {
             newsReactionRepository.deleteByNewsAndUserAndReaction(news, user, newsReaction);
 
             // 레디스 랭킹 반영
-            redisService.decreaseRankingByReaction(newsId);
+            redisService.decreaseRankingByReaction(news);
 
             return "success";
         } else {
