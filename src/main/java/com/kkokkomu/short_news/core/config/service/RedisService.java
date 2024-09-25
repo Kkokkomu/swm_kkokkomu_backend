@@ -141,7 +141,7 @@ public class RedisService {
         log.info("getNewsIdsForMultipleCategories");
         Map<Long, Double> newsScores = new HashMap<>();
         for (ECategory category : categories) {
-            String rankingKey = "news:ranking:" + category.name().toLowerCase();
+            String rankingKey = String.format(NEWS_RANKING_KEY, category.name().toLowerCase());
             Set<ZSetOperations.TypedTuple<String>> newsIdsWithScores = redisTemplate.opsForZSet()
                     .reverseRangeByScoreWithScores(rankingKey, cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, Double.NEGATIVE_INFINITY, 0, size+1);
 
