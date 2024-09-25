@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.kkokkomu.short_news.core.constant.Constant.*;
@@ -166,5 +167,22 @@ public class RedisService {
         String key = VIEW_HISTORY_PREFIX + userId;
         redisTemplate.delete(key);
     }
+
+    /****** 유저 인증코드 ******/
+    public void saveCodeWithUserId(String code, Long userId) {
+        String key = USER_VALIDATION_CODE_PREFIX + code; // code를 키로 사용
+        redisTemplate.opsForValue().set(key, userId.toString(), 10, TimeUnit.MINUTES);
+    } // 인증코드를 키로 해서 유저 아이디 저장
+
+    public Long getUserIdByCode(String code) {
+        String key = USER_VALIDATION_CODE_PREFIX + code;
+        String userIdString = redisTemplate.opsForValue().get(key);
+        if (userIdString != null) {
+            redisTemplate.delete(key); // 코드 사용 후 삭제
+            return Long.parseLong(userIdString);
+        }
+        return null;
+    }
+
 }
 
