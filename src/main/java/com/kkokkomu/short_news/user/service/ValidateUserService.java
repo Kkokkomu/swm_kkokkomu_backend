@@ -29,7 +29,7 @@ public class ValidateUserService {
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 
         String authCode = RandomCodeUtil.generateVerificationCode();
-        mailService.sendCodeMail(emailValicate.email(), "[NEWSnack] 이메일 인증코드", authCode);
+        mailService.sendCodeMail(emailValicate.email(), "[NEWSnack] 이메일 인증", authCode);
 
         redisService.saveCodeWithUserId(authCode, user.getId());
         log.info(authCode);
