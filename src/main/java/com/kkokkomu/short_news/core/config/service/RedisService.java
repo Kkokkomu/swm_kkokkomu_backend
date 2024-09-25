@@ -1,5 +1,7 @@
 package com.kkokkomu.short_news.core.config.service;
 
+import com.kkokkomu.short_news.core.exception.CommonException;
+import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.ECategory;
 import com.kkokkomu.short_news.news.domain.News;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -22,8 +23,6 @@ public class RedisService {
     private RedisTemplate<String, String> redisTemplate;
 
     /****** 뉴스 랭킹 ******/
-
-    // 뉴스 랭킹 키 패턴
 
     // 뉴스 조회수 증가 및 랭킹 업데이트
     public void incrementRankingByView(News news) {
@@ -97,6 +96,14 @@ public class RedisService {
         increaseScore(news.getId(), SHARE_WEIGHT, globalKey);
     }
 
+    // 공유 수 증가 시 랭킹 업데이트
+    public void applyRankingByShare(News news) {
+        String categoryKey = String.format(NEWS_RANKING_KEY, news.getCategory().name().toLowerCase());
+        String globalKey = GLOBAL_RANKING_KEY;
+        increaseScore(news.getId(), 0L, categoryKey);
+        increaseScore(news.getId(), 0L, globalKey);
+    }
+
     // 특정 뉴스 글로벌 랭킹
     public Double getGlobalNewsScore(Long newsId) {
         String key = GLOBAL_RANKING_KEY;
@@ -121,11 +128,36 @@ public class RedisService {
     }
 
     // 글로벌 랭킹 보드 반환
-    public Set<String> getGlocalNewsRanking(Double cursorScore, int size) {
+    public Set<String> getGlobalNewsRanking(Double cursorScore, int size) {
         return (cursorScore == null) ?
                 redisTemplate.opsForZSet().reverseRange(GLOBAL_RANKING_KEY, 0, size - 1) :
                 redisTemplate.opsForZSet().reverseRangeByScore(GLOBAL_RANKING_KEY, 0, cursorScore, 0, size);
     }
+
+    public List<Long> getNewsIdsForMultipleCategories(List<ECategory> categories, Long cursorId, int size) {
+        Map<Long, Double> newsScores = new HashMap<>();
+        for (ECategory category : categories) {
+            String rankingKey = "news:ranking:" + category.name().toLowerCase();
+            Set<ZSetOperations.TypedTuple<String>> newsIdsWithScores = redisTemplate.opsForZSet()
+                    .reverseRangeByScoreWithScores(rankingKey, cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, Double.NEGATIVE_INFINITY, 0, size);
+
+            newsIdsWithScores.forEach(idWithScore ->
+                    newsScores.put(Long.parseLong(idWithScore.getValue()), idWithScore.getScore()));
+        }
+
+        // 정렬하고 상위 N개만 반환
+        return newsScores.entrySet().stream()
+                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
+                .map(Map.Entry::getKey)
+                .limit(size)
+                .collect(Collectors.toList());
+    }
+
+    private double getScore(Long newsId) {
+        return Optional.ofNullable(redisTemplate.opsForZSet().score(GLOBAL_RANKING_KEY, String.valueOf(newsId)))
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
+    }
+
 
     /****** 뉴스 조회수 ******/
 
