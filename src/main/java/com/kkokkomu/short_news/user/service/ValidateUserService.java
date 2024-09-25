@@ -38,11 +38,13 @@ public class ValidateUserService {
     }
 
     public String validateUser(String authCode) {
+        log.info("validateUser service");
         Long userId = redisService.getUserIdByCode(authCode);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 
+        log.info("delete user {}", userId.toString());
         user.softDelete();
 
         userRepository.save(user);
