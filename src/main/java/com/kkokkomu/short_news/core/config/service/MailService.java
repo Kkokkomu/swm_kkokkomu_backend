@@ -63,6 +63,7 @@ public class MailService {
                     "<p></p>" +
                     "<p>작성한 댓글의 닉네임이 “알수없음”으로 표시됩니다.</p>" +
                     "<p></p>" +
+                    "<p></p>" +
                     "<a href='http://kkm-shortnews.shop/validate/" + authCode + "' " +
                     "style='background-color: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px;'>" +
                     "탈퇴하기</a>";
