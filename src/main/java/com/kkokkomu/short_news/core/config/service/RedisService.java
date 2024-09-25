@@ -139,14 +139,14 @@ public class RedisService {
 
     public List<Long> getNewsIdsForMultipleCategories(List<ECategory> categories, Long cursorId, int size) {
         log.info("getNewsIdsForMultipleCategories");
+        log.info("cursorId: " + cursorId);
         Map<Long, Double> newsScores = new HashMap<>();
         for (ECategory category : categories) {
             String rankingKey = String.format(NEWS_RANKING_KEY, category.name().toLowerCase());
             Set<ZSetOperations.TypedTuple<String>> newsIdsWithScores = redisTemplate.opsForZSet()
-                    .reverseRangeByScoreWithScores(rankingKey, cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, Double.NEGATIVE_INFINITY, 0, size+1);
+                    .reverseRangeByScoreWithScores(rankingKey, Double.NEGATIVE_INFINITY, cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, 0, size+1);
             if (newsIdsWithScores != null) {
-
-                log.info("{} newsIdsWithScores {}", category.name().toLowerCase(), newsIdsWithScores.size());
+                log.info("{} newsIdsWithScores {}", rankingKey, newsIdsWithScores.size());
             }
 
             newsIdsWithScores.forEach(idWithScore ->
