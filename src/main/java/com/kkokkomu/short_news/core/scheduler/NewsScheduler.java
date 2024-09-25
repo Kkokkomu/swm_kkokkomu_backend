@@ -1,7 +1,5 @@
 package com.kkokkomu.short_news.core.scheduler;
 
-import com.kkokkomu.short_news.core.config.service.RedisService;
-import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.dto.news.request.CreateGenerateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.response.GenerateNewsDto;
 import com.kkokkomu.short_news.core.config.service.MailService;
@@ -37,7 +35,7 @@ public class NewsScheduler {
                 .count_sports(2)
                 .build();
 
-        List<GenerateNewsDto> generateNewsDtos = adminNewsService.generateNews(createGenerateNewsDto);
+        List<GenerateNewsDto> generateNewsDtos = adminNewsService.generateNewsList(createGenerateNewsDto);
 
         log.info("generateNewsDtos: {}", generateNewsDtos);
 
@@ -62,11 +60,11 @@ public class NewsScheduler {
 
         // 이메일 전송
         log.info("send aahhll654@gmail.com");
-        mailService.sendEmail("aahhll654@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        mailService.sendNewsMail("aahhll654@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
         log.info("send gouyeonch@naver.com");
-        mailService.sendEmail("gouyeonch@naver.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        mailService.sendNewsMail("gouyeonch@naver.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
         log.info("send leesk9663@gmail.com");
-        mailService.sendEmail("leesk9663@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        mailService.sendNewsMail("leesk9663@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
         
     } // 뉴스 생성
 

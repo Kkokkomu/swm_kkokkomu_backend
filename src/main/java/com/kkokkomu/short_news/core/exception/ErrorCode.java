@@ -22,7 +22,7 @@ public enum ErrorCode {
     EXPIRED_APPLE_IDENTITY_TOKEN_ERROR("40011", HttpStatus.BAD_REQUEST, "만료된 Apple Identity Token입니다."),
     INVALID_APPLE_PUBLIC_KEY_ERROR("40012", HttpStatus.BAD_REQUEST, "유효하지 않은 Apple Public Key입니다."),
     INVALID_OAUTH2_PROVIDER("40013", HttpStatus.BAD_REQUEST, "유효하지 않은 OAuth2 제공자입니다."),
-    DELETED_USER_ERROR("40014", HttpStatus.BAD_REQUEST, "탈퇴한 유저는 30일 동안 재가입할 수 없습니다."),
+    DELETED_USER_ERROR("40014", HttpStatus.BAD_REQUEST, "이미 탈퇴한 유저입니다."),
     DUPLICATED_SOCIAL_ID("40015", HttpStatus.BAD_REQUEST, "해당 이메일로 가입된 소셜 계정이 존재합니다."),
     CANNOT_BLOCK_MYSELF("40016", HttpStatus.BAD_REQUEST, "자신을 차단할 수 없습니다."),
     ALREADY_BLOCKED_USER("40017", HttpStatus.BAD_REQUEST, "이미 차단된 사용자입니다."),

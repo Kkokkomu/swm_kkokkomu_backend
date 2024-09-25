@@ -68,7 +68,7 @@ public class UserController {
 
     @Operation(summary = "회원 탈퇴")
     @DeleteMapping("/exit")
-    public ResponseDto<?> deleteUser(@Parameter(hidden = true) @UserId Long userId) {
+    public ResponseDto<String> deleteUser(@Parameter(hidden = true) @UserId Long userId) {
         userService.softDeleteUser(userId);
         return ResponseDto.ok("회원 탈퇴가 완료되었습니다.");
     }

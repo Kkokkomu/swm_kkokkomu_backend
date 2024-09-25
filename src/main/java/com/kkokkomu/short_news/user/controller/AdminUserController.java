@@ -48,4 +48,11 @@ public class AdminUserController {
         log.info("clearUser controller");
         return ResponseDto.ok(userService.clearUser(userId));
     }
+
+    @Operation(summary = "회원 탈퇴 취소")
+    @PutMapping("/exit")
+    public ResponseDto<String> cancleDeleteUser(@Parameter(hidden = true) @UserId Long userId) {
+        userService.cancleSoftDeleteUser(userId);
+        return ResponseDto.ok("회원 탈퇴가 취소되었습니다.");
+    }
 }

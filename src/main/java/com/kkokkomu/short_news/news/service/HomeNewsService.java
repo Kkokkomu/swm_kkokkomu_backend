@@ -119,7 +119,7 @@ public class HomeNewsService {
         newsRepository.save(news);
 
         // 레디스 반영
-        redisService.incrementRankingByShare(sharedCntDto.newsId());
+        redisService.incrementRankingByShare(news);
 
         return NewsDto.of(news);
     } // 공유 수 증가
@@ -131,9 +131,10 @@ public class HomeNewsService {
     } // 관심없음 표시
 
     public String increaseNewsView(SharedCntDto sharedCntDto, Long userId) {
+        News news = newsLookupService.findNewsById(sharedCntDto.newsId());
 
         // 레디스 조회수 ++
-        redisService.incrementRankingByView(sharedCntDto.newsId());
+        redisService.incrementRankingByView(news);
         Integer viewCount = redisService.getViewCount(sharedCntDto.newsId());
 
         // 시청기록 저장
@@ -143,9 +144,10 @@ public class HomeNewsService {
     } // 뉴스 조회
 
     public String guestIncreaseNewsView(SharedCntDto sharedCntDto) {
+        News news = newsLookupService.findNewsById(sharedCntDto.newsId());
 
         // 레디스 조회수 ++
-        redisService.incrementRankingByView(sharedCntDto.newsId());
+        redisService.incrementRankingByView(news);
         Integer viewCount = redisService.getViewCount(sharedCntDto.newsId());
 
         return "조회수: " + viewCount;
