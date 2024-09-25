@@ -77,20 +77,25 @@ public class SearchNewsService {
 
     @Transactional(readOnly = true)
     public CursorResponseDto<List<NewsInfoDto>> getPopularNewsFilteredByCategory(Long cursorId, int size, Long userId) {
-
         log.info("getPopularNewsFilteredByCategory service");
 
         // 커서 아이디에 해당하는 뉴스의 점수를 레디스에서 조회
         Double cursorScore = (cursorId != null) ? redisService.getGlobalNewsScore(cursorId) : null;
 
-        // 레디스에서 전체 랭킹 조회
-        List<Long> newsIds = redisService.getGlocalNewsRanking(cursorScore, size)
+        // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
+        List<Long> newsIds = redisService.getGlobalNewsRanking(cursorScore, size + 1) // 요청 사이즈보다 1개 더 많이
                 .stream()
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
 
+        boolean isLast = newsIds.size() <= size;
+        if (!isLast) {
+            // 마지막 아이템을 제거하여 실제 페이지 사이즈를 유지
+            newsIds.remove(newsIds.size() - 1);
+        }
+
         if (newsIds.isEmpty()) {
-            return new CursorResponseDto<>(Collections.emptyList(), null);
+            return new CursorResponseDto<>(Collections.emptyList(), CursorInfoDto.builder().size(size).isLast(true).build());
         }
 
         // 데이터베이스에서 뉴스 상세 정보 조회
@@ -99,12 +104,11 @@ public class SearchNewsService {
 
         // 커서 정보 계산
         CursorInfoDto cursorInfoDto = CursorInfoDto.builder()
-                .isLast(true)
-                .size(10)
+                .size(size)
+                .isLast(isLast)
                 .build();
 
         return new CursorResponseDto<>(newsInfoDtos, cursorInfoDto);
-
     } // 탐색 화면 카테고리 필터 인기순
 
     @Transactional(readOnly = true)
@@ -142,31 +146,36 @@ public class SearchNewsService {
 
         log.info("getGuestPopularNewsFilteredByCategory service");
 
-        // 커서 아이디에 해당하는 뉴스가 있는지 검사
-        if (cursorId != null && !newsRepository.existsById(cursorId)) {
-            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        // 커서 아이디에 해당하는 뉴스의 점수를 레디스에서 조회
+        Double cursorScore = (cursorId != null) ? redisService.getGlobalNewsScore(cursorId) : null;
+
+        // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
+        List<Long> newsIds = redisService.getGlobalNewsRanking(cursorScore, size + 1) // 요청 사이즈보다 1개 더 많이
+                .stream()
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+
+        boolean isLast = newsIds.size() <= size;
+        if (!isLast) {
+            // 마지막 아이템을 제거하여 실제 페이지 사이즈를 유지
+            newsIds.remove(newsIds.size() - 1);
         }
 
-        PageRequest pageRequest = PageRequest.of(0, size);
-
-        List<News> news;
-        Page<News> results;
-        if (cursorId == null) {
-            results = newsRepository.findFirstPageByPopularity(VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, pageRequest);
-        } else {
-            // cursorScore 계산
-            News cursorNews = newsLookupService.findNewsById(cursorId);
-
-            double cursorScore = calculateScore(cursorNews);
-
-            results = newsRepository.findByPopularityLessThan(VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, cursorScore, cursorId, pageRequest);
+        if (newsIds.isEmpty()) {
+            return new CursorResponseDto<>(Collections.emptyList(), CursorInfoDto.builder().size(size).isLast(true).build());
         }
-        news = results.getContent();
 
-        List<GuestNewsInfoDto> newsInfoDtos = getGuestNewsInfo(news);
-        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+        // 데이터베이스에서 뉴스 상세 정보 조회
+        List<News> newsList = newsRepository.findAllById(newsIds);
 
-        return CursorResponseDto.fromEntityAndPageInfo(newsInfoDtos, cursorInfoDto);
+        List<GuestNewsInfoDto> newsInfoDtos = getGuestNewsInfo(newsList);
+        // 커서 정보 계산
+        CursorInfoDto cursorInfoDto = CursorInfoDto.builder()
+                .size(size)
+                .isLast(isLast)
+                .build();
+
+        return new CursorResponseDto<>(newsInfoDtos, cursorInfoDto);
     } // 비로그인 탐색 화면 카테고리 필터 인기순
 
     public CursorResponseDto<List<SearchNewsDto>> searchLatestNews(String category, String text, Long cursorId, int size) {
