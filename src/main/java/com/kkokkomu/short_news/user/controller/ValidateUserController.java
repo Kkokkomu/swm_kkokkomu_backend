@@ -16,7 +16,7 @@ public class ValidateUserController {
     /****** 안드로이드 url 회원탈퇴 ******/
     @PostMapping("")
     public String validateUser(@RequestBody EmailValicate emailValicate) {
-        log.info("validateUser controller");
+        log.info("validateUser controller {}", emailValicate.email());
         return emailValicate.email();
     }
 }
