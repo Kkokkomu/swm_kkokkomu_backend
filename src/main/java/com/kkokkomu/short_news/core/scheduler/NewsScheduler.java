@@ -37,7 +37,7 @@ public class NewsScheduler {
                 .count_sports(2)
                 .build();
 
-        List<GenerateNewsDto> generateNewsDtos = adminNewsService.generateNews(createGenerateNewsDto);
+        List<GenerateNewsDto> generateNewsDtos = adminNewsService.generateNewsList(createGenerateNewsDto);
 
         log.info("generateNewsDtos: {}", generateNewsDtos);
 
