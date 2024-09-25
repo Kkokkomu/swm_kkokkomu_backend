@@ -35,7 +35,7 @@ public class HomeNewsController {
         log.info("readNewsList controller");
 
         if (filter.equals(EHomeFilter.RECOMMEND)) {
-            return ResponseDto.ok(homeNewsService.readNewsList(userId, cursorId, size));
+            return ResponseDto.ok(homeNewsService.readNewsPopularList(userId, cursorId, size));
         } else {
             return ResponseDto.ok(homeNewsService.readNewsList(userId, cursorId, size));
         }
