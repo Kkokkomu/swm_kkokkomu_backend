@@ -144,6 +144,10 @@ public class RedisService {
             String rankingKey = String.format(NEWS_RANKING_KEY, category.name().toLowerCase());
             Set<ZSetOperations.TypedTuple<String>> newsIdsWithScores = redisTemplate.opsForZSet()
                     .reverseRangeByScoreWithScores(rankingKey, cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, Double.NEGATIVE_INFINITY, 0, size+1);
+            if (newsIdsWithScores != null) {
+
+                log.info("{} newsIdsWithScores {}", category.name().toLowerCase(), newsIdsWithScores.size());
+            }
 
             newsIdsWithScores.forEach(idWithScore ->
                     newsScores.put(Long.parseLong(idWithScore.getValue()), idWithScore.getScore()));
