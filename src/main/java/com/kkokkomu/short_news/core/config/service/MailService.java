@@ -6,6 +6,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,9 @@ import java.time.LocalDate;
 @Service
 public class MailService {
     private final JavaMailSender emailSender;
+
+    @Value("${domain}")
+    String domain;
 
     public String sendNewsMail(String to, String title, String content) {
         try {
@@ -64,8 +68,8 @@ public class MailService {
                     "<p>작성한 댓글의 닉네임이 “알수없음”으로 표시됩니다.</p>" +
                     "<br>" +
                     "<br>" +
-                    "<a href='http://kkm-shortnews.shop/validate/" + authCode + "' " +
-                    "style='background-color: #4CAF50; color: blue; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px;'>" +
+                    "<a href='" + domain + authCode + "' " +
+                    "style='background-color: #6781FF; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px;'>" +
                     "탈퇴하기</a>";
 
             helper.setText(htmlContent, true); // true로 설정하여 HTML 사용 가능
