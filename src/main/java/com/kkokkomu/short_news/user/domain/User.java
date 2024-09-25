@@ -204,6 +204,11 @@ public class User {
         this.deletedAt = LocalDateTime.now().plusDays(Constant.MEMBER_INFO_RETENTION_PERIOD);
     }
 
+    public void cancleSoftDelete() {
+        this.isDeleted = false;
+        this.deletedAt = null;
+    }
+
     public void hardDelete() {
         this.nickname = "알수없음";
         this.birthday = null;

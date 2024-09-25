@@ -105,7 +105,14 @@ public class UserService {
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         user.softDelete();
         userRepository.save(user);
-    }
+    } // 유저 회원 탈퇴
+
+    public void cancleSoftDeleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        user.cancleSoftDelete();
+        userRepository.save(user);
+    } // 유저 회원 탈퇴 취소
 
     public void hardDeleteUser(User user) {
         log.info("Hard Delete user: {}", user);
