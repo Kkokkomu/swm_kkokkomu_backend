@@ -24,6 +24,7 @@ public class ValidateUserService {
     private final MailService mailService;
 
     public String sendValidateCodeByEmail(EmailValicate emailValicate) {
+        log.info(emailValicate.email());
         User user = userRepository.findByEmail(emailValicate.email())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 
