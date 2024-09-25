@@ -87,6 +87,37 @@ public class HomeNewsService {
     } // 숏폼 리스트 조회
 
     @Transactional
+    public PagingResponseDto<List<NewsInfoDto>> readNewsPopularList(Long userId, Long cursorId, int size) {
+        User user = userLookupService.findUserById(userId);
+
+        // 커서 아이디에 해당하는 뉴스가 있는지 검사
+        if (cursorId != null && !newsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        // 유저가 설정한 카테고리 조회
+        List<ECategory> categories = userCategoryService.findAllCategoriesByUserId(userId);
+
+        if (cursorId == null) {
+            // 뉴스 조회 기록 캐싱 동기화
+            newsViewHistService.updateNewsHist(userId);
+        }
+
+        // 레디스에서 카테고리별 뉴스 랭킹 조회
+        List<Long> newsIds = redisService.getNewsIdsForMultipleCategories(categories, cursorId, size+1);
+
+        // 데이터베이스에서 뉴스 상세 정보 조회
+        List<News> news = newsRepository.findAllById(newsIds);
+        List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(news, userId);
+
+        // 페이지 정보 계산 (isLast 판단 포함)
+        boolean isLast = news.size() < size;
+        PageInfoDto pageInfo = new PageInfoDto(0,size,0, isLast);
+
+        return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
+    } // 숏폼 리스트 조회
+
+    @Transactional
     public PagingResponseDto<List<GuestNewsInfoDto>> guestReadNewsList(Long cursorId, int size) {
         // 커서 아이디에 해당하는 뉴스가 있는지 검사
         if (cursorId != null && !newsRepository.existsById(cursorId)) {

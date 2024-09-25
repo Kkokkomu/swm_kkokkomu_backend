@@ -237,6 +237,9 @@ public class AdminNewsService {
         // 영상 생성 서버에서 영상 url 및 정보 받아옴
         ObjectMapper objectMapper = new ObjectMapper();
         List<GenerateNewsDto> generateNewsDtos = new ArrayList<>();
+        // 레디스 랭킹 초기화
+        redisService.normalizeScores();
+
         for (int i = 0; i < idList.size(); i++) {
             // 인덱스에 맞는 임시 뉴스 객체
             News news = newsList.get(i);
@@ -283,10 +286,12 @@ public class AdminNewsService {
                     category
             );
 
-            // 레디스 랭킹 초기화
-            redisService.normalizeScores();
+
 
             news = newsRepository.save(news);
+
+            // 랭키보드 등록
+            redisService.applyRankingByShare(news);
 
             generateNewsDtos.add(
                     GenerateNewsDto.builder()
