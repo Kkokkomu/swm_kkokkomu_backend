@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.news.service;
 
+import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.core.dto.CursorInfoDto;
 import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
@@ -22,10 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.kkokkomu.short_news.core.constant.Constant.*;
 import static com.kkokkomu.short_news.core.constant.Constant.DATE_WEIGHT;
+import static com.kkokkomu.short_news.core.constant.RedisConstant.GLOBAL_RANKING_KEY;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ public class SearchNewsService {
 
     private final NewsLookupService newsLookupService;
     private final NewsReactionService newsReactionService;
+    private final RedisService redisService;
 
     private final CategoryUtil categoryUtil;
 
@@ -74,31 +80,31 @@ public class SearchNewsService {
 
         log.info("getPopularNewsFilteredByCategory service");
 
-        // 커서 아이디에 해당하는 뉴스가 있는지 검사
-        if (cursorId != null && !newsRepository.existsById(cursorId)) {
-            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        // 커서 아이디에 해당하는 뉴스의 점수를 레디스에서 조회
+        Double cursorScore = (cursorId != null) ? redisService.getGlobalNewsScore(cursorId) : null;
+
+        // 레디스에서 전체 랭킹 조회
+        List<Long> newsIds = redisService.getGlocalNewsRanking(cursorScore, size)
+                .stream()
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+
+        if (newsIds.isEmpty()) {
+            return new CursorResponseDto<>(Collections.emptyList(), null);
         }
 
-        PageRequest pageRequest = PageRequest.of(0, size);
+        // 데이터베이스에서 뉴스 상세 정보 조회
+        List<News> newsList = newsRepository.findAllById(newsIds);
+        List<NewsInfoDto> newsInfoDtos = getNewsInfo(newsList, userId);
 
-        List<News> news;
-        Page<News> results;
-        if (cursorId == null) {
-            results = newsRepository.findFirstPageByPopularity(VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, pageRequest);
-        } else {
-            // cursorScore 계산
-            News cursorNews = newsLookupService.findNewsById(cursorId);
+        // 커서 정보 계산
+        CursorInfoDto cursorInfoDto = CursorInfoDto.builder()
+                .isLast(true)
+                .size(10)
+                .build();
 
-            double cursorScore = calculateScore(cursorNews);
+        return new CursorResponseDto<>(newsInfoDtos, cursorInfoDto);
 
-            results = newsRepository.findByPopularityLessThan(VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, cursorScore, cursorId, pageRequest);
-        }
-        news = results.getContent();
-
-        List<NewsInfoDto> newsInfoDtos = getNewsInfo(news, userId);
-        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
-
-        return CursorResponseDto.fromEntityAndPageInfo(newsInfoDtos, cursorInfoDto);
     } // 탐색 화면 카테고리 필터 인기순
 
     @Transactional(readOnly = true)
