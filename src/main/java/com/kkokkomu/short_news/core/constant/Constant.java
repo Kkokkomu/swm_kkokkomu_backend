@@ -55,7 +55,7 @@ public class Constant {
             "/search/news/info/guest",
 
             // 사용자 이메일 인증
-            "/validate"
+            "/validate/**"
     );
     public static final String DEFAULT_PROFILE = "https://kkm-config.s3.ap-northeast-2.amazonaws.com/profile.png";
 

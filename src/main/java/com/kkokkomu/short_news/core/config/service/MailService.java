@@ -55,8 +55,14 @@ public class MailService {
             // HTML 형식으로 메일 내용 설정
             String htmlContent = "<h3 style='font-size: 24px; font-weight: bold;'>" + "정말로 탈퇴하시겠어요?" + "</h3>" +
                     "<p>탈퇴 후에는 서비스 이용에 대한 모든 권리가 소멸됩니다.</p>" +
-                    "<p>탈퇴 신청 후, 30일 이후에 계정 삭제가 완료되며 복구 및 동일 이메일로 재가입이 불가능합니다.</p>" +
+                    "<p>탈퇴 후에는 서비스 이용에 대한 모든 권리가 소멸됩니다.</p>" +
+                    "<p></p>" +
+                    "<p>탈퇴 신청 후, 30일 이후에" +
+                    "<p>계정 삭제가 완료되며</p>" +
+                    "<p>복구 및 동일 이메일로 재가입이 불가능합니다.</p>" +
+                    "<p></p>" +
                     "<p>작성한 댓글의 닉네임이 “알수없음”으로 표시됩니다.</p>" +
+                    "<p></p>" +
                     "<a href='http://kkm-shortnews.shop/validate/" + authCode + "' " +
                     "style='background-color: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px;'>" +
                     "탈퇴하기</a>";
