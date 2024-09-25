@@ -205,7 +205,7 @@ public class User {
     }
 
     public void hardDelete() {
-        this.nickname = "탈퇴한 사용자";
+        this.nickname = "알수없음";
         this.birthday = null;
         this.sex = null;
     }
