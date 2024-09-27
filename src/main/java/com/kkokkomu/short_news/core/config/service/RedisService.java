@@ -31,8 +31,9 @@ public class RedisService {
     public void incrementRankingByView(News news) {
         String categoryKey = String.format(NEWS_RANKING_KEY, news.getCategory().name().toLowerCase());
         String globalKey = GLOBAL_RANKING_KEY;
-        String viewKey = NEWS_VIEW_COUNT_PREFIX + news.getId();
-        redisTemplate.opsForValue().increment(viewKey);
+
+        incrementViewCount(news.getId());
+
         increaseScore(news.getId(), VIEW_WEIGHT, categoryKey);
         increaseScore(news.getId(), VIEW_WEIGHT, globalKey);
     }
@@ -140,11 +141,11 @@ public class RedisService {
     public List<Long> getNewsIdsForMultipleCategories(List<ECategory> categories, Long cursorId, int size) {
         log.info("getNewsIdsForMultipleCategories");
         log.info("cursorId: " + cursorId);
-        Map<Long, Double> newsScores = new HashMap<>();
+        Map<Long, Double> newsScores = new TreeMap<>();
         for (ECategory category : categories) {
             String rankingKey = String.format(NEWS_RANKING_KEY, category.name().toLowerCase());
             Set<ZSetOperations.TypedTuple<String>> newsIdsWithScores = redisTemplate.opsForZSet()
-                    .reverseRangeByScoreWithScores(rankingKey, Double.NEGATIVE_INFINITY, cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, 0, size+1);
+                    .reverseRangeByScoreWithScores(rankingKey, Double.NEGATIVE_INFINITY, cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, 0, size + 1);
             if (newsIdsWithScores != null) {
                 log.info("{} newsIdsWithScores {}", rankingKey, newsIdsWithScores.size());
             }
@@ -152,15 +153,12 @@ public class RedisService {
             newsIdsWithScores.forEach(idWithScore ->
                     newsScores.put(Long.parseLong(idWithScore.getValue()), idWithScore.getScore()));
         }
-        log.info("newsScores {}",newsScores.size());
+        log.info("newsScores {}", newsScores.size());
 
-        // 정렬하고 상위 N개만 반환
-        return newsScores.entrySet().stream()
-                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
-                .map(Map.Entry::getKey)
-                .limit(size)
-                .collect(Collectors.toList());
+        // 중복 제거 및 정렬
+        return new ArrayList<>(newsScores.keySet()).subList(0, Math.min(newsScores.size(), size));
     }
+
 
     private double getScore(Long newsId) {
         return Optional.ofNullable(redisTemplate.opsForZSet().score(GLOBAL_RANKING_KEY, String.valueOf(newsId)))
