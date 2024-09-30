@@ -172,7 +172,6 @@ public class SearchNewsService {
         Double cursorScore = (cursorId != null) ? redisService.getGlobalNewsScore(cursorId) : null;
 
         // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
-        // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
         List<ZSetOperations.TypedTuple<String>> rankedNewsWithScores = redisService.getGlobalNewsRankingWithScores(cursorScore, cursorId, size + 1);
 
         List<Long> newsIds = rankedNewsWithScores.stream()
