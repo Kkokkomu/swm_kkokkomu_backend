@@ -22,6 +22,7 @@ import static com.kkokkomu.short_news.core.constant.RedisConstant.*;
 public class RedisService {
 
     private static final Logger log = LoggerFactory.getLogger(RedisService.class);
+
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
@@ -104,8 +105,8 @@ public class RedisService {
     public void applyRankingByShare(News news) {
         String categoryKey = String.format(NEWS_RANKING_KEY, news.getCategory().name().toLowerCase());
         String globalKey = GLOBAL_RANKING_KEY;
-        increaseScore(news.getId(), 0L, categoryKey);
-        increaseScore(news.getId(), 0L, globalKey);
+        increaseScore(news.getId(), 1L, categoryKey);
+        increaseScore(news.getId(), 1L, globalKey);
     }
 
     // 특정 뉴스 글로벌 랭킹
@@ -132,10 +133,30 @@ public class RedisService {
     }
 
     // 글로벌 랭킹 보드 반환
-    public Set<String> getGlobalNewsRanking(Double cursorScore, int size) {
-        return (cursorScore == null) ?
-                redisTemplate.opsForZSet().reverseRange(GLOBAL_RANKING_KEY, 0, size - 1) :
-                redisTemplate.opsForZSet().reverseRangeByScore(GLOBAL_RANKING_KEY, 0, cursorScore, 0, size);
+    public List<ZSetOperations.TypedTuple<String>> getGlobalNewsRankingWithScores(Double cursorScore, Long cursorId, int size) {
+        String key = GLOBAL_RANKING_KEY;
+
+        // 커서가 없을 경우 처음부터 조회
+        if (cursorScore == null && cursorId == null) {
+            return redisTemplate.opsForZSet().reverseRangeWithScores(key, 0, size - 1).stream()
+                    .collect(Collectors.toList());
+        }
+
+        // 커서가 있는 경우, 점수와 뉴스 ID를 기반으로 2차 정렬
+        Set<ZSetOperations.TypedTuple<String>> resultSet = redisTemplate.opsForZSet()
+                .reverseRangeByScoreWithScores(key, 0, cursorScore, 0, size);
+
+        return resultSet.stream()
+                .sorted((a, b) -> {
+                    int scoreComparison = b.getScore().compareTo(a.getScore());
+                    if (scoreComparison == 0) {
+                        // 점수가 같을 경우 뉴스 ID로 추가 정렬
+                        return Long.compare(Long.parseLong(b.getValue()), Long.parseLong(a.getValue()));
+                    }
+                    return scoreComparison;
+                })
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     public List<Long> getNewsIdsForMultipleCategories(List<ECategory> categories, Long cursorId, int size) {
