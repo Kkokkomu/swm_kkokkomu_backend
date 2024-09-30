@@ -17,15 +17,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.kkokkomu.short_news.core.constant.Constant.*;
@@ -83,10 +81,21 @@ public class SearchNewsService {
         Double cursorScore = (cursorId != null) ? redisService.getGlobalNewsScore(cursorId) : null;
 
         // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
-        List<Long> newsIds = redisService.getGlobalNewsRanking(cursorScore, size + 1) // 요청 사이즈보다 1개 더 많이
-                .stream()
-                .map(Long::parseLong)
+        List<ZSetOperations.TypedTuple<String>> rankedNewsWithScores = redisService.getGlobalNewsRankingWithScores(cursorScore, cursorId, size + 1);
+
+        // 로그로 ID와 점수를 출력
+        rankedNewsWithScores.forEach(tuple -> {
+            Long newsId = Long.parseLong(tuple.getValue());
+            Double score = tuple.getScore();
+            log.info("News ID: {}, Score: {}", newsId, score);
+        });
+
+        List<Long> newsIds = rankedNewsWithScores.stream()
+                .map(tuple -> Long.parseLong(tuple.getValue())) // 뉴스 ID 추출
                 .collect(Collectors.toList());
+        for (Long newsId : newsIds) {
+            log.info("News ID: {}", newsId);
+        }
 
         boolean isLast = newsIds.size() <= size;
         if (!isLast) {
@@ -100,7 +109,20 @@ public class SearchNewsService {
 
         // 데이터베이스에서 뉴스 상세 정보 조회
         List<News> newsList = newsRepository.findAllById(newsIds);
-        List<NewsInfoDto> newsInfoDtos = getNewsInfo(newsList, userId);
+
+        // 뉴스 ID의 순서에 맞춰 리스트를 정렬
+        Map<Long, News> newsMap = newsList.stream()
+                .collect(Collectors.toMap(News::getId, news -> news));  // ID를 키로 하는 맵으로 변환
+
+        List<News> sortedNewsList = newsIds.stream()
+                .map(newsMap::get)  // newsIds의 순서에 맞춰 맵에서 뉴스 객체를 가져옴
+                .toList();
+
+
+        List<NewsInfoDto> newsInfoDtos = getNewsInfo(sortedNewsList, userId);
+        for (NewsInfoDto newsInfoDto : newsInfoDtos) {
+            log.info("News Info: {}", newsInfoDto.info().news().id());
+        }
 
         // 커서 정보 계산
         CursorInfoDto cursorInfoDto = CursorInfoDto.builder()
@@ -150,9 +172,11 @@ public class SearchNewsService {
         Double cursorScore = (cursorId != null) ? redisService.getGlobalNewsScore(cursorId) : null;
 
         // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
-        List<Long> newsIds = redisService.getGlobalNewsRanking(cursorScore, size + 1) // 요청 사이즈보다 1개 더 많이
-                .stream()
-                .map(Long::parseLong)
+        // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
+        List<ZSetOperations.TypedTuple<String>> rankedNewsWithScores = redisService.getGlobalNewsRankingWithScores(cursorScore, cursorId, size + 1);
+
+        List<Long> newsIds = rankedNewsWithScores.stream()
+                .map(tuple -> Long.parseLong(tuple.getValue())) // 뉴스 ID 추출
                 .collect(Collectors.toList());
 
         boolean isLast = newsIds.size() <= size;
@@ -166,9 +190,23 @@ public class SearchNewsService {
         }
 
         // 데이터베이스에서 뉴스 상세 정보 조회
+        // 데이터베이스에서 뉴스 상세 정보 조회
         List<News> newsList = newsRepository.findAllById(newsIds);
 
-        List<GuestNewsInfoDto> newsInfoDtos = getGuestNewsInfo(newsList);
+        // 뉴스 ID의 순서에 맞춰 리스트를 정렬
+        Map<Long, News> newsMap = newsList.stream()
+                .collect(Collectors.toMap(News::getId, news -> news));  // ID를 키로 하는 맵으로 변환
+
+        List<News> sortedNewsList = newsIds.stream()
+                .map(newsMap::get)  // newsIds의 순서에 맞춰 맵에서 뉴스 객체를 가져옴
+                .toList();
+
+
+        List<GuestNewsInfoDto> newsInfoDtos = getGuestNewsInfo(sortedNewsList);
+        for (GuestNewsInfoDto newsInfoDto : newsInfoDtos) {
+            log.info("News Info: {}", newsInfoDto.info().news().id());
+        }
+
         // 커서 정보 계산
         CursorInfoDto cursorInfoDto = CursorInfoDto.builder()
                 .size(size)
