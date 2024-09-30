@@ -105,8 +105,8 @@ public class RedisService {
     public void applyRankingByShare(News news) {
         String categoryKey = String.format(NEWS_RANKING_KEY, news.getCategory().name().toLowerCase());
         String globalKey = GLOBAL_RANKING_KEY;
-        increaseScore(news.getId(), 0L, categoryKey);
-        increaseScore(news.getId(), 0L, globalKey);
+        increaseScore(news.getId(), 1L, categoryKey);
+        increaseScore(news.getId(), 1L, globalKey);
     }
 
     // 특정 뉴스 글로벌 랭킹
