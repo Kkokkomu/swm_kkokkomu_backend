@@ -202,9 +202,6 @@ public class SearchNewsService {
 
 
         List<GuestNewsInfoDto> newsInfoDtos = getGuestNewsInfo(sortedNewsList);
-        for (GuestNewsInfoDto newsInfoDto : newsInfoDtos) {
-            log.info("News Info: {}", newsInfoDto.info().news().id());
-        }
 
         // 커서 정보 계산
         CursorInfoDto cursorInfoDto = CursorInfoDto.builder()
