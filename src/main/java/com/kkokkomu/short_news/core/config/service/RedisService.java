@@ -101,8 +101,8 @@ public class RedisService {
         increaseScore(news.getId(), SHARE_WEIGHT, globalKey);
     }
 
-    // 공유 수 증가 시 랭킹 업데이트
-    public void applyRankingByShare(News news) {
+    // 뉴스 생성 시 랭킹 등록
+    public void applyRankingByGenerate(News news) {
         String categoryKey = String.format(NEWS_RANKING_KEY, news.getCategory().name().toLowerCase());
         String globalKey = GLOBAL_RANKING_KEY;
         increaseScore(news.getId(), 1L, categoryKey);
@@ -136,16 +136,34 @@ public class RedisService {
     public List<ZSetOperations.TypedTuple<String>> getGlobalNewsRankingWithScores(Double cursorScore, Long cursorId, int size) {
         String key = GLOBAL_RANKING_KEY;
 
+        Set<ZSetOperations.TypedTuple<String>> resultSet;
+
         // 커서가 없을 경우 처음부터 조회
         if (cursorScore == null && cursorId == null) {
-            return redisTemplate.opsForZSet().reverseRangeWithScores(key, 0, size - 1).stream()
-                    .collect(Collectors.toList());
+            resultSet = redisTemplate.opsForZSet().reverseRangeWithScores(key, 0, size - 1);
+            log.info("No cursor - fetching top {} results", size);
+        } else {
+            log.info("cursorID : {}", cursorId);
+
+            // 커서가 있는 경우, 점수와 뉴스 ID를 기반으로 조회
+            resultSet = redisTemplate.opsForZSet()
+                    .reverseRangeByScoreWithScores(key, Double.NEGATIVE_INFINITY, cursorScore, 0, size + 1); // 하나 더 가져옴
+
+            // 점수가 같은 경우 커서 ID 이후의 데이터만 필터링
+            resultSet = resultSet.stream()
+                    .filter(tuple -> {
+                        if (tuple.getScore().equals(cursorScore)) {
+                            // 점수가 같으면 커서 ID보다 큰 ID만 가져옴
+                            return Long.parseLong(tuple.getValue()) < cursorId;
+                        }
+                        return true;
+                    })
+                    .collect(Collectors.toSet());
+
+            log.info("resultSet size after filtering: {}", resultSet.size());
         }
 
-        // 커서가 있는 경우, 점수와 뉴스 ID를 기반으로 2차 정렬
-        Set<ZSetOperations.TypedTuple<String>> resultSet = redisTemplate.opsForZSet()
-                .reverseRangeByScoreWithScores(key, 0, cursorScore, 0, size);
-
+        // 중복 방지를 위한 ID 기반 2차 정렬 수행
         return resultSet.stream()
                 .sorted((a, b) -> {
                     int scoreComparison = b.getScore().compareTo(a.getScore());
@@ -159,24 +177,37 @@ public class RedisService {
                 .collect(Collectors.toList());
     }
 
+
+
     public List<Long> getNewsIdsForMultipleCategories(List<ECategory> categories, Long cursorId, int size) {
         log.info("getNewsIdsForMultipleCategories");
         log.info("cursorId: " + cursorId);
-        Map<Long, Double> newsScores = new TreeMap<>();
+        Map<Long, Double> newsScores = new TreeMap<>(); // 중복 제거 및 자동 정렬
+
         for (ECategory category : categories) {
             String rankingKey = String.format(NEWS_RANKING_KEY, category.name().toLowerCase());
             Set<ZSetOperations.TypedTuple<String>> newsIdsWithScores = redisTemplate.opsForZSet()
-                    .reverseRangeByScoreWithScores(rankingKey, Double.NEGATIVE_INFINITY, cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, 0, size + 1);
+                    .reverseRangeByScoreWithScores(rankingKey, Double.NEGATIVE_INFINITY,
+                            cursorId == null ? Double.POSITIVE_INFINITY : getScore(cursorId) - 1, 0, size + 1);
+
             if (newsIdsWithScores != null) {
                 log.info("{} newsIdsWithScores {}", rankingKey, newsIdsWithScores.size());
             }
 
-            newsIdsWithScores.forEach(idWithScore ->
-                    newsScores.put(Long.parseLong(idWithScore.getValue()), idWithScore.getScore()));
+            newsIdsWithScores.forEach(idWithScore -> {
+                Long newsId = Long.parseLong(idWithScore.getValue());
+                Double score = idWithScore.getScore();
+
+                // 중복 제거와 동시에 cursorId 필터링
+                if (cursorId == null || !score.equals(getScore(cursorId)) || newsId < cursorId) {
+                    newsScores.put(newsId, score);
+                }
+            });
         }
+
         log.info("newsScores {}", newsScores.size());
 
-        // 중복 제거 및 정렬
+        // 중복 제거 및 정렬 후 반환
         return new ArrayList<>(newsScores.keySet()).subList(0, Math.min(newsScores.size(), size));
     }
 

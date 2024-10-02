@@ -286,13 +286,11 @@ public class AdminNewsService {
                     category
             );
 
-
-
             news = newsRepository.save(news);
 
             // 랭키보드 등록
             log.info("apply redis {}", news.getId());
-            redisService.applyRankingByShare(news);
+            redisService.applyRankingByGenerate(news);
 
             generateNewsDtos.add(
                     GenerateNewsDto.builder()

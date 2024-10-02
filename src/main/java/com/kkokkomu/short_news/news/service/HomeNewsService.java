@@ -26,6 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -84,7 +88,7 @@ public class HomeNewsService {
         log.info("newsListDtos: " + newsListDtos);
 
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
-    } // 숏폼 리스트 조회
+    } // 숏폼 리스트 최신순 조회
 
     @Transactional
     public PagingResponseDto<List<NewsInfoDto>> readNewsPopularList(Long userId, Long cursorId, int size) {
@@ -105,10 +109,21 @@ public class HomeNewsService {
 
         // 레디스에서 카테고리별 뉴스 랭킹 조회
         List<Long> newsIds = redisService.getNewsIdsForMultipleCategories(categories, cursorId, size+1);
+        for (Long newsId : newsIds) {
+            log.info("newsId: " + newsId);
+        }
 
         // 데이터베이스에서 뉴스 상세 정보 조회
         List<News> news = newsRepository.findAllById(newsIds);
-        List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(news, userId);
+
+        // newsIds의 순서를 유지하면서 news를 재정렬
+        Map<Long, News> newsMap = news.stream().collect(Collectors.toMap(News::getId, Function.identity()));
+        List<News> orderedNews = newsIds.stream()
+                .map(newsMap::get)
+                .filter(Objects::nonNull) // null 방지
+                .toList();
+
+        List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(orderedNews, userId);
 
         // 페이지 정보 계산 (isLast 판단 포함)
         boolean isLast = news.size() <= size;
@@ -120,7 +135,7 @@ public class HomeNewsService {
         PageInfoDto pageInfo = new PageInfoDto(0,size,0, isLast);
 
         return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
-    } // 숏폼 리스트 조회
+    } // 숏폼 리스트 인기순 조회
 
     @Transactional
     public PagingResponseDto<List<GuestNewsInfoDto>> guestReadNewsList(Long cursorId, int size) {

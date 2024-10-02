@@ -79,9 +79,11 @@ public class SearchNewsService {
 
         // 커서 아이디에 해당하는 뉴스의 점수를 레디스에서 조회
         Double cursorScore = (cursorId != null) ? redisService.getGlobalNewsScore(cursorId) : null;
+        log.info("cursorId global score {}", cursorScore);
 
         // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
         List<ZSetOperations.TypedTuple<String>> rankedNewsWithScores = redisService.getGlobalNewsRankingWithScores(cursorScore, cursorId, size + 1);
+        log.info("rankedNewsWithScores size: {}", rankedNewsWithScores.size());
 
         // 로그로 ID와 점수를 출력
         rankedNewsWithScores.forEach(tuple -> {
@@ -93,9 +95,9 @@ public class SearchNewsService {
         List<Long> newsIds = rankedNewsWithScores.stream()
                 .map(tuple -> Long.parseLong(tuple.getValue())) // 뉴스 ID 추출
                 .collect(Collectors.toList());
-        for (Long newsId : newsIds) {
-            log.info("News ID: {}", newsId);
-        }
+//        for (Long newsId : newsIds) {
+//            log.info("News ID: {}", newsId);
+//        }
 
         boolean isLast = newsIds.size() <= size;
         if (!isLast) {
@@ -120,9 +122,9 @@ public class SearchNewsService {
 
 
         List<NewsInfoDto> newsInfoDtos = getNewsInfo(sortedNewsList, userId);
-        for (NewsInfoDto newsInfoDto : newsInfoDtos) {
-            log.info("News Info: {}", newsInfoDto.info().news().id());
-        }
+//        for (NewsInfoDto newsInfoDto : newsInfoDtos) {
+//            log.info("News Info: {}", newsInfoDto.info().news().id());
+//        }
 
         // 커서 정보 계산
         CursorInfoDto cursorInfoDto = CursorInfoDto.builder()
@@ -173,6 +175,7 @@ public class SearchNewsService {
 
         // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
         List<ZSetOperations.TypedTuple<String>> rankedNewsWithScores = redisService.getGlobalNewsRankingWithScores(cursorScore, cursorId, size + 1);
+        log.info("rankedNewsWithScores size: {}", rankedNewsWithScores.size());
 
         List<Long> newsIds = rankedNewsWithScores.stream()
                 .map(tuple -> Long.parseLong(tuple.getValue())) // 뉴스 ID 추출
@@ -188,7 +191,6 @@ public class SearchNewsService {
             return new CursorResponseDto<>(Collections.emptyList(), CursorInfoDto.builder().size(size).isLast(true).build());
         }
 
-        // 데이터베이스에서 뉴스 상세 정보 조회
         // 데이터베이스에서 뉴스 상세 정보 조회
         List<News> newsList = newsRepository.findAllById(newsIds);
 
