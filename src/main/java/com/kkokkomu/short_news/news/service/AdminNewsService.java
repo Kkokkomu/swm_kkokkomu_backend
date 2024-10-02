@@ -159,7 +159,12 @@ public class AdminNewsService {
                     category
             );
 
+            // 해당 카테고리에 대한
             redisService.normalizeCategoryScores(news.getCategory());
+
+            // 랭키보드 등록
+            log.info("apply redis {}", news.getId());
+            redisService.applyRankingByGenerate(news);
 
             news = newsRepository.save(news);
 
@@ -289,6 +294,9 @@ public class AdminNewsService {
             );
 
             news = newsRepository.save(news);
+
+            // 해당 카테고리에 대한
+            redisService.normalizeCategoryScores(news.getCategory());
 
             // 랭키보드 등록
             log.info("apply redis {}", news.getId());
