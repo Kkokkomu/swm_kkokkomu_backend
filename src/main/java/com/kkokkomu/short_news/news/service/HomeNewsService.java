@@ -109,6 +109,9 @@ public class HomeNewsService {
 
         // 레디스에서 카테고리별 뉴스 랭킹 조회
         List<Long> newsIds = redisService.getNewsIdsForMultipleCategories(categories, cursorId, size+1);
+        for (Long newsId : newsIds) {
+            log.info("newsId: " + newsId);
+        }
 
         // 데이터베이스에서 뉴스 상세 정보 조회
         List<News> news = newsRepository.findAllById(newsIds);
@@ -120,7 +123,7 @@ public class HomeNewsService {
                 .filter(Objects::nonNull) // null 방지
                 .toList();
 
-        List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(news, userId);
+        List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(orderedNews, userId);
 
         // 페이지 정보 계산 (isLast 판단 포함)
         boolean isLast = news.size() <= size;
