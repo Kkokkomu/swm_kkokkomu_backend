@@ -149,6 +149,26 @@ public class RedisService {
         }
     }
 
+    // 모든 카테고리 랭킹에 대해 초기화
+    public void normalizeALLCategoryScores() {
+        Set<ZSetOperations.TypedTuple<String>> topNews = redisTemplate.opsForZSet().reverseRangeWithScores(GLOBAL_RANKING_KEY, 0, 0);
+        Double topScore = topNews.stream().findFirst().get().getScore();
+
+        for (ECategory category : ECategory.values()) {
+            String categoryKey = String.format(NEWS_RANKING_KEY, category.name().toLowerCase());
+
+            if (topNews != null && !topNews.isEmpty()) {
+                if (topScore != null) {
+                    redisTemplate.opsForZSet().rangeWithScores(categoryKey, 0, -1).forEach(news -> {
+                        Double currentScore = news.getScore();
+                        Long newsId = Long.valueOf(Objects.requireNonNull(news.getValue()));
+                        redisTemplate.opsForZSet().add(categoryKey, String.valueOf(newsId), currentScore - topScore);
+                    });
+                }
+            }
+        }
+    }
+
     // 글로벌 랭킹 보드 반환
     public List<ZSetOperations.TypedTuple<String>> getGlobalNewsRankingWithScores(Double cursorScore, Long cursorId, int size) {
         String key = GLOBAL_RANKING_KEY;
@@ -194,12 +214,10 @@ public class RedisService {
                 .collect(Collectors.toList());
     }
 
-
-
     public List<Long> getNewsIdsForMultipleCategories(List<ECategory> categories, Long cursorId, int size) {
         log.info("getNewsIdsForMultipleCategories");
         log.info("cursorId: " + cursorId);
-        Map<Long, Double> newsScores = new TreeMap<>(); // 중복 제거 및 자동 정렬
+        Map<Long, Double> newsScores = new HashMap<>(); // 점수 기반 정렬을 위해 HashMap 사용
 
         for (ECategory category : categories) {
             String rankingKey = String.format(NEWS_RANKING_KEY, category.name().toLowerCase());
@@ -209,6 +227,9 @@ public class RedisService {
 
             if (newsIdsWithScores != null) {
                 log.info("{} newsIdsWithScores {}", rankingKey, newsIdsWithScores.size());
+            }
+            for (ZSetOperations.TypedTuple<String> newsId : newsIdsWithScores) {
+                log.info("{} newsId value {}, newsId score {}", rankingKey, newsId.getValue(), newsId.getScore());
             }
 
             newsIdsWithScores.forEach(idWithScore -> {
@@ -224,7 +245,16 @@ public class RedisService {
 
         log.info("newsScores {}", newsScores.size());
 
-        return new ArrayList<>(newsScores.keySet()).subList(0, Math.min(newsScores.size(), size));
+        // 점수 기준으로 내림차순 정렬
+        List<Map.Entry<Long, Double>> sortedNewsList = newsScores.entrySet().stream()
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue())) // 점수 기준으로 내림차순
+                .collect(Collectors.toList());
+
+        // 정렬된 리스트에서 뉴스 ID만 추출하여 반환
+        return sortedNewsList.stream()
+                .map(Map.Entry::getKey)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
 
@@ -232,7 +262,6 @@ public class RedisService {
         return Optional.ofNullable(redisTemplate.opsForZSet().score(GLOBAL_RANKING_KEY, String.valueOf(newsId)))
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
     }
-
 
     /****** 뉴스 조회수 ******/
 
