@@ -110,6 +110,9 @@ public class AdminNewsService {
         // 레디스 글로벌 랭킹 초기화
         redisService.normalizeScores();
 
+        // 레디스 카테고리 랭킹 초기화
+        redisService.normalizeALLCategoryScores();
+
         // 영상 생성 서버에서 영상 url 및 정보 받아옴
         ObjectMapper objectMapper = new ObjectMapper();
         List<GenerateNewsDto> generateNewsDtos = new ArrayList<>();
@@ -158,9 +161,6 @@ public class AdminNewsService {
                     summary,
                     category
             );
-
-            // 해당 카테고리에 대한
-            redisService.normalizeCategoryScores(news.getCategory());
 
             // 랭키보드 등록
             log.info("apply redis {}", news.getId());
@@ -244,8 +244,12 @@ public class AdminNewsService {
         // 영상 생성 서버에서 영상 url 및 정보 받아옴
         ObjectMapper objectMapper = new ObjectMapper();
         List<GenerateNewsDto> generateNewsDtos = new ArrayList<>();
+
         // 레디스 랭킹 초기화
         redisService.normalizeScores();
+
+        // 레디스 카테고리 랭킹 초기화
+        redisService.normalizeALLCategoryScores();
 
         for (int i = 0; i < idList.size(); i++) {
             // 인덱스에 맞는 임시 뉴스 객체
