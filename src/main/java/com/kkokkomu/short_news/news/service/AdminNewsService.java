@@ -107,6 +107,9 @@ public class AdminNewsService {
         log.info("response data : {}", (Object) Objects.requireNonNull(response.getBody()));
         GenerateResponseDto[] generateResponseDtos = response.getBody();
 
+        // 레디스 글로벌 랭킹 초기화
+        redisService.normalizeScores();
+
         // 영상 생성 서버에서 영상 url 및 정보 받아옴
         ObjectMapper objectMapper = new ObjectMapper();
         List<GenerateNewsDto> generateNewsDtos = new ArrayList<>();
@@ -156,8 +159,12 @@ public class AdminNewsService {
                     category
             );
 
-            // 레디스 랭킹 초기화
-            redisService.normalizeScores();
+            // 해당 카테고리에 대한
+            redisService.normalizeCategoryScores(news.getCategory());
+
+            // 랭키보드 등록
+            log.info("apply redis {}", news.getId());
+            redisService.applyRankingByGenerate(news);
 
             news = newsRepository.save(news);
 
@@ -286,13 +293,14 @@ public class AdminNewsService {
                     category
             );
 
-
-
             news = newsRepository.save(news);
+
+            // 해당 카테고리에 대한
+            redisService.normalizeCategoryScores(news.getCategory());
 
             // 랭키보드 등록
             log.info("apply redis {}", news.getId());
-            redisService.applyRankingByShare(news);
+            redisService.applyRankingByGenerate(news);
 
             generateNewsDtos.add(
                     GenerateNewsDto.builder()
