@@ -210,6 +210,9 @@ public class RedisService {
             if (newsIdsWithScores != null) {
                 log.info("{} newsIdsWithScores {}", rankingKey, newsIdsWithScores.size());
             }
+            for (ZSetOperations.TypedTuple<String> newsId : newsIdsWithScores) {
+                log.info("{} newsId value {}, newsId score{}", rankingKey, newsId.getValue(), newsId.getScore());
+            }
 
             newsIdsWithScores.forEach(idWithScore -> {
                 Long newsId = Long.parseLong(idWithScore.getValue());
