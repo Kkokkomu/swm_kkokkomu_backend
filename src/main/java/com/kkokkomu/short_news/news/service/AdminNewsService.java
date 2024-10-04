@@ -160,6 +160,9 @@ public class AdminNewsService {
             );
 
             // 해당 카테고리에 대한
+            for (ECategory category1 : ECategory.values()) {
+
+            }
             redisService.normalizeCategoryScores(news.getCategory());
 
             // 랭키보드 등록

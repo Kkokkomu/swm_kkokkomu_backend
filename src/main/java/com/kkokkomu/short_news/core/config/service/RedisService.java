@@ -149,6 +149,23 @@ public class RedisService {
         }
     }
 
+    // 모든 카테고리 랭킹에 대해 초기화
+//    public void normalizeCategoryScores(ECategory category) {
+//        String categoryKey = String.format(NEWS_RANKING_KEY, category.name().toLowerCase());
+//
+//        Set<ZSetOperations.TypedTuple<String>> topNews = redisTemplate.opsForZSet().reverseRangeWithScores(categoryKey, 0, 0);
+//        if (topNews != null && !topNews.isEmpty()) {
+//            Double topScore = topNews.stream().findFirst().get().getScore();
+//            if (topScore != null) {
+//                redisTemplate.opsForZSet().rangeWithScores(categoryKey, 0, -1).forEach(news -> {
+//                    Double currentScore = news.getScore();
+//                    Long newsId = Long.valueOf(Objects.requireNonNull(news.getValue()));
+//                    redisTemplate.opsForZSet().add(categoryKey, String.valueOf(newsId), currentScore - topScore);
+//                });
+//            }
+//        }
+//    }
+
     // 글로벌 랭킹 보드 반환
     public List<ZSetOperations.TypedTuple<String>> getGlobalNewsRankingWithScores(Double cursorScore, Long cursorId, int size) {
         String key = GLOBAL_RANKING_KEY;
