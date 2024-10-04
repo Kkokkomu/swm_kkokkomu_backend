@@ -116,13 +116,15 @@ public class HomeNewsService {
         // 데이터베이스에서 뉴스 상세 정보 조회
         List<News> news = newsRepository.findAllById(newsIds);
 
-        // newsIds의 순서를 유지하면서 news를 재정렬
+        // newsIds의 순서를 유지하면서 news를 재정렬d
         Map<Long, News> newsMap = news.stream().collect(Collectors.toMap(News::getId, Function.identity()));
         List<News> orderedNews = newsIds.stream()
                 .map(newsMap::get)
                 .filter(Objects::nonNull) // null 방지
                 .toList();
-
+        for (News n : orderedNews) {
+            log.info("orderedNews: " + n);
+        }
         List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(orderedNews, userId);
 
         // 페이지 정보 계산 (isLast 판단 포함)

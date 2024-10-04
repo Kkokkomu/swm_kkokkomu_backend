@@ -210,6 +210,9 @@ public class RedisService {
             if (newsIdsWithScores != null) {
                 log.info("{} newsIdsWithScores {}", rankingKey, newsIdsWithScores.size());
             }
+            for (ZSetOperations.TypedTuple<String> newsId : newsIdsWithScores) {
+                log.info("{} newsId value {}, newsId score{}", rankingKey, newsId.getValue(), newsId.getScore());
+            }
 
             newsIdsWithScores.forEach(idWithScore -> {
                 Long newsId = Long.parseLong(idWithScore.getValue());
@@ -224,7 +227,6 @@ public class RedisService {
 
         log.info("newsScores {}", newsScores.size());
 
-        // 중복 제거 및 정렬 후 반환
         return new ArrayList<>(newsScores.keySet()).subList(0, Math.min(newsScores.size(), size));
     }
 
