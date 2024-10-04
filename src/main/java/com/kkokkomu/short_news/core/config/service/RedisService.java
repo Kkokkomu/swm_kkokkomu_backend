@@ -224,7 +224,6 @@ public class RedisService {
 
         log.info("newsScores {}", newsScores.size());
 
-        // 중복 제거 및 정렬 후 반환
         return new ArrayList<>(newsScores.keySet()).subList(0, Math.min(newsScores.size(), size));
     }
 
