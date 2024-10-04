@@ -194,12 +194,10 @@ public class RedisService {
                 .collect(Collectors.toList());
     }
 
-
-
     public List<Long> getNewsIdsForMultipleCategories(List<ECategory> categories, Long cursorId, int size) {
         log.info("getNewsIdsForMultipleCategories");
         log.info("cursorId: " + cursorId);
-        Map<Long, Double> newsScores = new TreeMap<>(); // 중복 제거 및 자동 정렬
+        Map<Long, Double> newsScores = new HashMap<>(); // 점수 기반 정렬을 위해 HashMap 사용
 
         for (ECategory category : categories) {
             String rankingKey = String.format(NEWS_RANKING_KEY, category.name().toLowerCase());
@@ -211,7 +209,7 @@ public class RedisService {
                 log.info("{} newsIdsWithScores {}", rankingKey, newsIdsWithScores.size());
             }
             for (ZSetOperations.TypedTuple<String> newsId : newsIdsWithScores) {
-                log.info("{} newsId value {}, newsId score{}", rankingKey, newsId.getValue(), newsId.getScore());
+                log.info("{} newsId value {}, newsId score {}", rankingKey, newsId.getValue(), newsId.getScore());
             }
 
             newsIdsWithScores.forEach(idWithScore -> {
@@ -227,7 +225,16 @@ public class RedisService {
 
         log.info("newsScores {}", newsScores.size());
 
-        return new ArrayList<>(newsScores.keySet()).subList(0, Math.min(newsScores.size(), size));
+        // 점수 기준으로 내림차순 정렬
+        List<Map.Entry<Long, Double>> sortedNewsList = newsScores.entrySet().stream()
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue())) // 점수 기준으로 내림차순
+                .collect(Collectors.toList());
+
+        // 정렬된 리스트에서 뉴스 ID만 추출하여 반환
+        return sortedNewsList.stream()
+                .map(Map.Entry::getKey)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
 
@@ -235,7 +242,6 @@ public class RedisService {
         return Optional.ofNullable(redisTemplate.opsForZSet().score(GLOBAL_RANKING_KEY, String.valueOf(newsId)))
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR));
     }
-
 
     /****** 뉴스 조회수 ******/
 
