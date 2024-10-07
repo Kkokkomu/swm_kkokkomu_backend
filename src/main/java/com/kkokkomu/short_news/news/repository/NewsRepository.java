@@ -54,6 +54,31 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             Pageable pageable
     );
 
+    // 카테고리별 인기순 홈화면 뉴스 조회
+    @Query("""
+    SELECT n FROM News n 
+    WHERE ((n.score < :score) OR (n.score = :score AND n.id > :cursorId))
+    AND n.category IN :categories
+    ORDER BY n.score DESC, n.id
+    """)
+    Page<News> findByAllOrderByScoreAndCategoryDesc(
+            @Param("categories") List<ECategory> category,
+            @Param("cursorId") Long cursorId,
+            @Param("score") Double score,
+            Pageable pageable
+    );
+
+    // 카테고리별 인기순 홈화면 뉴스 조회 초기화
+    @Query("""
+    SELECT n FROM News n 
+    WHERE n.category IN :categories
+    ORDER BY n.score DESC, n.id
+    """)
+    Page<News> findByAllOrderByScoreAndCategoryDescFirst(
+            @Param("categories") List<ECategory> category,
+            Pageable pageable
+    );
+
     /****************** 뉴스 시청 기록 *************************/
 
     // 시청했던 뉴스 조회
@@ -156,8 +181,8 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     // 인기순 탐색 쿼리
     @Query("""
     SELECT n FROM News n 
-    WHERE (n.score < :score) OR (n.score = :score AND n.id < :cursorId)
-    ORDER BY n.score DESC, n.id DESC
+    WHERE (n.score < :score) OR (n.score = :score AND n.id > :cursorId)
+    ORDER BY n.score DESC, n.id
     """)
     Page<News> findByAllOrderByScoreDesc(
             @Param("cursorId") Long cursorId,
@@ -168,7 +193,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     // 인기순 탐색 쿼리 초기화
     @Query("""
     SELECT n FROM News n 
-    ORDER BY n.score DESC, n.id DESC
+    ORDER BY n.score DESC, n.id
     """)
     Page<News> findByAllOrderByScoreDescFirst(
             Pageable pageable
