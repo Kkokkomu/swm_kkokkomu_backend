@@ -232,50 +232,30 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     );
 
     @Query(value = """
-    SELECT n.*, 
-           (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.shared_cnt * :shareWeight +
-            TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) AS popularity_score
-    FROM news n
-    LEFT JOIN comment c ON n.id = c.news_id
-    LEFT JOIN news_reaction r ON n.id = r.news_id
-    WHERE n.category IN :categories
-    AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+    SELECT n FROM News n 
+    WHERE ((n.score < :score) OR (n.score = :score AND n.id > :cursorId))
+      AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
-    GROUP BY n.id
-    HAVING popularity_score <= :cursorScore
-    ORDER BY popularity_score DESC, n.id DESC
+    AND n.category IN :categories
+    ORDER BY n.score DESC, n.id
     """, nativeQuery = true)
     Page<News> findByKeywordOrderByPopularity(
             @Param("categories") List<String> categories,
-            @Param("viewWeight") double viewWeight,
-            @Param("commentWeight") double commentWeight,
-            @Param("reactionWeight") double reactionWeight,
-            @Param("shareWeight") double shareWeight,
-            @Param("dateWeight") double dateWeight,
-            @Param("cursorScore") double cursorScore,
+            @Param("score") Double score,
             @Param("keyword") String keyword,
             Pageable pageable
     );
 
     // 인기순 검색 초기화
     @Query(value = """
-    SELECT n.* FROM news n
-    LEFT JOIN comment c ON n.id = c.news_id
-    LEFT JOIN news_reaction r ON n.id = r.news_id
-    WHERE n.category IN :categories
-    AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    SELECT n FROM News n 
+    WHERE (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
-    GROUP BY n.id
-    ORDER BY (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.shared_cnt * :shareWeight +
-    TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
+    AND n.category IN :categories
+    ORDER BY n.score DESC, n.id
     """, nativeQuery = true)
     Page<News> findFirstByKeywordOrderByPopularity(
             @Param("categories") List<String> categories,
-            @Param("viewWeight") double viewWeight,
-            @Param("commentWeight") double commentWeight,
-            @Param("reactionWeight") double reactionWeight,
-            @Param("shareWeight") double shareWeight,
-            @Param("dateWeight") double dateWeight,
             @Param("keyword") String keyword,
             Pageable pageable
     );

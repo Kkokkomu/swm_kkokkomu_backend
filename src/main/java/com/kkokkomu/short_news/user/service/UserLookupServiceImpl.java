@@ -35,4 +35,9 @@ public class UserLookupServiceImpl implements UserLookupService {
     public List<User> findAll() {
         return userRepository.findAll();
     }
+
+    @Override
+    public Boolean existsUser(Long userId) {
+        return userRepository.existsById(userId);
+    }
 }
