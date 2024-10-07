@@ -28,6 +28,16 @@ public class RedisService {
 
     /****** 뉴스 랭킹 ******/
 
+    // 글로벌 랭킹 초기화
+    public void deleteGlobalRank() {
+        redisTemplate.delete(GLOBAL_RANKING_KEY);
+    }
+
+    // 전체 랭킹 뉴스 아이디 및 점수 반환
+    public Set<ZSetOperations.TypedTuple<String>> getAllGlobalRank() {
+        return redisTemplate.opsForZSet().rangeWithScores(GLOBAL_RANKING_KEY, 0, -1);
+    }
+
     // 뉴스 조회수 증가 및 랭킹 업데이트
     public void incrementRankingByView(News news) {
         String categoryKey = String.format(NEWS_RANKING_KEY, news.getCategory().name().toLowerCase());

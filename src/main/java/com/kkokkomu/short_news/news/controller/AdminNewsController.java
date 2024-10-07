@@ -10,10 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,5 +33,12 @@ public class AdminNewsController {
     public ResponseDto<NewsDto> updateNews(@RequestBody UpdateNewsDto updateNewsDto) {
         log.info("updateNews controller");
         return ResponseDto.ok(adminNewsService.updateNews(updateNewsDto));
+    }
+
+    @PutMapping("/rank")
+    public String syncGlobalRank() {
+        log.info("syncGlobalRank controller");
+        adminNewsService.syncRanking();
+        return "success";
     }
 }

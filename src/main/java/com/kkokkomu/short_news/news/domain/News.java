@@ -55,6 +55,9 @@ public class News {
     @Column(name = "related_url")
     private String relatedUrl; // 관련 URL
 
+    @Column(name = "score", nullable = false, columnDefinition = "DOUBLE DEFAULT 0.0")
+    private Double score; // 인기순 점수
+
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments; // 댓글들
 
@@ -81,6 +84,7 @@ public class News {
         this.category = category;
         this.createdAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 설정
         this.editedAt = LocalDateTime.now(); // 초기값을 현재 시간으로 설정
+        this.score = 0.0;
     }
 
     public void update(String shortformUrl, String youtubeUrl, String instagramUrl, String relatedUrl, String thumbnail, String title, String summary, ECategory category) {
@@ -105,6 +109,10 @@ public class News {
 
     public void updateSharedCnt() {
         this.sharedCnt++;
+    }
+
+    public void updateScore(Double score) {
+        this.score = score;
     }
 
     public void updateViewCnt(int viewCnt) {
