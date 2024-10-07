@@ -55,5 +55,5 @@ public class NewsViewHistService {
             // Redis에서 시청 기록 삭제
             redisService.deleteNewsViewHistory(userId);
         }
-    }
+    } // 레디스로 부터 해당 유저의 뉴스 시청기록 디비에 동기화
 }

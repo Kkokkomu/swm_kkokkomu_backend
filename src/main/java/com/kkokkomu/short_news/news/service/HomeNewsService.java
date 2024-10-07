@@ -1,6 +1,8 @@
 package com.kkokkomu.short_news.news.service;
 
 import com.kkokkomu.short_news.core.config.service.RedisService;
+import com.kkokkomu.short_news.core.dto.CursorInfoDto;
+import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.dto.PageInfoDto;
 import com.kkokkomu.short_news.core.dto.PagingResponseDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
@@ -92,12 +94,7 @@ public class HomeNewsService {
 
     @Transactional
     public PagingResponseDto<List<NewsInfoDto>> readNewsPopularList(Long userId, Long cursorId, int size) {
-        User user = userLookupService.findUserById(userId);
-
-        // 커서 아이디에 해당하는 뉴스가 있는지 검사
-        if (cursorId != null && !newsRepository.existsById(cursorId)) {
-            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
-        }
+        log.info("readNewsPopularList service");
 
         // 유저가 설정한 카테고리 조회
         List<ECategory> categories = userCategoryService.findAllCategoriesByUserId(userId);
@@ -107,36 +104,27 @@ public class HomeNewsService {
             newsViewHistService.updateNewsHist(userId);
         }
 
-        // 레디스에서 카테고리별 뉴스 랭킹 조회
-        List<Long> newsIds = redisService.getNewsIdsForMultipleCategories(categories, cursorId, size+1);
-        for (Long newsId : newsIds) {
-            log.info("newsId: " + newsId);
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        // 인기순으로 조회
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) { // 첫 요청
+            results = newsRepository.findByAllOrderByScoreAndCategoryDescFirst(categories, pageRequest);
+        } else { // 두 번째 이후 요청
+            Double cursorScore = newsRepository.findById(cursorId)
+                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR))
+                    .getScore();
+
+            results = newsRepository.findByAllOrderByScoreAndCategoryDesc(categories, cursorId, cursorScore, pageRequest);
         }
+        news = results.getContent();
 
-        // 데이터베이스에서 뉴스 상세 정보 조회
-        List<News> news = newsRepository.findAllById(newsIds);
+        List<NewsInfoDto> newsDtos = searchNewsService.getNewsInfo(news, userId);
 
-        // newsIds의 순서를 유지하면서 news를 재정렬d
-        Map<Long, News> newsMap = news.stream().collect(Collectors.toMap(News::getId, Function.identity()));
-        List<News> orderedNews = newsIds.stream()
-                .map(newsMap::get)
-                .filter(Objects::nonNull) // null 방지
-                .toList();
-        for (News n : orderedNews) {
-            log.info("orderedNews: " + n);
-        }
-        List<NewsInfoDto> newsListDtos = searchNewsService.getNewsInfo(orderedNews, userId);
+        PageInfoDto pageInfo = PageInfoDto.fromPageInfo(results);
 
-        // 페이지 정보 계산 (isLast 판단 포함)
-        boolean isLast = news.size() <= size;
-        if (!isLast) {
-            // 마지막 아이템을 제거하여 실제 페이지 사이즈를 유지
-            newsIds.remove(newsIds.size() - 1);
-        }
-
-        PageInfoDto pageInfo = new PageInfoDto(0,size,0, isLast);
-
-        return PagingResponseDto.fromEntityAndPageInfo(newsListDtos, pageInfo);
+        return PagingResponseDto.fromEntityAndPageInfo(newsDtos, pageInfo);
     } // 숏폼 리스트 인기순 조회
 
     @Transactional

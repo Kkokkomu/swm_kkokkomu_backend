@@ -38,7 +38,6 @@ public class SearchNewsService {
 
     private final NewsLookupService newsLookupService;
     private final NewsReactionService newsReactionService;
-    private final RedisService redisService;
 
     private final CategoryUtil categoryUtil;
 
