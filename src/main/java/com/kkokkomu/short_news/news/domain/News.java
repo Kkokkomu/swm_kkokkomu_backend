@@ -111,6 +111,10 @@ public class News {
         this.sharedCnt++;
     }
 
+    public void updateScore(Double score) {
+        this.score = score;
+    }
+
     public void updateViewCnt(int viewCnt) {
         this.viewCnt += viewCnt;
     }

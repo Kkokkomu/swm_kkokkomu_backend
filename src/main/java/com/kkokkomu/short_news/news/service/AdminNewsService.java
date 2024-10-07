@@ -17,6 +17,7 @@ import com.kkokkomu.short_news.news.dto.news.response.*;
 import com.kkokkomu.short_news.news.repository.NewsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -338,5 +339,26 @@ public class AdminNewsService {
         return NewsDto.of(news);
     } // 뉴스 수정
 
-    // 영상 처리 내역 조회
+    public void syncRanking() {
+        Set<ZSetOperations.TypedTuple<String>> scores = redisService.getAllGlobalRank();
+
+        // 가져온 데이터를 처리하여 뉴스 엔티티의 점수를 업데이트
+        if (scores != null && !scores.isEmpty()) {
+            for (ZSetOperations.TypedTuple<String> score : scores) {
+                String idString = score.getValue();
+                Double rankScore = score.getScore();
+
+                // String ID를 Long으로 변환하여 데이터베이스에서 해당 News 엔티티를 찾음
+                Long newsId = Long.parseLong(idString);
+                News news = newsRepository.findById(newsId)
+                        .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
+
+                // 뉴스 엔티티의 점수를 업데이트
+                news.updateScore(news.getScore() + rankScore);
+                newsRepository.save(news);
+            }
+        }
+
+        redisService.deleteGlobalRank();
+    } // 레디스 글로벌 랭킹 db 동기화
 }

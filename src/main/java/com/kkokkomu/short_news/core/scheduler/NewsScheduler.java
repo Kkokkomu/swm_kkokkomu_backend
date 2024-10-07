@@ -74,6 +74,12 @@ public class NewsScheduler {
         homeNewsService.updateViewCnt();
     } // 뉴스 조회수 동기화
 
+    @Scheduled(fixedRate = 1200000) // 10분 마다
+    public void syncGlobalRankToDatabase() {
+        log.info("syncGlobalRankToDatabase");
+        adminNewsService.syncRanking();
+    } // 뉴스 전체 랭킹 동기화
+
     @Scheduled(cron = "0 0 4 * * ?") // 매일 새벽 4시에 실행
     public void syncAllUsersViewHistory() {
         log.info("syncAllUsersViewHistory");
