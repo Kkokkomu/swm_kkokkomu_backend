@@ -10,12 +10,14 @@ import java.util.List;
 public record SummaryHideUserDto(
         Long id,
         String userName,
+        String profileImg,
         String createdAt
 ) {
     static public SummaryHideUserDto of(HideUser hideUser) {
         return SummaryHideUserDto.builder()
                 .id(hideUser.getId())
                 .userName(hideUser.getHidedUser().getNickname())
+                .profileImg(hideUser.getHidedUser().getProfileImgs().get(0).getImgUrl())
                 .createdAt(hideUser.getCreatedAt().toString())
                 .build();
     }
