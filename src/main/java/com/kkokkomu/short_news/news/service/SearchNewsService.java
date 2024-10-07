@@ -77,62 +77,26 @@ public class SearchNewsService {
     public CursorResponseDto<List<NewsInfoDto>> getPopularNewsFilteredByCategory(Long cursorId, int size, Long userId) {
         log.info("getPopularNewsFilteredByCategory service");
 
-        // 커서 아이디에 해당하는 뉴스의 점수를 레디스에서 조회
-        Double cursorScore = (cursorId != null) ? redisService.getGlobalNewsScore(cursorId) : null;
-        log.info("cursorId global score {}", cursorScore);
+        PageRequest pageRequest = PageRequest.of(0, size);
 
-        // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
-        List<ZSetOperations.TypedTuple<String>> rankedNewsWithScores = redisService.getGlobalNewsRankingWithScores(cursorScore, cursorId, size + 1);
-        log.info("rankedNewsWithScores size: {}", rankedNewsWithScores.size());
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) { // 첫 요청
+            results = newsRepository.findByAllOrderByScoreDescFirst(pageRequest);
+        } else { // 두 번째 이후 요청
+            Double cursorScore = newsRepository.findById(cursorId)
+                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR))
+                    .getScore();
 
-        // 로그로 ID와 점수를 출력
-        rankedNewsWithScores.forEach(tuple -> {
-            Long newsId = Long.parseLong(tuple.getValue());
-            Double score = tuple.getScore();
-            log.info("News ID: {}, Score: {}", newsId, score);
-        });
-
-        List<Long> newsIds = rankedNewsWithScores.stream()
-                .map(tuple -> Long.parseLong(tuple.getValue())) // 뉴스 ID 추출
-                .collect(Collectors.toList());
-//        for (Long newsId : newsIds) {
-//            log.info("News ID: {}", newsId);
-//        }
-
-        boolean isLast = newsIds.size() <= size;
-        if (!isLast) {
-            // 마지막 아이템을 제거하여 실제 페이지 사이즈를 유지
-            newsIds.remove(newsIds.size() - 1);
+            results = newsRepository.findByAllOrderByScoreDesc(cursorId, cursorScore, pageRequest);
         }
+        news = results.getContent();
 
-        if (newsIds.isEmpty()) {
-            return new CursorResponseDto<>(Collections.emptyList(), CursorInfoDto.builder().size(size).isLast(true).build());
-        }
+        List<NewsInfoDto> newsDtos = getNewsInfo(news, userId);
 
-        // 데이터베이스에서 뉴스 상세 정보 조회
-        List<News> newsList = newsRepository.findAllById(newsIds);
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
-        // 뉴스 ID의 순서에 맞춰 리스트를 정렬
-        Map<Long, News> newsMap = newsList.stream()
-                .collect(Collectors.toMap(News::getId, news -> news));  // ID를 키로 하는 맵으로 변환
-
-        List<News> sortedNewsList = newsIds.stream()
-                .map(newsMap::get)  // newsIds의 순서에 맞춰 맵에서 뉴스 객체를 가져옴
-                .toList();
-
-
-        List<NewsInfoDto> newsInfoDtos = getNewsInfo(sortedNewsList, userId);
-//        for (NewsInfoDto newsInfoDto : newsInfoDtos) {
-//            log.info("News Info: {}", newsInfoDto.info().news().id());
-//        }
-
-        // 커서 정보 계산
-        CursorInfoDto cursorInfoDto = CursorInfoDto.builder()
-                .size(size)
-                .isLast(isLast)
-                .build();
-
-        return new CursorResponseDto<>(newsInfoDtos, cursorInfoDto);
+        return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 탐색 화면 카테고리 필터 인기순
 
     @Transactional(readOnly = true)
