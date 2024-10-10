@@ -206,7 +206,7 @@ public class SearchNewsService {
 
         PageRequest pageRequest = PageRequest.of(0, size);
 
-        List<String> categoryList = categoryUtil.getCategoryStringList(category);
+        List<ECategory> categoryList = categoryUtil.getCategoryList(category);
 
         List<News> news;
         Page<News> results;
@@ -271,7 +271,7 @@ public class SearchNewsService {
 
         PageRequest pageRequest = PageRequest.of(0, size);
 
-        List<String> categoryList = categoryUtil.getCategoryStringList(category);
+        List<ECategory> categoryList = categoryUtil.getCategoryList(category);
 
         List<News> news;
         Page<News> results;
