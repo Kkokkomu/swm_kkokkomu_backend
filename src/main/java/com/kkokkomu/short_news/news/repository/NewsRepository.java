@@ -240,7 +240,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     ORDER BY n.score DESC, n.id
     """)
     Page<News> findByKeywordOrderByPopularity(
-            @Param("categories") List<String> categories,
+            @Param("categories") List<ECategory> categories,
             @Param("score") Double score,
             @Param("keyword") String keyword,
             Pageable pageable
@@ -255,7 +255,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     ORDER BY n.score DESC, n.id
     """)
     Page<News> findFirstByKeywordOrderByPopularity(
-            @Param("categories") List<String> categories,
+            @Param("categories") List<ECategory> categories,
             @Param("keyword") String keyword,
             Pageable pageable
     );
