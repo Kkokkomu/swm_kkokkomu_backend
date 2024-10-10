@@ -77,7 +77,7 @@ public class SearchNewsController {
 
     @Operation(summary = "비로그인 뉴스 검색")
     @GetMapping("/guest")
-    public ResponseDto<CursorResponseDto<List<GuestNewsInfoDto>>> guestSearchNews(@Parameter(example = "popular,politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
+    public ResponseDto<CursorResponseDto<List<GuestNewsInfoDto>>> guestSearchNews(@Parameter(example = "politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
                                                                                @RequestParam String text,
                                                                                @RequestParam EHomeFilter filter,
                                                                                @RequestParam(required = false) Long cursorId,
