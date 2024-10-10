@@ -156,6 +156,7 @@ public class SearchNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 비로그인 탐색 화면 인기순
 
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<NewsInfoDto>> searchLatestNews(String category, String text, Long cursorId, int size, Long userId) {
         log.info("searchLatestNews service");
 
@@ -191,6 +192,7 @@ public class SearchNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 최신순 뉴스 검색
 
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<NewsInfoDto>> searchPopularNews(String category, String text, Long cursorId, int size, Long userId) {
         log.info("searchPopularNews service");
 
@@ -227,6 +229,7 @@ public class SearchNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 인기순 뉴스 검색
 
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<GuestNewsInfoDto>> guestSearchLatestNews(String category, String text, Long cursorId, int size) {
         log.info("searchLatestNews service");
 
@@ -258,6 +261,7 @@ public class SearchNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 비로그인 최신순 뉴스 검색
 
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<GuestNewsInfoDto>> guestSearchPopularNews(String category, String text, Long cursorId, int size) {
         log.info("searchPopularNews service");
 
