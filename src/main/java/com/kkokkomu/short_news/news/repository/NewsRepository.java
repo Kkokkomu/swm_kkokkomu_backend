@@ -238,7 +238,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
     AND n.category IN :categories
     ORDER BY n.score DESC, n.id
-    """, nativeQuery = true)
+    """)
     Page<News> findByKeywordOrderByPopularity(
             @Param("categories") List<String> categories,
             @Param("score") Double score,
@@ -253,7 +253,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
     AND n.category IN :categories
     ORDER BY n.score DESC, n.id
-    """, nativeQuery = true)
+    """)
     Page<News> findFirstByKeywordOrderByPopularity(
             @Param("categories") List<String> categories,
             @Param("keyword") String keyword,
