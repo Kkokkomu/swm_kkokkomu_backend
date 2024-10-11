@@ -15,4 +15,6 @@ public interface UserLookupService {
     User findUserById(Long userId);
 
     User findAdminUser(Long userId);
+
+    Boolean existsUser(Long userId);
 }

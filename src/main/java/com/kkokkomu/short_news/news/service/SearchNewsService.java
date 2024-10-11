@@ -13,6 +13,7 @@ import com.kkokkomu.short_news.news.dto.news.response.*;
 import com.kkokkomu.short_news.news.dto.newsReaction.response.NewReactionByUserDto;
 import com.kkokkomu.short_news.news.dto.newsReaction.response.ReactionCntDto;
 import com.kkokkomu.short_news.news.repository.NewsRepository;
+import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -38,9 +39,9 @@ public class SearchNewsService {
 
     private final NewsLookupService newsLookupService;
     private final NewsReactionService newsReactionService;
-    private final RedisService redisService;
 
     private final CategoryUtil categoryUtil;
+    private final UserLookupService userLookupService;
 
     /* 탐색화면 */
     @Transactional(readOnly = true)
@@ -77,62 +78,26 @@ public class SearchNewsService {
     public CursorResponseDto<List<NewsInfoDto>> getPopularNewsFilteredByCategory(Long cursorId, int size, Long userId) {
         log.info("getPopularNewsFilteredByCategory service");
 
-        // 커서 아이디에 해당하는 뉴스의 점수를 레디스에서 조회
-        Double cursorScore = (cursorId != null) ? redisService.getGlobalNewsScore(cursorId) : null;
-        log.info("cursorId global score {}", cursorScore);
+        PageRequest pageRequest = PageRequest.of(0, size);
 
-        // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
-        List<ZSetOperations.TypedTuple<String>> rankedNewsWithScores = redisService.getGlobalNewsRankingWithScores(cursorScore, cursorId, size + 1);
-        log.info("rankedNewsWithScores size: {}", rankedNewsWithScores.size());
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) { // 첫 요청
+            results = newsRepository.findByAllOrderByScoreDescFirst(pageRequest);
+        } else { // 두 번째 이후 요청
+            Double cursorScore = newsRepository.findById(cursorId)
+                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR))
+                    .getScore();
 
-        // 로그로 ID와 점수를 출력
-        rankedNewsWithScores.forEach(tuple -> {
-            Long newsId = Long.parseLong(tuple.getValue());
-            Double score = tuple.getScore();
-            log.info("News ID: {}, Score: {}", newsId, score);
-        });
-
-        List<Long> newsIds = rankedNewsWithScores.stream()
-                .map(tuple -> Long.parseLong(tuple.getValue())) // 뉴스 ID 추출
-                .collect(Collectors.toList());
-//        for (Long newsId : newsIds) {
-//            log.info("News ID: {}", newsId);
-//        }
-
-        boolean isLast = newsIds.size() <= size;
-        if (!isLast) {
-            // 마지막 아이템을 제거하여 실제 페이지 사이즈를 유지
-            newsIds.remove(newsIds.size() - 1);
+            results = newsRepository.findByAllOrderByScoreDesc(cursorId, cursorScore, pageRequest);
         }
+        news = results.getContent();
 
-        if (newsIds.isEmpty()) {
-            return new CursorResponseDto<>(Collections.emptyList(), CursorInfoDto.builder().size(size).isLast(true).build());
-        }
+        List<NewsInfoDto> newsDtos = getNewsInfo(news, userId);
 
-        // 데이터베이스에서 뉴스 상세 정보 조회
-        List<News> newsList = newsRepository.findAllById(newsIds);
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
-        // 뉴스 ID의 순서에 맞춰 리스트를 정렬
-        Map<Long, News> newsMap = newsList.stream()
-                .collect(Collectors.toMap(News::getId, news -> news));  // ID를 키로 하는 맵으로 변환
-
-        List<News> sortedNewsList = newsIds.stream()
-                .map(newsMap::get)  // newsIds의 순서에 맞춰 맵에서 뉴스 객체를 가져옴
-                .toList();
-
-
-        List<NewsInfoDto> newsInfoDtos = getNewsInfo(sortedNewsList, userId);
-//        for (NewsInfoDto newsInfoDto : newsInfoDtos) {
-//            log.info("News Info: {}", newsInfoDto.info().news().id());
-//        }
-
-        // 커서 정보 계산
-        CursorInfoDto cursorInfoDto = CursorInfoDto.builder()
-                .size(size)
-                .isLast(isLast)
-                .build();
-
-        return new CursorResponseDto<>(newsInfoDtos, cursorInfoDto);
+        return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
     } // 탐색 화면 카테고리 필터 인기순
 
     @Transactional(readOnly = true)
@@ -163,58 +128,109 @@ public class SearchNewsService {
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(newsInfoDtos, cursorInfoDto);
-    } // 비로그인 탐색 화면 카테고리 필터 최신순
+    } // 비로그인 탐색 화면 최신순
 
     @Transactional(readOnly = true)
     public CursorResponseDto<List<GuestNewsInfoDto>> getGuestPopularNewsFilteredByCategory(Long cursorId, int size) {
-
         log.info("getGuestPopularNewsFilteredByCategory service");
 
-        // 커서 아이디에 해당하는 뉴스의 점수를 레디스에서 조회
-        Double cursorScore = (cursorId != null) ? redisService.getGlobalNewsScore(cursorId) : null;
+        PageRequest pageRequest = PageRequest.of(0, size);
 
-        // 레디스에서 전체 랭킹 조회, 요청 사이즈보다 하나 더 많은 아이템을 가져옴
-        List<ZSetOperations.TypedTuple<String>> rankedNewsWithScores = redisService.getGlobalNewsRankingWithScores(cursorScore, cursorId, size + 1);
-        log.info("rankedNewsWithScores size: {}", rankedNewsWithScores.size());
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) { // 첫 요청
+            results = newsRepository.findByAllOrderByScoreDescFirst(pageRequest);
+        } else { // 두 번째 이후 요청
+            Double cursorScore = newsRepository.findById(cursorId)
+                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CURSOR))
+                    .getScore();
 
-        List<Long> newsIds = rankedNewsWithScores.stream()
-                .map(tuple -> Long.parseLong(tuple.getValue())) // 뉴스 ID 추출
-                .collect(Collectors.toList());
+            results = newsRepository.findByAllOrderByScoreDesc(cursorId, cursorScore, pageRequest);
+        }
+        news = results.getContent();
 
-        boolean isLast = newsIds.size() <= size;
-        if (!isLast) {
-            // 마지막 아이템을 제거하여 실제 페이지 사이즈를 유지
-            newsIds.remove(newsIds.size() - 1);
+        List<GuestNewsInfoDto> newsDtos = getGuestNewsInfo(news);
+
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
+    } // 비로그인 탐색 화면 인기순
+
+    @Transactional(readOnly = true)
+    public CursorResponseDto<List<NewsInfoDto>> searchLatestNews(String category, String text, Long cursorId, int size, Long userId) {
+        log.info("searchLatestNews service");
+
+        if (!userLookupService.existsUser(userId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_USER);
         }
 
-        if (newsIds.isEmpty()) {
-            return new CursorResponseDto<>(Collections.emptyList(), CursorInfoDto.builder().size(size).isLast(true).build());
+        if (cursorId != null && !newsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
         }
 
-        // 데이터베이스에서 뉴스 상세 정보 조회
-        List<News> newsList = newsRepository.findAllById(newsIds);
+        PageRequest pageRequest = PageRequest.of(0, size);
 
-        // 뉴스 ID의 순서에 맞춰 리스트를 정렬
-        Map<Long, News> newsMap = newsList.stream()
-                .collect(Collectors.toMap(News::getId, news -> news));  // ID를 키로 하는 맵으로 변환
+        List<ECategory> categoryList = categoryUtil.getCategoryList(category);
 
-        List<News> sortedNewsList = newsIds.stream()
-                .map(newsMap::get)  // newsIds의 순서에 맞춰 맵에서 뉴스 객체를 가져옴
-                .toList();
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) { // 첫 요청
+            results = newsRepository.findFirstByKeywordOrderByIdDesc(categoryList, text, pageRequest);
+        } else { // 두 번째 이후 요청
+            if (newsRepository.existsById(cursorId)){ // 커서 id에 해당하는 뉴스가 있는지 검사
+                throw new CommonException(ErrorCode.NOT_FOUND_NEWS);
+            }
 
+            results = newsRepository.findByKeywordOrderByIdDesc(categoryList, cursorId, text, pageRequest);
+        }
+        news = results.getContent();
 
-        List<GuestNewsInfoDto> newsInfoDtos = getGuestNewsInfo(sortedNewsList);
+        List<NewsInfoDto> newsDtos = getNewsInfo(news, userId);
 
-        // 커서 정보 계산
-        CursorInfoDto cursorInfoDto = CursorInfoDto.builder()
-                .size(size)
-                .isLast(isLast)
-                .build();
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
-        return new CursorResponseDto<>(newsInfoDtos, cursorInfoDto);
-    } // 비로그인 탐색 화면 카테고리 필터 인기순
+        return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
+    } // 최신순 뉴스 검색
 
-    public CursorResponseDto<List<SearchNewsDto>> searchLatestNews(String category, String text, Long cursorId, int size) {
+    @Transactional(readOnly = true)
+    public CursorResponseDto<List<NewsInfoDto>> searchPopularNews(String category, String text, Long cursorId, int size, Long userId) {
+        log.info("searchPopularNews service");
+
+        if (!userLookupService.existsUser(userId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_USER);
+        }
+
+        if (cursorId != null && !newsRepository.existsById(cursorId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        List<ECategory> categoryList = categoryUtil.getCategoryList(category);
+
+        List<News> news;
+        Page<News> results;
+        if (cursorId == null) {
+            results = newsRepository.findFirstByKeywordOrderByPopularity(categoryList, text, pageRequest);
+        } else {
+            // cursorScore 계산
+            News cursorNews = newsLookupService.findNewsById(cursorId);
+
+            double cursorScore = calculateScore(cursorNews);
+
+            results = newsRepository.findByKeywordOrderByPopularity(categoryList, cursorScore, text, pageRequest);
+        }
+        news = results.getContent();
+
+        List<NewsInfoDto> newsDtos = getNewsInfo(news, userId);
+
+        CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
+
+        return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
+    } // 인기순 뉴스 검색
+
+    @Transactional(readOnly = true)
+    public CursorResponseDto<List<GuestNewsInfoDto>> guestSearchLatestNews(String category, String text, Long cursorId, int size) {
         log.info("searchLatestNews service");
 
         if (cursorId != null && !newsRepository.existsById(cursorId)) {
@@ -238,14 +254,15 @@ public class SearchNewsService {
         }
         news = results.getContent();
 
-        List<SearchNewsDto> newsDtos = SearchNewsDto.of(news);
+        List<GuestNewsInfoDto> newsDtos = getGuestNewsInfo(news);
 
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
-    } // 최신순 뉴스 검색
+    } // 비로그인 최신순 뉴스 검색
 
-    public CursorResponseDto<List<SearchNewsDto>> searchPopularNews(String category, String text, Long cursorId, int size) {
+    @Transactional(readOnly = true)
+    public CursorResponseDto<List<GuestNewsInfoDto>> guestSearchPopularNews(String category, String text, Long cursorId, int size) {
         log.info("searchPopularNews service");
 
         if (cursorId != null && !newsRepository.existsById(cursorId)) {
@@ -254,28 +271,28 @@ public class SearchNewsService {
 
         PageRequest pageRequest = PageRequest.of(0, size);
 
-        List<String> categoryList = categoryUtil.getCategoryStringList(category);
+        List<ECategory> categoryList = categoryUtil.getCategoryList(category);
 
         List<News> news;
         Page<News> results;
         if (cursorId == null) {
-            results = newsRepository.findFirstByKeywordOrderByPopularity(categoryList, VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, text, pageRequest);
+            results = newsRepository.findFirstByKeywordOrderByPopularity(categoryList, text, pageRequest);
         } else {
             // cursorScore 계산
             News cursorNews = newsLookupService.findNewsById(cursorId);
 
             double cursorScore = calculateScore(cursorNews);
 
-            results = newsRepository.findByKeywordOrderByPopularity(categoryList, VIEW_WEIGHT, COMMENT_WEIGHT, REACTION_WEIGHT, SHARE_WEIGHT, DATE_WEIGHT, cursorScore, text, pageRequest);
+            results = newsRepository.findByKeywordOrderByPopularity(categoryList, cursorScore, text, pageRequest);
         }
         news = results.getContent();
 
-        List<SearchNewsDto> newsDtos = SearchNewsDto.of(news);
+        List<GuestNewsInfoDto> newsDtos = getGuestNewsInfo(news);
 
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(newsDtos, cursorInfoDto);
-    } // 인기순 뉴스 검색
+    } // 비로그인 인기순 뉴스 검색
 
     @Transactional(readOnly = true)
     public NewsInfoDto readNewsInfo(Long userId, Long newsId) {

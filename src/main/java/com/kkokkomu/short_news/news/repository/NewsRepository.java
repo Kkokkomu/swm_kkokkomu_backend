@@ -54,6 +54,31 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             Pageable pageable
     );
 
+    // 카테고리별 인기순 홈화면 뉴스 조회
+    @Query("""
+    SELECT n FROM News n 
+    WHERE ((n.score < :score) OR (n.score = :score AND n.id > :cursorId))
+    AND n.category IN :categories
+    ORDER BY n.score DESC, n.id
+    """)
+    Page<News> findByAllOrderByScoreAndCategoryDesc(
+            @Param("categories") List<ECategory> category,
+            @Param("cursorId") Long cursorId,
+            @Param("score") Double score,
+            Pageable pageable
+    );
+
+    // 카테고리별 인기순 홈화면 뉴스 조회 초기화
+    @Query("""
+    SELECT n FROM News n 
+    WHERE n.category IN :categories
+    ORDER BY n.score DESC, n.id
+    """)
+    Page<News> findByAllOrderByScoreAndCategoryDescFirst(
+            @Param("categories") List<ECategory> category,
+            Pageable pageable
+    );
+
     /****************** 뉴스 시청 기록 *************************/
 
     // 시청했던 뉴스 조회
@@ -153,69 +178,24 @@ public interface NewsRepository extends JpaRepository<News, Long> {
             Pageable pageable
     );
 
-    // 인기순 필터 쿼리
-    @Query(value = """
-SELECT n.id, n.shortform_url, n.youtube_url, n.instagram_url, n.thumbnail, 
-       n.view_cnt, n.title, n.summary, n.shared_cnt, n.category, 
-       n.created_at, n.edited_at, n.related_url,
-       (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + 
-       n.shared_cnt * :shareWeight + TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) AS popularityScore
-FROM news n
-LEFT JOIN comment c ON n.id = c.news_id
-LEFT JOIN news_reaction r ON n.id = r.news_id
-GROUP BY n.id, n.shortform_url, n.youtube_url, n.instagram_url, n.thumbnail, 
-         n.view_cnt, n.title, n.summary, n.shared_cnt, n.category, 
-         n.created_at, n.edited_at, n.related_url
-HAVING popularityScore < :cursorScore
-   OR (popularityScore = :cursorScore AND n.id < :cursorId)
-ORDER BY popularityScore DESC, n.id DESC
-""",
-            countQuery = """
-SELECT COUNT(DISTINCT n.id)
-FROM news n
-LEFT JOIN comment c ON n.id = c.news_id
-LEFT JOIN news_reaction r ON n.id = r.news_id
-""",
-            nativeQuery = true)
-    Page<News> findByPopularityLessThan(
-            @Param("viewWeight") double viewWeight,
-            @Param("commentWeight") double commentWeight,
-            @Param("reactionWeight") double reactionWeight,
-            @Param("shareWeight") double shareWeight,
-            @Param("dateWeight") double dateWeight,
-            @Param("cursorScore") double cursorScore,
+    // 인기순 탐색 쿼리
+    @Query("""
+    SELECT n FROM News n 
+    WHERE (n.score < :score) OR (n.score = :score AND n.id > :cursorId)
+    ORDER BY n.score DESC, n.id
+    """)
+    Page<News> findByAllOrderByScoreDesc(
             @Param("cursorId") Long cursorId,
+            @Param("score") Double score,
             Pageable pageable
     );
 
-    // 첫 페이지 인기순 필터 쿼리
-    @Query(value = """
-SELECT n.id, n.shortform_url, n.youtube_url, n.instagram_url, n.thumbnail, 
-       n.view_cnt, n.title, n.summary, n.shared_cnt, n.category, 
-       n.created_at, n.edited_at, n.related_url,
-       (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + 
-       n.shared_cnt * :shareWeight + TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) AS popularityScore
-FROM news n
-LEFT JOIN comment c ON n.id = c.news_id
-LEFT JOIN news_reaction r ON n.id = r.news_id
-GROUP BY n.id, n.shortform_url, n.youtube_url, n.instagram_url, n.thumbnail, 
-         n.view_cnt, n.title, n.summary, n.shared_cnt, n.category, 
-         n.created_at, n.edited_at, n.related_url
-ORDER BY popularityScore DESC, n.id DESC
-""",
-            countQuery = """
-SELECT COUNT(DISTINCT n.id)
-FROM news n
-LEFT JOIN comment c ON n.id = c.news_id
-LEFT JOIN news_reaction r ON n.id = r.news_id
-""",
-            nativeQuery = true)
-    Page<News> findFirstPageByPopularity(
-            @Param("viewWeight") double viewWeight,
-            @Param("commentWeight") double commentWeight,
-            @Param("reactionWeight") double reactionWeight,
-            @Param("shareWeight") double shareWeight,
-            @Param("dateWeight") double dateWeight,
+    // 인기순 탐색 쿼리 초기화
+    @Query("""
+    SELECT n FROM News n 
+    ORDER BY n.score DESC, n.id
+    """)
+    Page<News> findByAllOrderByScoreDescFirst(
             Pageable pageable
     );
 
@@ -252,50 +232,30 @@ LEFT JOIN news_reaction r ON n.id = r.news_id
     );
 
     @Query(value = """
-    SELECT n.*, 
-           (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.shared_cnt * :shareWeight +
-            TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) AS popularity_score
-    FROM news n
-    LEFT JOIN comment c ON n.id = c.news_id
-    LEFT JOIN news_reaction r ON n.id = r.news_id
-    WHERE n.category IN :categories
-    AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+    SELECT n FROM News n 
+    WHERE ((n.score < :score) OR (n.score = :score AND n.id > :cursorId))
+      AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
-    GROUP BY n.id
-    HAVING popularity_score <= :cursorScore
-    ORDER BY popularity_score DESC, n.id DESC
-    """, nativeQuery = true)
+    AND n.category IN :categories
+    ORDER BY n.score DESC, n.id
+    """)
     Page<News> findByKeywordOrderByPopularity(
-            @Param("categories") List<String> categories,
-            @Param("viewWeight") double viewWeight,
-            @Param("commentWeight") double commentWeight,
-            @Param("reactionWeight") double reactionWeight,
-            @Param("shareWeight") double shareWeight,
-            @Param("dateWeight") double dateWeight,
-            @Param("cursorScore") double cursorScore,
+            @Param("categories") List<ECategory> categories,
+            @Param("score") Double score,
             @Param("keyword") String keyword,
             Pageable pageable
     );
 
     // 인기순 검색 초기화
     @Query(value = """
-    SELECT n.* FROM news n
-    LEFT JOIN comment c ON n.id = c.news_id
-    LEFT JOIN news_reaction r ON n.id = r.news_id
-    WHERE n.category IN :categories
-    AND (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    SELECT n FROM News n 
+    WHERE (LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
          OR LOWER(n.summary) LIKE LOWER(CONCAT('%', :keyword, '%')))
-    GROUP BY n.id
-    ORDER BY (n.view_cnt * :viewWeight + COUNT(c.id) * :commentWeight + COUNT(r.id) * :reactionWeight + n.shared_cnt * :shareWeight +
-    TIMESTAMPDIFF(DAY, n.created_at, CURRENT_TIMESTAMP) * :dateWeight) DESC, n.id DESC
-    """, nativeQuery = true)
+    AND n.category IN :categories
+    ORDER BY n.score DESC, n.id
+    """)
     Page<News> findFirstByKeywordOrderByPopularity(
-            @Param("categories") List<String> categories,
-            @Param("viewWeight") double viewWeight,
-            @Param("commentWeight") double commentWeight,
-            @Param("reactionWeight") double reactionWeight,
-            @Param("shareWeight") double shareWeight,
-            @Param("dateWeight") double dateWeight,
+            @Param("categories") List<ECategory> categories,
             @Param("keyword") String keyword,
             Pageable pageable
     );

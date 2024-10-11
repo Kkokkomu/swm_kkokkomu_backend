@@ -60,7 +60,7 @@ public class SearchNewsController {
 
     @Operation(summary = "뉴스 검색")
     @GetMapping("")
-    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> searchNews(@Parameter(example = "politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
+    public ResponseDto<CursorResponseDto<List<NewsInfoDto>>> searchNews(@Parameter(example = "politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
                                                                           @RequestParam String text,
                                                                           @RequestParam EHomeFilter filter,
                                                                           @RequestParam(required = false) Long cursorId,
@@ -69,26 +69,25 @@ public class SearchNewsController {
         log.info("searchNews controller");
 
         if (filter == EHomeFilter.LATEST) {
-            return ResponseDto.ok(searchNewsService.searchLatestNews(category, text, cursorId, size));
+            return ResponseDto.ok(searchNewsService.searchLatestNews(category, text, cursorId, size, userId));
         } else {
-            return ResponseDto.ok(searchNewsService.searchPopularNews(category, text, cursorId, size));
+            return ResponseDto.ok(searchNewsService.searchPopularNews(category, text, cursorId, size, userId));
         }
     }
 
     @Operation(summary = "비로그인 뉴스 검색")
     @GetMapping("/guest")
-    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> guestSearchNews(@Parameter(example = "popular,politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
+    public ResponseDto<CursorResponseDto<List<GuestNewsInfoDto>>> guestSearchNews(@Parameter(example = "politics,economy,social,entertain,sports,living,world,it") @RequestParam String category,
                                                                                @RequestParam String text,
                                                                                @RequestParam EHomeFilter filter,
                                                                                @RequestParam(required = false) Long cursorId,
-                                                                               @RequestParam int size,
-                                                                               @Parameter(hidden = true) @UserId Long userId) {
+                                                                               @RequestParam int size) {
         log.info("guestSearchNews controller");
 
         if (filter == EHomeFilter.LATEST) {
-            return ResponseDto.ok(searchNewsService.searchLatestNews(category, text, cursorId, size));
+            return ResponseDto.ok(searchNewsService.guestSearchLatestNews(category, text, cursorId, size));
         } else {
-            return ResponseDto.ok(searchNewsService.searchPopularNews(category, text, cursorId, size));
+            return ResponseDto.ok(searchNewsService.guestSearchPopularNews(category, text, cursorId, size));
         }
     }
 
