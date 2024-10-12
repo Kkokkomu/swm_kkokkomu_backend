@@ -241,6 +241,7 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     """)
     Page<News> findByKeywordOrderByPopularity(
             @Param("categories") List<ECategory> categories,
+            @Param("cursorId") Long cursorId,
             @Param("score") Double score,
             @Param("keyword") String keyword,
             Pageable pageable
