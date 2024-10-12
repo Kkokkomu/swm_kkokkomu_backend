@@ -218,7 +218,7 @@ public class SearchNewsService {
 
             double cursorScore = calculateScore(cursorNews);
 
-            results = newsRepository.findByKeywordOrderByPopularity(categoryList, cursorScore, text, pageRequest);
+            results = newsRepository.findByKeywordOrderByPopularity(categoryList, cursorId, cursorScore, text, pageRequest);
         }
         news = results.getContent();
 
@@ -283,7 +283,7 @@ public class SearchNewsService {
 
             double cursorScore = calculateScore(cursorNews);
 
-            results = newsRepository.findByKeywordOrderByPopularity(categoryList, cursorScore, text, pageRequest);
+            results = newsRepository.findByKeywordOrderByPopularity(categoryList, cursorId, cursorScore, text, pageRequest);
         }
         news = results.getContent();
 
