@@ -10,6 +10,7 @@ public record NewsInfoDataDto(
         String title,
         NewsInfoSummaryDto summary,
         Map<String, String> keywords,
+        Map<String, String> characters,
         String section
 ) {
 }
