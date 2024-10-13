@@ -109,7 +109,8 @@ public class AdminNewsService {
         GenerateResponseDto[] generateResponseDtos = response.getBody();
 
         // 레디스 글로벌 랭킹 초기화
-        redisService.normalizeScores();
+        News topNews = newsRepository.findTopByOrderByScoreDesc();
+        redisService.normalizeScores(topNews.getScore());
 
         // 영상 생성 서버에서 영상 url 및 정보 받아옴
         ObjectMapper objectMapper = new ObjectMapper();
@@ -244,7 +245,8 @@ public class AdminNewsService {
         List<GenerateNewsDto> generateNewsDtos = new ArrayList<>();
 
         // 레디스 랭킹 초기화
-        redisService.normalizeScores();
+        News topNews = newsRepository.findTopByOrderByScoreDesc();
+        redisService.normalizeScores(topNews.getScore());
 
         for (int i = 0; i < idList.size(); i++) {
             // 인덱스에 맞는 임시 뉴스 객체

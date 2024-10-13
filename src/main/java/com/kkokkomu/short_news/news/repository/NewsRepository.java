@@ -201,6 +201,10 @@ public interface NewsRepository extends JpaRepository<News, Long> {
 
 
     /****************** 뉴스 검색 *************************/
+
+    // 인기 순위 제일 높은 뉴스 반환
+    News findTopByOrderByScoreDesc();
+
     // 최신순 검색
     @Query("""
     SELECT n FROM News n 
