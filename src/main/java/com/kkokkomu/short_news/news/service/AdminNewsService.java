@@ -112,6 +112,7 @@ public class AdminNewsService {
         GenerateResponseDto[] generateResponseDtos = response.getBody();
 
         // 랭킹 초기화
+        log.info("news ranking rese");
         News topNews = newsRepository.findTopByOrderByScoreDesc();
         Double topScore = topNews.getScore() * -1;
 
@@ -135,7 +136,6 @@ public class AdminNewsService {
             } else {
                 throw new CommonException(ErrorCode.VIDEO_SERVER_ERROR);
             }
-
 
             Map<String, Object> dataMap = generateResponseDto.data();
             NewsInfoDataDto dataDto = objectMapper.convertValue(dataMap, NewsInfoDataDto.class);
@@ -254,6 +254,7 @@ public class AdminNewsService {
         List<GenerateNewsDto> generateNewsDtos = new ArrayList<>();
 
         // 랭킹 초기화
+        log.info("news ranking rese");
         News topNews = newsRepository.findTopByOrderByScoreDesc();
         Double topScore = topNews.getScore() * -1;
 
@@ -310,9 +311,6 @@ public class AdminNewsService {
             );
 
             news = newsRepository.save(news);
-
-            // 해당 카테고리에 대한
-            redisService.normalizeCategoryScores(news.getCategory());
 
             // 랭키보드 등록
             log.info("apply redis {}", news.getId());

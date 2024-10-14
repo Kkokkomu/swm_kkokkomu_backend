@@ -6,6 +6,7 @@ import com.kkokkomu.short_news.keyword.domain.NewsKeyword;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -59,16 +60,16 @@ public class News {
     private Double score; // 인기순 점수
 
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments; // 댓글들
+    private List<Comment> comments = new ArrayList<>(); // 댓글들
 
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NewsReaction> reactions; // 감정표현
+    private List<NewsReaction> reactions = new ArrayList<>();; // 감정표현
 
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NewsViewHist> newsViewHists; // 뉴스 시청 기록
+    private List<NewsViewHist> newsViewHists = new ArrayList<>();; // 뉴스 시청 기록
 
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NewsKeyword> newsKeywords; // 뉴스 키워드 매핑
+    private List<NewsKeyword> newsKeywords = new ArrayList<>();; // 뉴스 키워드 매핑
 
     @Builder
     public News(String shortformUrl, String youtubeUrl, String instagramUrl, String relatedUrl, String thumbnail, String title, String summary, ECategory category) {
