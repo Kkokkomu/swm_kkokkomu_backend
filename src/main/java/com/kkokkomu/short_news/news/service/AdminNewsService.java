@@ -2,6 +2,7 @@ package com.kkokkomu.short_news.news.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kkokkomu.short_news.core.config.service.MailService;
 import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
@@ -28,6 +29,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static com.kkokkomu.short_news.core.constant.Constant.VIDEO_SERVER_GENERATE_HOST;
@@ -43,6 +45,7 @@ public class AdminNewsService {
     private final CategoryUtil categoryUtil;
     private final NewsLookupService newsLookupService;
     private final RedisService redisService;
+    private final MailService mailService;
 
     /* 관리자 */
     @jakarta.transaction.Transactional
@@ -324,6 +327,35 @@ public class AdminNewsService {
                             .build()
             );
         }
+
+        log.info("generateNewsDtos: {}", generateNewsDtos);
+
+        // 이메일 내용 생성
+        StringBuilder content = new StringBuilder();
+        for (GenerateNewsDto generateNewsDto : generateNewsDtos) {
+            if (generateNewsDto.newsDto() != null) {
+                content.append("<p> Title: ").append(generateNewsDto.newsDto().title()).append("</p>");
+                content.append("<p> URL: ").append(generateNewsDto.newsDto().shortformUrl()).append("</p>");
+                content.append("<p> origin: ").append(generateNewsDto.newsDto().relatedUrl()).append("</p>");
+            }
+
+            if (generateNewsDto.keywords() != null && !generateNewsDto.keywords().isEmpty()) {
+                content.append("<p> Keywords: ").append(String.join(", ", generateNewsDto.keywords())).append("</p>");
+            }
+
+            content.append("</br></br>");
+        }
+
+        // 로그 출력 (디버깅 용도)
+        log.info("Generated News Content: \n{}", content.toString());
+
+        // 이메일 전송
+        log.info("send aahhll654@gmail.com");
+        mailService.sendNewsMail("aahhll654@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        log.info("send gouyeonch@naver.com");
+        mailService.sendNewsMail("gouyeonch@naver.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+        log.info("send leesk9663@gmail.com");
+        mailService.sendNewsMail("leesk9663@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
 
         return generateNewsDtos;
     } // 영상 리스트 생성 api
