@@ -115,6 +115,10 @@ public class News {
         this.score = score;
     }
 
+    public void addScore(Double score) {
+        this.score = this.score + score;
+    }
+
     public void updateViewCnt(int viewCnt) {
         this.viewCnt += viewCnt;
     }
