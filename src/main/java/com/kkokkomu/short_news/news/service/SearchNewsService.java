@@ -214,9 +214,12 @@ public class SearchNewsService {
             results = newsRepository.findFirstByKeywordOrderByPopularity(categoryList, text, pageRequest);
         } else {
             // cursorScore 계산
+            log.info("searchPopularNews newsId: " + cursorId);
             News cursorNews = newsLookupService.findNewsById(cursorId);
 
-            double cursorScore = calculateScore(cursorNews);
+            double cursorScore = cursorNews.getScore();
+
+            log.info("searchPopularNews cursorScore: " + cursorScore);
 
             results = newsRepository.findByKeywordOrderByPopularity(categoryList, cursorId, cursorScore, text, pageRequest);
         }
@@ -281,7 +284,7 @@ public class SearchNewsService {
             // cursorScore 계산
             News cursorNews = newsLookupService.findNewsById(cursorId);
 
-            double cursorScore = calculateScore(cursorNews);
+            double cursorScore = cursorNews.getScore();
 
             results = newsRepository.findByKeywordOrderByPopularity(categoryList, cursorId, cursorScore, text, pageRequest);
         }
@@ -307,19 +310,6 @@ public class SearchNewsService {
 
         return getGuestNewsInfo(news);
     } // 비로그인 뉴스 정보 조회
-
-    // cursorScore 계산 메서드
-    private double calculateScore(News news) {
-        long daysDifference = ChronoUnit.DAYS.between(news.getCreatedAt(), LocalDateTime.now());
-
-        double score = (news.getViewCnt() * VIEW_WEIGHT) +
-                (news.getComments().size() * COMMENT_WEIGHT) +
-                (news.getReactions().size() * REACTION_WEIGHT) +
-                (news.getSharedCnt() * SHARE_WEIGHT) +
-                (daysDifference * DATE_WEIGHT);
-
-        return score;
-    }
 
     public NewsInfoDto getNewsInfo(News news, Long userId) {
         // 각 감정표현 별 갯수
