@@ -128,17 +128,13 @@ public class RedisService {
     }
 
     // 최상위 뉴스 점수 감소 로직
-    public void normalizeScores() {
-        Set<ZSetOperations.TypedTuple<String>> topNews = redisTemplate.opsForZSet().reverseRangeWithScores(GLOBAL_RANKING_KEY, 0, 0);
-        if (topNews != null && !topNews.isEmpty()) {
-            Double topScore = topNews.stream().findFirst().get().getScore();
-            if (topScore != null) {
-                redisTemplate.opsForZSet().rangeWithScores(GLOBAL_RANKING_KEY, 0, -1).forEach(news -> {
-                    Double currentScore = news.getScore();
-                    Long newsId = Long.valueOf(Objects.requireNonNull(news.getValue()));
-                    redisTemplate.opsForZSet().add(GLOBAL_RANKING_KEY, String.valueOf(newsId), currentScore - topScore);
-                });
-            }
+    public void normalizeScores(Double topScore) {
+        if (topScore != null) {
+            redisTemplate.opsForZSet().rangeWithScores(GLOBAL_RANKING_KEY, 0, -1).forEach(news -> {
+                Double currentScore = news.getScore();
+                Long newsId = Long.valueOf(Objects.requireNonNull(news.getValue()));
+                redisTemplate.opsForZSet().add(GLOBAL_RANKING_KEY, String.valueOf(newsId), currentScore - topScore);
+            });
         }
     }
 
