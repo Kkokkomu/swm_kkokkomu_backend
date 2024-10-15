@@ -118,7 +118,7 @@ public class AdminNewsService {
 
         List<News> newsListAll = newsRepository.findAll();
         for (News news : newsListAll) {
-            news.addScore(-1 * topScore);
+            news.addScore(topScore);
         }
         newsRepository.saveAll(newsListAll);
 
@@ -256,11 +256,12 @@ public class AdminNewsService {
         // 랭킹 초기화
         log.info("news ranking rese");
         News topNews = newsRepository.findTopByOrderByScoreDesc();
+        log.info("top news {}", topNews.getId());
         Double topScore = topNews.getScore() * -1;
 
         List<News> newsListAll = newsRepository.findAll();
         for (News news : newsListAll) {
-            news.addScore(-1 * topScore);
+            news.addScore(topScore);
         }
         newsRepository.saveAll(newsListAll);
 
@@ -333,7 +334,7 @@ public class AdminNewsService {
         for (GenerateNewsDto generateNewsDto : generateNewsDtos) {
             if (generateNewsDto.newsDto() != null) {
                 content.append("<p> Title: ").append(generateNewsDto.newsDto().title()).append("</p>");
-                content.append("<p> URL: ").append(generateNewsDto.newsDto().shortformUrl()).append("</p>");
+                content.append("<p> URL: ").append(generateNewsDto.newsDto().shortformUrl().replace("kkm-shortform", "kkm-shortform-withad")).append("</p>");
                 content.append("<p> origin: ").append(generateNewsDto.newsDto().relatedUrl()).append("</p>");
             }
 

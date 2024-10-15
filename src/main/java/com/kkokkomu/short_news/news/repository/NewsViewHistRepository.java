@@ -21,15 +21,17 @@ public interface NewsViewHistRepository extends JpaRepository<NewsViewHist, Long
 
     void deleteAllByUser(User user);
 
+    // 뉴스 시청기록 최신순 조회
     @Query("SELECT nh FROM NewsViewHist nh " +
             "WHERE nh.user.id = :userId " +
-            "ORDER BY nh.id DESC")
+            "ORDER BY nh.id ")
     Page<NewsViewHist> findAllByUserAndCorsorFirst(Long userId, Pageable pageable);
 
+    // 뉴스 시청기록 최신순 조회 초기화
     @Query("SELECT nh FROM NewsViewHist nh " +
             "WHERE nh.user.id = :userId " +
-            "AND nh.id < :cursorId " +
-            "ORDER BY nh.id DESC")
+            "AND nh.id > :cursorId " +
+            "ORDER BY nh.id ")
     Page<NewsViewHist> findAllByUserAndCorsor(@Param("userId") Long userId, @Param("cursorId") Long cursorId, Pageable pageable);
 
     // 중복 체크를 위한 쿼리

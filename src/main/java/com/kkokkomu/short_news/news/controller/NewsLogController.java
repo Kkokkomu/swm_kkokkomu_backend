@@ -5,6 +5,7 @@ import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.news.dto.news.response.NewsInfoDto;
 import com.kkokkomu.short_news.news.dto.news.response.SearchNewsDto;
+import com.kkokkomu.short_news.news.dto.newsHist.response.CommentHistInfoDto;
 import com.kkokkomu.short_news.news.dto.newsHist.response.NewsHistInfoDto;
 import com.kkokkomu.short_news.news.service.NewsLogService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +27,7 @@ public class NewsLogController {
 
     @Operation(summary = "댓글 달았던 뉴스 조회")
     @GetMapping("/commented")
-    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> readCommentedNews(
+    public ResponseDto<CursorResponseDto<List<CommentHistInfoDto>>> readCommentedNews(
             @UserId Long userId,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam("size") int size
@@ -37,7 +38,7 @@ public class NewsLogController {
 
     @Operation(summary = "감정표현한 뉴스 조회")
     @GetMapping("/reaction")
-    public ResponseDto<CursorResponseDto<List<NewsHistInfoDto>>> readReactionNews(
+    public ResponseDto<CursorResponseDto<List<NewsInfoDto>>> readReactionNews(
             @UserId Long userId,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam("size") int size
