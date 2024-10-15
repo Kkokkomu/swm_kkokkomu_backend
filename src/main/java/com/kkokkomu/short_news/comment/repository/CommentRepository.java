@@ -1,6 +1,7 @@
 package com.kkokkomu.short_news.comment.repository;
 
 import com.kkokkomu.short_news.comment.domain.Comment;
+import com.kkokkomu.short_news.news.domain.NewsReaction;
 import com.kkokkomu.short_news.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -228,4 +229,16 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             @Param("user") User user
     );
 
+    // 최신순 댓글 단 댓글 조회
+    @Query("SELECT c FROM Comment c " +
+            "WHERE c.user.id = :userId " +
+            "ORDER BY c.id")
+    Page<Comment> findAllByUserAndCorsorFirst(Long userId, Pageable pageable);
+
+    // 최신순 댓글 단 댓글 조회 초기화
+    @Query("SELECT c FROM Comment c " +
+            "WHERE c.user.id = :userId " +
+            "AND c.id > :cursorId " +
+            "ORDER BY c.id")
+    Page<Comment> findAllByUserAndCorsor(@Param("userId") Long userId, @Param("cursorId") Long cursorId, Pageable pageable);
 }
