@@ -153,6 +153,16 @@ public class NewsLogService {
         return "success";
     }
 
+    @Transactional
+    public String deleteNewsHistByUserId(Long userId) {
+        log.info("deleteNewsHistByUserId service");
+        User user = userLookupService.findUserById(userId);
+
+        newsViewHistRepository.deleteAllByUser(user);
+
+        return "success";
+    }
+
     private NewsHistInfoDto getNewsHistInfo(NewsViewHist newsViewHist) {
         return NewsHistInfoDto.builder()
                 .id(newsViewHist.getId())
