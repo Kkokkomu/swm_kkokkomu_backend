@@ -5,15 +5,14 @@ import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.news.dto.news.response.NewsInfoDto;
 import com.kkokkomu.short_news.news.dto.news.response.SearchNewsDto;
+import com.kkokkomu.short_news.news.dto.newsHist.response.NewsHistInfoDto;
 import com.kkokkomu.short_news.news.service.NewsLogService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class NewsLogController {
 
     @Operation(summary = "감정표현한 뉴스 조회")
     @GetMapping("/reaction")
-    public ResponseDto<CursorResponseDto<List<NewsInfoDto>>> readReactionNews(
+    public ResponseDto<CursorResponseDto<List<NewsHistInfoDto>>> readReactionNews(
             @UserId Long userId,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam("size") int size
@@ -49,12 +48,21 @@ public class NewsLogController {
 
     @Operation(summary = "시청한 뉴스 조회")
     @GetMapping("/view")
-    public ResponseDto<CursorResponseDto<List<NewsInfoDto>>> readViewNews(
+    public ResponseDto<CursorResponseDto<List<NewsHistInfoDto>>> readViewNews(
             @UserId Long userId,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam("size") int size
     ) {
         log.info("readViewNews controller");
         return ResponseDto.ok(newsLogService.getNewsWithHist(userId, cursorId, size));
+    }
+
+    @Operation(summary = "뉴스 시청기록 삭제")
+    @DeleteMapping("/list")
+    public ResponseDto<String> deleteViewNews(
+            @Parameter(example = "1,4,7,10,15") @RequestParam(value = "newsIdList") String newsIdList
+    ) {
+        log.info("deleteViewNews controller");
+        return ResponseDto.ok(newsLogService.deleteNewsHist(newsIdList));
     }
 }
