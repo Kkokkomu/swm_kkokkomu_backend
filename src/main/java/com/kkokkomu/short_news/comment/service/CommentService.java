@@ -4,6 +4,7 @@ import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.comment.dto.comment.response.*;
 import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.news.domain.News;
+import com.kkokkomu.short_news.news.domain.NewsReaction;
 import com.kkokkomu.short_news.news.service.NewsLookupService;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.comment.dto.comment.request.CreateCommentDto;
@@ -470,5 +471,26 @@ public class CommentService {
         return CursorResponseDto.fromEntityAndPageInfo(replyListDtos, cursorInfoDto);
     } // 비로그인 오래된순 대댓글 조회
 
-    /* 관리자 */
+    /* 유틸 */
+    @Transactional(readOnly = true)
+    public Page<Comment> getNewsCommentByCursor(Long userId, Long cursorId, int size) {
+        log.info("getNewsCommentByCursor service");
+
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        Page<Comment> results;
+        if (cursorId == null) {
+            // 최초
+            results = commentRepository.findAllByUserAndCorsorFirst(userId, pageRequest);
+        } else {
+            // 그 이후
+            if (!commentRepository.existsById(cursorId)) {
+                throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+            }
+
+            results = commentRepository.findAllByUserAndCorsor(userId, cursorId, pageRequest);
+        }
+
+        return results;
+    }
 }

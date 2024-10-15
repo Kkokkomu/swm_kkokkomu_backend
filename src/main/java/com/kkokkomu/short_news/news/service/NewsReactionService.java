@@ -1,8 +1,12 @@
 package com.kkokkomu.short_news.news.service;
 
 import com.kkokkomu.short_news.core.config.service.RedisService;
+import com.kkokkomu.short_news.core.dto.CursorInfoDto;
+import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.domain.NewsReaction;
+import com.kkokkomu.short_news.news.domain.NewsViewHist;
+import com.kkokkomu.short_news.news.dto.newsHist.response.NewsHistInfoDto;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.news.dto.newsReaction.request.CreateNewsReactionDto;
 import com.kkokkomu.short_news.news.dto.newsReaction.response.NewReactionByUserDto;
@@ -16,8 +20,12 @@ import com.kkokkomu.short_news.user.service.UserLookupService;
 import com.kkokkomu.short_news.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -93,6 +101,28 @@ public class NewsReactionService {
             throw new CommonException(ErrorCode.NOT_FOUND_NEWS_REACTION);
         }
     } // 뉴스 감정표현 삭제
+
+    @Transactional(readOnly = true)
+    public Page<NewsReaction> getNewsReactionsByCursor(Long userId, Long cursorId, int size) {
+        log.info("getNewsWithReaction service");
+
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        Page<NewsReaction> results;
+        if (cursorId == null) {
+            // 최초
+            results = newsReactionRepository.findAllByUserAndCorsorFirst(userId, pageRequest);
+        } else {
+            // 그 이후
+            if (!newsReactionRepository.existsById(cursorId)) {
+                throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+            }
+
+            results = newsReactionRepository.findAllByUserAndCorsor(userId, cursorId, pageRequest);
+        }
+
+        return results;
+    }
 
     // 각 감정표현 별 갯수 카운드
     public ReactionCntDto countNewsReaction(Long newsId) {
