@@ -3,6 +3,7 @@ package com.kkokkomu.short_news.news.controller;
 import com.kkokkomu.short_news.core.annotation.UserId;
 import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
+import com.kkokkomu.short_news.news.dto.news.response.NewsInfoDto;
 import com.kkokkomu.short_news.news.dto.news.response.SearchNewsDto;
 import com.kkokkomu.short_news.news.service.NewsLogService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,7 +38,7 @@ public class NewsLogController {
 
     @Operation(summary = "감정표현한 뉴스 조회")
     @GetMapping("/reaction")
-    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> readReactionNews(
+    public ResponseDto<CursorResponseDto<List<NewsInfoDto>>> readReactionNews(
             @UserId Long userId,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam("size") int size
@@ -48,7 +49,7 @@ public class NewsLogController {
 
     @Operation(summary = "시청한 뉴스 조회")
     @GetMapping("/view")
-    public ResponseDto<CursorResponseDto<List<SearchNewsDto>>> readViewNews(
+    public ResponseDto<CursorResponseDto<List<NewsInfoDto>>> readViewNews(
             @UserId Long userId,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam("size") int size

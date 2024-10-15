@@ -5,6 +5,7 @@ import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.news.domain.News;
+import com.kkokkomu.short_news.news.dto.news.response.NewsInfoDto;
 import com.kkokkomu.short_news.news.dto.news.response.SearchNewsDto;
 import com.kkokkomu.short_news.news.repository.NewsRepository;
 import com.kkokkomu.short_news.user.domain.User;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,8 +24,10 @@ import java.util.List;
 @Slf4j
 public class NewsLogService {
     private final NewsRepository newsRepository;
+
     private final NewsViewHistService newsViewHistService;
     private final UserLookupService userLookupService;
+    private final SearchNewsService searchNewsService;
 
     public CursorResponseDto<List<SearchNewsDto>> getNewsWithComment(Long userId, Long cursorId, int size) {
         log.info("getNewsWithComment service");
@@ -58,7 +62,8 @@ public class NewsLogService {
         return CursorResponseDto.fromEntityAndPageInfo(searchNewsDtos, cursorInfoDto);
     } // 댓글 달았던 뉴스 조회
 
-    public CursorResponseDto<List<SearchNewsDto>> getNewsWithReaction(Long userId, Long cursorId, int size) {
+    @Transactional(readOnly = true)
+    public CursorResponseDto<List<NewsInfoDto>> getNewsWithReaction(Long userId, Long cursorId, int size) {
         log.info("getNewsWithReaction service");
 
         User user = userLookupService.findUserById(userId);
@@ -84,14 +89,15 @@ public class NewsLogService {
         }
         news = results.getContent();
 
-        List<SearchNewsDto> searchNewsDtos = SearchNewsDto.of(news);
+        List<NewsInfoDto> searchNewsDtos = searchNewsService.getNewsInfo(news, userId)
 
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
         return CursorResponseDto.fromEntityAndPageInfo(searchNewsDtos, cursorInfoDto);
     } // 감정표현한 뉴스 조회
 
-    public CursorResponseDto<List<SearchNewsDto>> getNewsWithHist(Long userId, Long cursorId, int size) {
+    @Transactional(readOnly = true)
+    public CursorResponseDto<List<NewsInfoDto>> getNewsWithHist(Long userId, Long cursorId, int size) {
         log.info("getNewsWithHist service");
 
         User user = userLookupService.findUserById(userId);
@@ -117,7 +123,7 @@ public class NewsLogService {
         }
         news = results.getContent();
 
-        List<SearchNewsDto> searchNewsDtos = SearchNewsDto.of(news);
+        List<NewsInfoDto> searchNewsDtos = searchNewsService.getNewsInfo(news, userId);
 
         CursorInfoDto cursorInfoDto = CursorInfoDto.fromPageInfo(results);
 
