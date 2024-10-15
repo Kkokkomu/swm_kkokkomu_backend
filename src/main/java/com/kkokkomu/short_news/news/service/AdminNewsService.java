@@ -334,7 +334,7 @@ public class AdminNewsService {
         for (GenerateNewsDto generateNewsDto : generateNewsDtos) {
             if (generateNewsDto.newsDto() != null) {
                 content.append("<p> Title: ").append(generateNewsDto.newsDto().title()).append("</p>");
-                content.append("<p> URL: ").append(generateNewsDto.newsDto().shortformUrl()).append("</p>");
+                content.append("<p> URL: ").append(generateNewsDto.newsDto().shortformUrl().replace("kkm-shortform", "kkm-shortform-withad")).append("</p>");
                 content.append("<p> origin: ").append(generateNewsDto.newsDto().relatedUrl()).append("</p>");
             }
 
