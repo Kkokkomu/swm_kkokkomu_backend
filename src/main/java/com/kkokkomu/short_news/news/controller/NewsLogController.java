@@ -65,4 +65,13 @@ public class NewsLogController {
         log.info("deleteViewNews controller");
         return ResponseDto.ok(newsLogService.deleteNewsHist(newsIdList));
     }
+
+    @Operation(summary = "뉴스 시청기록 일괄삭제")
+    @DeleteMapping("/user")
+    public ResponseDto<String> deleteViewNewsByUser(
+            @UserId Long userId
+    ) {
+        log.info("deleteViewNewsByUser controller");
+        return ResponseDto.ok(newsLogService.deleteNewsHistByUserId(userId));
+    }
 }
