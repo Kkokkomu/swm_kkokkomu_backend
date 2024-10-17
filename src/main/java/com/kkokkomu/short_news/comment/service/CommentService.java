@@ -353,10 +353,12 @@ public class CommentService {
 
     public String deleteReply(Long replyId) {
         log.info("deleteReply service");
-        commentRepository.findById(replyId)
+        Comment comment = commentRepository.findById(replyId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPLY));
 
         commentRepository.deleteById(replyId);
+
+        redisService.decreaseRankingByComment(comment.getNews());
         return "success";
     } // 대댓글 삭제
 

@@ -115,10 +115,11 @@ public class AdminNewsService {
         log.info("news ranking rese");
         News topNews = newsRepository.findTopByOrderByScoreDesc();
         Double topScore = topNews.getScore() * -1;
+        Double reseScore = topScore - 10;
 
         List<News> newsListAll = newsRepository.findAll();
         for (News news : newsListAll) {
-            news.addScore(topScore);
+            news.addScore(reseScore);
         }
         newsRepository.saveAll(newsListAll);
 
@@ -261,10 +262,11 @@ public class AdminNewsService {
         News topNews = newsRepository.findTopByOrderByScoreDesc();
         log.info("top news {}", topNews.getId());
         Double topScore = topNews.getScore() * -1;
+        Double reseScore = topScore - 10;
 
         List<News> newsListAll = newsRepository.findAll();
         for (News news : newsListAll) {
-            news.addScore(topScore);
+            news.addScore(reseScore);
         }
         newsRepository.saveAll(newsListAll);
 
