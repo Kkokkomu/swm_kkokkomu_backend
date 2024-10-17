@@ -115,10 +115,11 @@ public class AdminNewsService {
         log.info("news ranking rese");
         News topNews = newsRepository.findTopByOrderByScoreDesc();
         Double topScore = topNews.getScore() * -1;
+        Double reseScore = topScore - 10;
 
         List<News> newsListAll = newsRepository.findAll();
         for (News news : newsListAll) {
-            news.addScore(topScore);
+            news.addScore(reseScore);
         }
         newsRepository.saveAll(newsListAll);
 
@@ -191,12 +192,15 @@ public class AdminNewsService {
 
     @jakarta.transaction.Transactional
     public List<GenerateNewsDto> generateNews(CreateGenerateNewsDto createGenerateNewsDto) {
+        int repeat = createGenerateNewsDto.count_news() + createGenerateNewsDto.count_entertain() + createGenerateNewsDto.count_sports();
+
         // 임시 뉴스 객체 생성 및 id 추출
-        // 요청을 위해 리스트 형식으로 저장
         List<News> newsList = new ArrayList<>();
+        for (int i = 0; i < repeat; i++) {
+            News news = News.builder().build();
 
-        newsList.add(newsRepository.save(News.builder().build()));
-
+            newsList.add(newsRepository.save(news));
+        }
         List<Integer> idList = newsList.stream()
                 .map(news -> Math.toIntExact(news.getId()))
                 .toList();
@@ -258,10 +262,11 @@ public class AdminNewsService {
         News topNews = newsRepository.findTopByOrderByScoreDesc();
         log.info("top news {}", topNews.getId());
         Double topScore = topNews.getScore() * -1;
+        Double reseScore = topScore - 10;
 
         List<News> newsListAll = newsRepository.findAll();
         for (News news : newsListAll) {
-            news.addScore(topScore);
+            news.addScore(reseScore);
         }
         newsRepository.saveAll(newsListAll);
 

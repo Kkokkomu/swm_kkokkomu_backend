@@ -9,7 +9,8 @@ public record CommentDto(
         Long userId,
         Long newsId,
         String content,
-        String editedAt
+        String editedAt,
+        Long parentId
 ) {
     static public CommentDto of(Comment comment) {
         return CommentDto.builder()
@@ -18,6 +19,7 @@ public record CommentDto(
                 .newsId(comment.getNews().getId())
                 .content(comment.getContent())
                 .editedAt(comment.getEditedAt().toString())
+                .parentId(comment.getParent() == null ? null : comment.getParent().getId())
                 .build();
     }
 }
