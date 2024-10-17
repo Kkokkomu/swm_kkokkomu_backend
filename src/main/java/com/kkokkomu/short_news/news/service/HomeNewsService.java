@@ -174,7 +174,7 @@ public class HomeNewsService {
     public String increaseNewsView(SharedCntDto sharedCntDto, Long userId) {
         News news = newsLookupService.findNewsById(sharedCntDto.newsId());
 
-        // 레디스 조회수 ++
+        // 레디스 조회수 ++ㅜㅜ
         redisService.incrementRankingByView(news);
         Integer viewCount = redisService.getViewCount(sharedCntDto.newsId());
 
