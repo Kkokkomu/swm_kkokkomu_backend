@@ -61,10 +61,11 @@ public class NewsLogController {
     @Operation(summary = "뉴스 시청기록 삭제")
     @DeleteMapping("/list")
     public ResponseDto<String> deleteViewNews(
-            @Parameter(example = "1,4,7,10,15") @RequestParam(value = "newsIdList") String newsIdList
+            @Parameter(example = "1,4,7,10,15") @RequestParam(value = "newsIdList") String newsIdList,
+            @Parameter(hidden = true) @UserId Long userId
     ) {
         log.info("deleteViewNews controller");
-        return ResponseDto.ok(newsLogService.deleteNewsHist(newsIdList));
+        return ResponseDto.ok(newsLogService.deleteNewsHist(userId, newsIdList));
     }
 
     @Operation(summary = "뉴스 시청기록 일괄삭제")
