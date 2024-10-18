@@ -64,7 +64,7 @@ public class NewsLogService {
         return CursorResponseDto.fromEntityAndPageInfo(searchNewsDtos, cursorInfoDto);
     } // 댓글 단 뉴스 조회
 
-    @Transactional
+    @Transactional(readOnly = true)
     public CursorResponseDto<List<NewsInfoDto>> getNewsWithReaction(Long userId, Long cursorId, int size) {
         log.info("getNewsWithReaction service");
 

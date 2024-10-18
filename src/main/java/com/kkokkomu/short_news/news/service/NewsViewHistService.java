@@ -33,7 +33,7 @@ public class NewsViewHistService {
         newsViewHistRepository.deleteAllByUser(user);
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateNewsHist(Long userId) {
         Set<Long> newsIds = redisService.getNewsViewHistory(userId);
         log.info(newsIds.size() + String.valueOf(newsIds.isEmpty()) + " new news history");
