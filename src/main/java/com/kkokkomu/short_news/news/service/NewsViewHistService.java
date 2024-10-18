@@ -11,6 +11,7 @@ import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -32,7 +33,7 @@ public class NewsViewHistService {
         newsViewHistRepository.deleteAllByUser(user);
     }
 
-    @Transactional
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void updateNewsHist(Long userId) {
         Set<Long> newsIds = redisService.getNewsViewHistory(userId);
         log.info(newsIds.size() + String.valueOf(newsIds.isEmpty()) + " new news history");
