@@ -44,7 +44,7 @@ public class NewsLogService {
     private final CommentService commentService;
     private final RedisService redisService;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CursorResponseDto<List<CommentHistInfoDto>> getNewsWithComment(Long userId, Long cursorId, int size) {
         log.info("getNewsWithComment service");
 
@@ -64,7 +64,7 @@ public class NewsLogService {
         return CursorResponseDto.fromEntityAndPageInfo(searchNewsDtos, cursorInfoDto);
     } // 댓글 단 뉴스 조회
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CursorResponseDto<List<NewsInfoDto>> getNewsWithReaction(Long userId, Long cursorId, int size) {
         log.info("getNewsWithReaction service");
 
@@ -88,7 +88,7 @@ public class NewsLogService {
         return CursorResponseDto.fromEntityAndPageInfo(newsHistList, cursorInfoDto);
     } // 감정표현한 뉴스 조회
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CursorResponseDto<List<NewsHistInfoDto>> getNewsWithHist(Long userId, Long cursorId, int size) {
         log.info("getNewsWithHist service");
         log.info("getNewsWithReaction service");
