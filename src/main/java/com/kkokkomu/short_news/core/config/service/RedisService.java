@@ -305,9 +305,17 @@ public class RedisService {
                 .collect(Collectors.toSet());
     }
 
-    public void deleteNewsViewHistory(Long userId) {
+    public void deleteNewsAllViewHistory(Long userId) {
         String key = VIEW_HISTORY_PREFIX + userId;
         redisTemplate.delete(key);
+    }
+
+    public void deleteNewsViewListHistory(Long userId, List<Long> newsIds) {
+        String key = VIEW_HISTORY_PREFIX + userId;
+
+        redisTemplate.opsForSet().remove(key, newsIds.stream()
+                .map(String::valueOf) // Long -> String 변환
+                .toArray());
     }
 
     /****** 유저 인증코드 ******/

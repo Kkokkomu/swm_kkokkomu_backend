@@ -3,6 +3,7 @@ package com.kkokkomu.short_news.news.service;
 import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.comment.dto.comment.response.CommentDto;
 import com.kkokkomu.short_news.comment.service.CommentService;
+import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.core.dto.CursorInfoDto;
 import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
@@ -41,8 +42,9 @@ public class NewsLogService {
     private final NewsReactionService newsReactionService;
     private final NewsLookupService newsLookupService;
     private final CommentService commentService;
+    private final RedisService redisService;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CursorResponseDto<List<CommentHistInfoDto>> getNewsWithComment(Long userId, Long cursorId, int size) {
         log.info("getNewsWithComment service");
 
@@ -86,7 +88,7 @@ public class NewsLogService {
         return CursorResponseDto.fromEntityAndPageInfo(newsHistList, cursorInfoDto);
     } // 감정표현한 뉴스 조회
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CursorResponseDto<List<NewsHistInfoDto>> getNewsWithHist(Long userId, Long cursorId, int size) {
         log.info("getNewsWithHist service");
         log.info("getNewsWithReaction service");
@@ -122,8 +124,12 @@ public class NewsLogService {
     } // 최신순 시청기록 조회
 
     @Transactional
-    public String deleteNewsHist(String newsHistIdList) {
+    public String deleteNewsHist(Long userId, String newsHistIdList) {
         log.info("deleteNewsHist service");
+
+        if (!userLookupService.existsUser(userId)) {
+            throw new CommonException(ErrorCode.NOT_FOUND_USER);
+        }
 
         List<Long> split = Arrays.stream(newsHistIdList.split(","))
                 .map(Long::parseLong)
@@ -133,6 +139,7 @@ public class NewsLogService {
             log.info("deleteNewsHist id {}", id);
         }
 
+        redisService.deleteNewsViewListHistory(userId, split);
         newsViewHistRepository.deleteAllById(split);
 
         return "success";
@@ -143,6 +150,7 @@ public class NewsLogService {
         log.info("deleteNewsHistByUserId service");
         User user = userLookupService.findUserById(userId);
 
+        redisService.deleteNewsAllViewHistory(userId);
         newsViewHistRepository.deleteAllByUser(user);
 
         return "success";
