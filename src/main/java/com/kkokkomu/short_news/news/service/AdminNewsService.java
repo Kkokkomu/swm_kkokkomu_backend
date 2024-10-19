@@ -282,13 +282,11 @@ public class AdminNewsService {
                 throw new CommonException(ErrorCode.VIDEO_SERVER_ERROR);
             }
 
-
             Map<String, Object> dataMap = generateResponseDto.data();
             NewsInfoDataDto dataDto = objectMapper.convertValue(dataMap, NewsInfoDataDto.class);
 
             NewsInfoSummaryDto summaryDto = dataDto.summary();
             Map<String, String> keywordMap = dataDto.keywords();
-
 
             String summary = summaryDto.sentence_total();
             List<String> keywords = new ArrayList<>(Arrays.asList(keywordMap.get("keyword_0"), keywordMap.get("keyword_1"), keywordMap.get("keyword_2")));
