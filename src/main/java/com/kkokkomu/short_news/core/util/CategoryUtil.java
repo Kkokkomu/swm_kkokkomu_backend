@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class CategoryUtil {
     public ECategory getCategoryByName(String categoryName) {
         ECategory category = null;
-        if (Objects.equals(categoryName, "정치")) {
+        if (Objects.equals(categoryName, "정치") && Objects.equals(categoryName, "총선")) {
             category = ECategory.POLITICS;
         } else if (Objects.equals(categoryName, "사회")) {
             category = ECategory.SOCIAL;
