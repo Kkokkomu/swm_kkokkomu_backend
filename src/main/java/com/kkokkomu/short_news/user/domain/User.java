@@ -88,6 +88,9 @@ public class User {
     @Column(name = "alarm_ad_yn")
     private Boolean alarmAdYn; // 광고 알림 여부
 
+    @Column(name = "alarm_banned_yn")
+    private Boolean alarmBannedYn; // 제재 대상 알림 on off
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt; // 생성 일자, 객체 생성 시 자동 설정
 
@@ -98,7 +101,7 @@ public class User {
     private List<ProfileImg> profileImgs;
 
     @Builder
-    public User(String email, String password, String nickname, LocalDate birthday, ESex sex, EUserRole role, ELoginProvider loginProvider, Boolean isLogin, String refreshToken, LocalDateTime bannedStartAt, LocalDateTime bannedEndAt, LocalDateTime deletedAt, Boolean isDeleted, Boolean privacyPolicyYn, Boolean serviceTermsYn, Boolean alarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn, Boolean alarmAdYn) {
+    public User(String email, String password, String nickname, LocalDate birthday, ESex sex, EUserRole role, ELoginProvider loginProvider, Boolean isLogin, String refreshToken, LocalDateTime bannedStartAt, LocalDateTime bannedEndAt, LocalDateTime deletedAt, Boolean isDeleted, Boolean privacyPolicyYn, Boolean serviceTermsYn, Boolean alarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn,Boolean alarmBannedYn, Boolean alarmAdYn) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
@@ -118,6 +121,7 @@ public class User {
         this.alarmYn = alarmYn;
         this.alarmNewContentYn = alarmNewContentYn;
         this.alarmReplyYn = alarmReplyYn;
+        this.alarmBannedYn = alarmBannedYn;
         this.alarmAdYn = alarmAdYn;
         this.createdAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 설정
         this.editedAt = LocalDateTime.now(); // 초기값을 현재 시간으로 설정
@@ -143,6 +147,7 @@ public class User {
                 .alarmYn(false)
                 .alarmNewContentYn(false)
                 .alarmReplyYn(false)
+                .alarmBannedYn(false)
                 .alarmAdYn(false)
                 .isDeleted(false)
                 .build();
