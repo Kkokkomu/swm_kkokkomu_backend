@@ -89,6 +89,7 @@ public class NewsLogService {
     @Transactional
     public CursorResponseDto<List<NewsHistInfoDto>> getNewsWithHist(Long userId, Long cursorId, int size) {
         log.info("getNewsWithHist service");
+        log.info("cursorId: {}", cursorId);
 
         User user = userLookupService.findUserById(userId);
 
