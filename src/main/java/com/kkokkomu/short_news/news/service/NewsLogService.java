@@ -12,10 +12,8 @@ import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.domain.NewsReaction;
 import com.kkokkomu.short_news.news.domain.NewsViewHist;
 import com.kkokkomu.short_news.news.dto.news.response.NewsInfoDto;
-import com.kkokkomu.short_news.news.dto.news.response.SearchNewsDto;
 import com.kkokkomu.short_news.news.dto.newsHist.response.CommentHistInfoDto;
 import com.kkokkomu.short_news.news.dto.newsHist.response.NewsHistInfoDto;
-import com.kkokkomu.short_news.news.repository.NewsRepository;
 import com.kkokkomu.short_news.news.repository.NewsViewHistRepository;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.service.UserLookupService;
@@ -95,11 +93,6 @@ public class NewsLogService {
 
         User user = userLookupService.findUserById(userId);
 
-        // 커서 아이디에 해당하는 뉴스가 있는지 검사
-        if (cursorId != null && !newsLookupService.existNewsById(cursorId)) {
-            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
-        }
-
         PageRequest pageRequest = PageRequest.of(0, size);
 
         // 캐싱 히스토리 db 동기화
@@ -109,10 +102,15 @@ public class NewsLogService {
         Page<NewsViewHist> results;
         if (cursorId == null) {
             // 최초
-            results = newsViewHistRepository.findAllByUserAndCorsorFirst(userId, pageRequest);
+            results = newsViewHistRepository.findAllByUserAndCursorFirst(userId, pageRequest);
         } else {
+            // 커서 아이디에 해당하는 뉴스가 있는지 검사
+            if (!newsLookupService.existNewsById(cursorId)) {
+                throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+            }
+
             // 그 이후
-            results = newsViewHistRepository.findAllByUserAndCorsor(userId, cursorId, pageRequest);
+            results = newsViewHistRepository.findAllByUserAndCursor(userId, cursorId, pageRequest);
         }
         hist = results.getContent();
 

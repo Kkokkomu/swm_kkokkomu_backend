@@ -232,13 +232,13 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     // 최신순 댓글 단 댓글 조회
     @Query("SELECT c FROM Comment c " +
             "WHERE c.user.id = :userId " +
-            "ORDER BY c.id")
+            "ORDER BY c.id DESC ")
     Page<Comment> findAllByUserAndCorsorFirst(Long userId, Pageable pageable);
 
     // 최신순 댓글 단 댓글 조회 초기화
     @Query("SELECT c FROM Comment c " +
             "WHERE c.user.id = :userId " +
-            "AND c.id > :cursorId " +
-            "ORDER BY c.id")
+            "AND c.id < :cursorId " +
+            "ORDER BY c.id DESC ")
     Page<Comment> findAllByUserAndCorsor(@Param("userId") Long userId, @Param("cursorId") Long cursorId, Pageable pageable);
 }
