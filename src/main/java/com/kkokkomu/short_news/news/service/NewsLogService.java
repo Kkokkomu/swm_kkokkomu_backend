@@ -75,7 +75,7 @@ public class NewsLogService {
         Page<NewsReaction> reactionsByCursor = newsReactionService.getNewsReactionsByCursor(userId, cursorId, size);
 
         List<News> newsList = reactionsByCursor.stream()
-                .map(r -> r.getNews())
+                .map(NewsReaction::getNews)
                 .toList();
 
         // 뉴스들 기반 시청기록 조회
