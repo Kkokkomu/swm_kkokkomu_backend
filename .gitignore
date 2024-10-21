@@ -8,6 +8,7 @@ build/
 #application.xx
 src/main/resources/*
 src/main/resources/youtube/*
+src/main/resources/firebase/*
 
 ### STS ###
 .apt_generated
