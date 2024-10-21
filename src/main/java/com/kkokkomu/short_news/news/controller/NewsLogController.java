@@ -28,7 +28,7 @@ public class NewsLogController {
     @Operation(summary = "댓글 달았던 뉴스 조회")
     @GetMapping("/commented")
     public ResponseDto<CursorResponseDto<List<CommentHistInfoDto>>> readCommentedNews(
-            @UserId Long userId,
+            @Parameter(hidden = true) @UserId Long userId,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam("size") int size
     ) {
@@ -39,7 +39,7 @@ public class NewsLogController {
     @Operation(summary = "감정표현한 뉴스 조회")
     @GetMapping("/reaction")
     public ResponseDto<CursorResponseDto<List<NewsInfoDto>>> readReactionNews(
-            @UserId Long userId,
+            @Parameter(hidden = true) @UserId Long userId,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam("size") int size
     ) {
@@ -50,7 +50,7 @@ public class NewsLogController {
     @Operation(summary = "시청한 뉴스 조회")
     @GetMapping("/view")
     public ResponseDto<CursorResponseDto<List<NewsHistInfoDto>>> readViewNews(
-            @UserId Long userId,
+            @Parameter(hidden = true) @UserId Long userId,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam("size") int size
     ) {

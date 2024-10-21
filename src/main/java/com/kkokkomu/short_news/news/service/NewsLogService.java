@@ -75,7 +75,7 @@ public class NewsLogService {
         Page<NewsReaction> reactionsByCursor = newsReactionService.getNewsReactionsByCursor(userId, cursorId, size);
 
         List<News> newsList = reactionsByCursor.stream()
-                .map(r -> r.getNews())
+                .map(NewsReaction::getNews)
                 .toList();
 
         // 뉴스들 기반 시청기록 조회
@@ -89,7 +89,6 @@ public class NewsLogService {
     @Transactional
     public CursorResponseDto<List<NewsHistInfoDto>> getNewsWithHist(Long userId, Long cursorId, int size) {
         log.info("getNewsWithHist service");
-        log.info("getNewsWithReaction service");
 
         User user = userLookupService.findUserById(userId);
 
@@ -108,6 +107,7 @@ public class NewsLogService {
             if (!newsLookupService.existNewsById(cursorId)) {
                 throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
             }
+            log.info("cursorId: " + cursorId);
 
             // 그 이후
             results = newsViewHistRepository.findAllByUserAndCursor(userId, cursorId, pageRequest);

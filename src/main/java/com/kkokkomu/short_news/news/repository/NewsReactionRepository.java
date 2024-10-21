@@ -24,6 +24,8 @@ public interface NewsReactionRepository extends JpaRepository<NewsReaction, Long
 
     Optional<NewsReaction> findByNewsAndUser(News news, User user);
 
+    Optional<NewsReaction> findByNewsIdAndUserId(Long newsId, Long userId);
+
     @Query("SELECT nr FROM NewsReaction nr " +
             "WHERE nr.user.id = :userId " +
             "ORDER BY nr.id DESC")

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -117,6 +118,7 @@ public class NewsReactionService {
             if (!newsReactionRepository.existsById(cursorId)) {
                 throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
             }
+            log.info("cursorId: " + cursorId);
 
             results = newsReactionRepository.findAllByUserAndCorsor(userId, cursorId, pageRequest);
         }
@@ -136,11 +138,25 @@ public class NewsReactionService {
 
     // 유저 감정표현 여부 체크
     public NewReactionByUserDto checkNewsReaction(Long userId, Long newsId) {
-        return NewReactionByUserDto.builder()
-                .like(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsId, userId, ENewsReaction.LIKE))
-                .angry(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsId, userId, ENewsReaction.ANGRY))
-                .sad(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsId, userId, ENewsReaction.SAD))
-                .surprise(newsReactionRepository.existsByNewsIdAndUserIdAndReaction(newsId, userId, ENewsReaction.SURPRISE))
-                .build();
+        Optional<NewsReaction> newsReaction = newsReactionRepository.findByNewsIdAndUserId(newsId, userId);
+
+        if (newsReaction.isPresent()) {
+            ENewsReaction reaction = newsReaction.get().getReaction();
+            return NewReactionByUserDto.builder()
+                    .id(newsReaction.get().getId())
+                    .like(reaction.equals(ENewsReaction.LIKE))
+                    .angry(reaction.equals(ENewsReaction.ANGRY))
+                    .sad(reaction.equals(ENewsReaction.SAD))
+                    .surprise(reaction.equals(ENewsReaction.SURPRISE))
+                    .build();
+        } else {
+            return NewReactionByUserDto.builder()
+                    .id(null)
+                    .like(false)
+                    .angry(false)
+                    .sad(false)
+                    .surprise(false)
+                    .build();
+        }
     }
 }
