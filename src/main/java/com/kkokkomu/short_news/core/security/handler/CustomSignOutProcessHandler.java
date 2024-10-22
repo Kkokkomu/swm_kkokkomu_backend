@@ -17,6 +17,7 @@ public class CustomSignOutProcessHandler implements LogoutHandler {
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        userRepository.updateRefreshTokenAndLoginStatus(userDetails.getId(), null, false);
+        userRepository.updateRefreshTokenAndLoginStatus(userDetails.getId(), null, false); // 리프레시 토큰 무료화
+
     }
 }
