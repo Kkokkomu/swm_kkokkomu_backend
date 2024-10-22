@@ -1,5 +1,7 @@
 package com.kkokkomu.short_news.user.service;
 
+import com.kkokkomu.short_news.alarm.dto.request.CreateTokenDto;
+import com.kkokkomu.short_news.alarm.service.FCMTokenService;
 import com.kkokkomu.short_news.core.constant.Constant;
 import com.kkokkomu.short_news.core.oauth2.apple.AppleOAuthService;
 import com.kkokkomu.short_news.event.domain.ShareEvent;
@@ -51,6 +53,7 @@ public class AuthService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private final AppleOAuthService appleOAuthService;
+    private final FCMTokenService fcmTokenService;
 
     @Transactional
     public JwtTokenDto socialRegister(String accessToken, SocialRegisterRequestDto socialRegisterRequestDto) {  // 소셜 로그인 후 회원 등록 및 토큰 발급
@@ -115,6 +118,9 @@ public class AuthService {
         final JwtTokenDto jwtTokenDto = jwtUtil.generateToken(user.getId(), user.getRole());
         user.updateRefreshToken(jwtTokenDto.refreshToken());
 
+        // fcm 토큰 생성
+        fcmTokenService.verifyFCMToken(userId, socialRegisterRequestDto.deviceId(), socialRegisterRequestDto.fcmToken());
+
         return jwtTokenDto;
     }
 
@@ -132,12 +138,12 @@ public class AuthService {
         return jwtToken;
     }
 
-    public Object authSocialLogin(String token, String provider) {
+    public Object authSocialLogin(String token, String provider, CreateTokenDto createTokenDto) {
         String accessToken = refineToken(token);
         String loginProvider = provider.toUpperCase();
         log.info("loginProvider : " + loginProvider);
         OAuth2UserInfo oAuth2UserInfoDto = getOAuth2UserInfo(loginProvider, accessToken);
-        return processUserLogin(oAuth2UserInfoDto, ELoginProvider.valueOf(loginProvider));
+        return processUserLogin(oAuth2UserInfoDto, ELoginProvider.valueOf(loginProvider), createTokenDto);
     }
 
 //    public Object adminSocialLogin(String accessToken, String provider) {
@@ -167,7 +173,7 @@ public class AuthService {
 //        return jwtToken;
 //    }
 
-    private Object processUserLogin(OAuth2UserInfo oAuth2UserInfo, ELoginProvider provider) {
+    private Object processUserLogin(OAuth2UserInfo oAuth2UserInfo, ELoginProvider provider, CreateTokenDto createTokenDto) {
         Optional<User> user = userRepository.findByEmailAndRole(oAuth2UserInfo.email(), EUserRole.USER);
         // 회원 탈퇴 여부 확인
         if (user.isPresent() && user.get().getIsDeleted()) {
@@ -179,8 +185,14 @@ public class AuthService {
         }
         // USER 권한 + 이메일 정보가 DB에 존재 -> 팝핀 토큰 발급 및 로그인 상태 변경
         if (user.isPresent() && user.get().getLoginProvider().equals(provider)) {
-            JwtTokenDto jwtTokenDto = jwtUtil.generateToken(user.get().getId(), EUserRole.USER);
-            userRepository.updateRefreshTokenAndLoginStatus(user.get().getId(), jwtTokenDto.refreshToken(), true);
+            Long userId = user.get().getId();
+
+            JwtTokenDto jwtTokenDto = jwtUtil.generateToken(userId, EUserRole.USER);
+            userRepository.updateRefreshTokenAndLoginStatus(userId, jwtTokenDto.refreshToken(), true);
+
+            //fcm 토큰 검증
+            fcmTokenService.verifyFCMToken(userId, createTokenDto.deviceId(), createTokenDto.fcmToken());
+
             return jwtTokenDto;
         } else {
             // 비밀번호 랜덤 생성 후 암호화해서 DB에 저장

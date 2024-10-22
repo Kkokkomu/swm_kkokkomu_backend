@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.user.controller;
 
+import com.kkokkomu.short_news.alarm.dto.request.CreateTokenDto;
 import com.kkokkomu.short_news.core.annotation.UserId;
 import com.kkokkomu.short_news.core.constant.Constant;
 import com.kkokkomu.short_news.user.dto.auth.request.SocialRegisterRequestDto;
@@ -45,9 +46,10 @@ public class AuthController {
     })
     @PostMapping("/login/{provider}")
     public ResponseDto<?> authSocialLogin(@PathVariable String provider,
-                                          @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String accessToken) {
+                                          @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String accessToken,
+                                          @RequestBody @Valid CreateTokenDto createTokenDto) {
         log.info("accessToken : " + accessToken);
-        return ResponseDto.ok(authService.authSocialLogin(accessToken, provider));
+        return ResponseDto.ok(authService.authSocialLogin(accessToken, provider, createTokenDto));
     }
 
 //    @Operation(summary = "관리자 로그인", description = "회원가입 필요시 access token만 반환, 로그인 완료시 access, refresh 둘 다 반환")

@@ -7,9 +7,6 @@ public record CreateTokenDto (
         String fcmToken,
 
         @NotNull
-        String device,
-
-        @NotNull
         String deviceId
 ) {
 }
