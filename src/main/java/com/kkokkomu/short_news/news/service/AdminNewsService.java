@@ -384,9 +384,9 @@ public class AdminNewsService {
     public void syncRanking() {
         log.info("syncRanking");
         Set<ZSetOperations.TypedTuple<String>> scores = redisService.getAllGlobalRank();
-        for (ZSetOperations.TypedTuple<String> score : scores) {
-            log.info("id : {}, score : {}", score.getValue(), score.getScore());
-        }
+//        for (ZSetOperations.TypedTuple<String> score : scores) {
+//            log.info("id : {}, score : {}", score.getValue(), score.getScore());
+//        }
 
         // 가져온 데이터를 처리하여 뉴스 엔티티의 점수를 업데이트
         if (scores != null && !scores.isEmpty()) {
@@ -400,10 +400,10 @@ public class AdminNewsService {
                         .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS));
 
                 // 뉴스 엔티티의 점수를 업데이트
-                log.info("be : {}, sync : {}", news.getScore(), rankScore);
+//                log.info("be : {}, sync : {}", news.getScore(), rankScore);
                 news.updateScore(news.getScore() + rankScore);
                 newsRepository.save(news);
-                log.info("af : {}", news.getScore());
+//                log.info("af : {}", news.getScore());
             }
         }
 
