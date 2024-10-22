@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record NewReactionByUserDto(
+        Long id,
         Boolean like,
         Boolean surprise,
         Boolean sad,

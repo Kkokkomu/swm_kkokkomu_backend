@@ -24,6 +24,8 @@ public interface NewsReactionRepository extends JpaRepository<NewsReaction, Long
 
     Optional<NewsReaction> findByNewsAndUser(News news, User user);
 
+    Optional<NewsReaction> findByNewsIdAndUserId(Long newsId, Long userId);
+
     @Query("SELECT nr FROM NewsReaction nr " +
             "WHERE nr.user.id = :userId " +
             "ORDER BY nr.id DESC")
@@ -31,7 +33,7 @@ public interface NewsReactionRepository extends JpaRepository<NewsReaction, Long
 
     @Query("SELECT nr FROM NewsReaction nr " +
             "WHERE nr.user.id = :userId " +
-            "AND nr.id > :cursorId " +
+            "AND nr.id < :cursorId " +
             "ORDER BY nr.id DESC")
     Page<NewsReaction> findAllByUserAndCorsor(@Param("userId") Long userId, @Param("cursorId") Long cursorId, Pageable pageable);
 

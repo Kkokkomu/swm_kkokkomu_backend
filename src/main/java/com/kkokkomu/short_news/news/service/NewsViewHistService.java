@@ -57,4 +57,13 @@ public class NewsViewHistService {
             redisService.deleteNewsAllViewHistory(userId);
         }
     } // 레디스로 부터 해당 유저의 뉴스 시청기록 디비에 동기화
+
+    public NewsViewHist findNewsViewHistById(Long histId) {
+        return newsViewHistRepository.findById(histId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_NEWS_HIST));
+    }
+
+    public Boolean existNewsViewHistById(Long histId) {
+        return newsViewHistRepository.existsById(histId);
+    }
 }

@@ -12,10 +12,8 @@ import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.news.domain.NewsReaction;
 import com.kkokkomu.short_news.news.domain.NewsViewHist;
 import com.kkokkomu.short_news.news.dto.news.response.NewsInfoDto;
-import com.kkokkomu.short_news.news.dto.news.response.SearchNewsDto;
 import com.kkokkomu.short_news.news.dto.newsHist.response.CommentHistInfoDto;
 import com.kkokkomu.short_news.news.dto.newsHist.response.NewsHistInfoDto;
-import com.kkokkomu.short_news.news.repository.NewsRepository;
 import com.kkokkomu.short_news.news.repository.NewsViewHistRepository;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.service.UserLookupService;
@@ -77,7 +75,7 @@ public class NewsLogService {
         Page<NewsReaction> reactionsByCursor = newsReactionService.getNewsReactionsByCursor(userId, cursorId, size);
 
         List<News> newsList = reactionsByCursor.stream()
-                .map(r -> r.getNews())
+                .map(NewsReaction::getNews)
                 .toList();
 
         // 뉴스들 기반 시청기록 조회
@@ -91,14 +89,9 @@ public class NewsLogService {
     @Transactional
     public CursorResponseDto<List<NewsHistInfoDto>> getNewsWithHist(Long userId, Long cursorId, int size) {
         log.info("getNewsWithHist service");
-        log.info("getNewsWithReaction service");
+        log.info("cursorId: {}", cursorId);
 
         User user = userLookupService.findUserById(userId);
-
-        // 커서 아이디에 해당하는 뉴스가 있는지 검사
-        if (cursorId != null && !newsLookupService.existNewsById(cursorId)) {
-            throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
-        }
 
         PageRequest pageRequest = PageRequest.of(0, size);
 
@@ -109,10 +102,16 @@ public class NewsLogService {
         Page<NewsViewHist> results;
         if (cursorId == null) {
             // 최초
-            results = newsViewHistRepository.findAllByUserAndCorsorFirst(userId, pageRequest);
+            results = newsViewHistRepository.findAllByUserAndCursorFirst(userId, pageRequest);
         } else {
+            // 커서 아이디에 해당하는 뉴스가 있는지 검사
+            if (!newsViewHistService.existNewsViewHistById(cursorId)) {
+                throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
+            }
+            log.info("cursorId: " + cursorId);
+
             // 그 이후
-            results = newsViewHistRepository.findAllByUserAndCorsor(userId, cursorId, pageRequest);
+            results = newsViewHistRepository.findAllByUserAndCursor(userId, cursorId, pageRequest);
         }
         hist = results.getContent();
 
