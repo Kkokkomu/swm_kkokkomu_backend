@@ -78,6 +78,7 @@ public enum ErrorCode {
     NOT_FOUND_REPORTED_COMMENT("40416", HttpStatus.NOT_FOUND, "신고 댓글 내역이 존재하지 않습니다."),
     NOT_FOUND_ADMIN("40417", HttpStatus.NOT_FOUND, "해당 관리자가 존재하지 않습니다."),
     NOT_FOUND_REPORTED_NEWS("40418", HttpStatus.NOT_FOUND, "신고 뉴스 내역이 존재하지 않습니다."),
+    NOT_FOUND_NEWS_HIST("40419", HttpStatus.NOT_FOUND, "해당 뉴스 시청 기록이 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),

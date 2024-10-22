@@ -105,7 +105,7 @@ public class NewsLogService {
             results = newsViewHistRepository.findAllByUserAndCursorFirst(userId, pageRequest);
         } else {
             // 커서 아이디에 해당하는 뉴스가 있는지 검사
-            if (!newsLookupService.existNewsById(cursorId)) {
+            if (!newsViewHistService.existNewsViewHistById(cursorId)) {
                 throw new CommonException(ErrorCode.NOT_FOUND_CURSOR);
             }
             log.info("cursorId: " + cursorId);
