@@ -34,7 +34,7 @@ public class FCMSendService {
 
     private final UserLookupService userLookupService;
 
-    public String test(PushAlarmDto pushAlarmDto, Long userId) throws IOException {
+    public String test(PushAlarmDto pushAlarmDto, Long userId) {
         FCMToken fcmToken = fcmTokenRepository.findByDeviceIdAndUserId(pushAlarmDto.deviceId(), userId);
 
         sendMessageTo(
@@ -54,29 +54,33 @@ public class FCMSendService {
      * @param fcmSendDto 모바일에서 전달받은 Object
      * @return 성공(1), 실패(0)
      */
-    public int sendMessageTo(FcmSendDto fcmSendDto) throws IOException {
+    public int sendMessageTo(FcmSendDto fcmSendDto) {
+        try {
+            String message = makeMessage(fcmSendDto);
+            RestTemplate restTemplate = new RestTemplate();
+            /**
+             * 추가된 사항 : RestTemplate 이용중 클라이언트의 한글 깨짐 증상에 대한 수정
+             * @refernece : https://stackoverflow.com/questions/29392422/how-can-i-tell-resttemplate-to-post-with-utf-8-encoding
+             */
+            restTemplate.getMessageConverters()
+                    .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
-        String message = makeMessage(fcmSendDto);
-        RestTemplate restTemplate = new RestTemplate();
-        /**
-         * 추가된 사항 : RestTemplate 이용중 클라이언트의 한글 깨짐 증상에 대한 수정
-         * @refernece : https://stackoverflow.com/questions/29392422/how-can-i-tell-resttemplate-to-post-with-utf-8-encoding
-         */
-        restTemplate.getMessageConverters()
-                .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + getAccessToken());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + getAccessToken());
+            HttpEntity entity = new HttpEntity<>(message, headers);
 
-        HttpEntity entity = new HttpEntity<>(message, headers);
+            String API_URL = "<https://fcm.googleapis.com/v1/projects/adjh54-a0189/messages:send>";
+            ResponseEntity response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, String.class);
 
-        String API_URL = "<https://fcm.googleapis.com/v1/projects/adjh54-a0189/messages:send>";
-        ResponseEntity response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, String.class);
+            log.info(String.valueOf(response.getStatusCode()));
 
-        log.info(String.valueOf(response.getStatusCode()));
-
-        return response.getStatusCode() == HttpStatus.OK ? 1 : 0;
+            return response.getStatusCode() == HttpStatus.OK ? 1 : 0;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     /**
