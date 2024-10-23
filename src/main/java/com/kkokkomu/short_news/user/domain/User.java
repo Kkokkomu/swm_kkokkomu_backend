@@ -6,6 +6,7 @@ import com.kkokkomu.short_news.core.type.ELoginProvider;
 import com.kkokkomu.short_news.core.type.ESex;
 import com.kkokkomu.short_news.core.type.EUserRole;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,8 +77,8 @@ public class User {
     @Column(name = "service_terms_yn")
     private Boolean serviceTermsYn; // 이용 약관 동의 여부
 
-    @Column(name = "alarm_yn")
-    private Boolean alarmYn; // 푸시알림 여부
+    @Column(name = "night_alarm_yn")
+    private Boolean nightAlarmYn; // 새 뉴스 알림 여부
 
     @Column(name = "alarm_new_content_yn")
     private Boolean alarmNewContentYn; // 새 뉴스 알림 여부
@@ -98,7 +99,7 @@ public class User {
     private List<ProfileImg> profileImgs;
 
     @Builder
-    public User(String email, String password, String nickname, LocalDate birthday, ESex sex, EUserRole role, ELoginProvider loginProvider, Boolean isLogin, String refreshToken, LocalDateTime bannedStartAt, LocalDateTime bannedEndAt, LocalDateTime deletedAt, Boolean isDeleted, Boolean privacyPolicyYn, Boolean serviceTermsYn, Boolean alarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn,Boolean alarmBannedYn) {
+    public User(String email, String password, String nickname, LocalDate birthday, ESex sex, EUserRole role, ELoginProvider loginProvider, Boolean isLogin, String refreshToken, LocalDateTime bannedStartAt, LocalDateTime bannedEndAt, LocalDateTime deletedAt, Boolean isDeleted, Boolean privacyPolicyYn, Boolean serviceTermsYn, Boolean nightAlarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn,Boolean alarmBannedYn) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
@@ -115,7 +116,7 @@ public class User {
         this.isDeleted = false;
         this.privacyPolicyYn = privacyPolicyYn;
         this.serviceTermsYn = serviceTermsYn;
-        this.alarmYn = alarmYn;
+        this.nightAlarmYn = nightAlarmYn;
         this.alarmNewContentYn = alarmNewContentYn;
         this.alarmReplyYn = alarmReplyYn;
         this.alarmBannedYn = alarmBannedYn;
@@ -140,7 +141,7 @@ public class User {
                 .role(EUserRole.GUEST)
                 .privacyPolicyYn(true)
                 .serviceTermsYn(true)
-                .alarmYn(false)
+                .nightAlarmYn(false)
                 .alarmNewContentYn(false)
                 .alarmReplyYn(false)
                 .alarmBannedYn(false)
@@ -213,5 +214,13 @@ public class User {
         this.nickname = "알수없음";
         this.birthday = null;
         this.sex = null;
+    }
+
+    // 알람 세팅
+    public void updateAlarmSetting(Boolean nightAlarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn, Boolean alarmBannedYn) {
+        this.nightAlarmYn = nightAlarmYn;
+        this.alarmNewContentYn = alarmNewContentYn;
+        this.alarmReplyYn = alarmReplyYn;
+        this.alarmBannedYn = alarmBannedYn;
     }
 }

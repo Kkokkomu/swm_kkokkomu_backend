@@ -8,6 +8,7 @@ import com.kkokkomu.short_news.user.dto.auth.response.JwtTokenDto;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.user.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -72,12 +73,13 @@ public class AuthController {
     @Operation(summary = "토큰 재발급")
     @PostMapping("/refresh")
     public ResponseDto<JwtTokenDto> refresh(
-            @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String refreshToken){
-        return ResponseDto.ok(authService.refresh(refreshToken));
+            @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String refreshToken,
+            @RequestBody CreateTokenDto createTokenDto){
+        return ResponseDto.ok(authService.refresh(refreshToken, createTokenDto));
     }
 
     // swagger 표기용
-    @Operation(summary = "로그아웃")
+    @Operation(summary = "로그아웃", description = "토큰 삭제 및 deviceId 전송 필요")
     @PostMapping("/logout")
     public ResponseDto<String> logout() {
 

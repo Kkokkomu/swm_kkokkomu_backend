@@ -125,7 +125,7 @@ public class AuthService {
     }
 
     @Transactional
-    public JwtTokenDto refresh(String refreshToken) {
+    public JwtTokenDto refresh(String refreshToken, CreateTokenDto createTokenDto) {
         String token = refineToken(refreshToken);
         Long userId = jwtUtil.getUserIdFromToken(token);
         User user = userRepository.findById(userId)
@@ -135,6 +135,10 @@ public class AuthService {
         }
         JwtTokenDto jwtToken = jwtUtil.generateToken(userId, user.getRole());
         user.updateRefreshToken(jwtToken.refreshToken());
+
+        // fcm 토큰 업데이트
+        fcmTokenService.verifyFCMToken(userId, createTokenDto.deviceId(), createTokenDto.fcmToken());
+
         return jwtToken;
     }
 
