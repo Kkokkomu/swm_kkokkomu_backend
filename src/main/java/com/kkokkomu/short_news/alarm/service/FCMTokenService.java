@@ -1,12 +1,9 @@
 package com.kkokkomu.short_news.alarm.service;
 
-import com.google.firebase.messaging.FirebaseMessagingException;
 import com.kkokkomu.short_news.alarm.domain.FCMToken;
 import com.kkokkomu.short_news.alarm.dto.request.CreateTokenDto;
 import com.kkokkomu.short_news.alarm.dto.response.FCMTokenDto;
 import com.kkokkomu.short_news.alarm.repository.FCMTokenRepository;
-import com.kkokkomu.short_news.core.exception.CommonException;
-import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.service.UserLookupService;
 import jakarta.transaction.Transactional;
@@ -15,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
