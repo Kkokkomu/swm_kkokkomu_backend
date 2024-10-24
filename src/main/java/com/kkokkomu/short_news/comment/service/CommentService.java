@@ -351,6 +351,7 @@ public class CommentService {
                 .build();
     } // 대댓글 생성
 
+    @Transactional
     public String deleteReply(Long replyId) {
         log.info("deleteReply service");
         Comment comment = commentRepository.findById(replyId)
