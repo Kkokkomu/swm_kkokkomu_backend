@@ -381,6 +381,14 @@ public class AdminNewsService {
         return NewsDto.of(news);
     } // 뉴스 수정
 
+    public String deleteNews(Long newsId) {
+        News news = newsLookupService.findNewsById(newsId);
+
+        newsRepository.delete(news);
+
+        return "success";
+    } // 뉴스 수정
+
     public void syncRanking() {
         log.info("syncRanking");
         Set<ZSetOperations.TypedTuple<String>> scores = redisService.getAllGlobalRank();
