@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "관리자 뉴스")
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -28,12 +27,17 @@ public class AdminNewsController {
         return ResponseDto.ok(adminNewsService.generateNews(createGenerateNewsDto));
     }
 
-    @Operation(summary = "뉴스 수정")
     @PostMapping("")
     public ResponseDto<NewsDto> updateNews(@RequestBody UpdateNewsDto updateNewsDto) {
         log.info("updateNews controller");
         return ResponseDto.ok(adminNewsService.updateNews(updateNewsDto));
-    }
+    } // 뉴스 수정
+
+    @DeleteMapping("")
+    public ResponseDto<String> deleteNews(@RequestParam(value = "newsId") Long newsId) {
+        log.info("updateNews controller");
+        return ResponseDto.ok(adminNewsService.deleteNews(newsId));
+    } // 뉴스 삭제
 
     @PutMapping("/rank")
     public String syncGlobalRank() {

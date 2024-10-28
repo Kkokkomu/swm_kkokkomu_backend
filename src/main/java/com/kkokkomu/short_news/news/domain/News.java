@@ -3,6 +3,7 @@ package com.kkokkomu.short_news.news.domain;
 import com.kkokkomu.short_news.core.type.ECategory;
 import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.keyword.domain.NewsKeyword;
+import com.kkokkomu.short_news.report.domain.ReportedNews;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -70,6 +71,9 @@ public class News {
 
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NewsKeyword> newsKeywords = new ArrayList<>();; // 뉴스 키워드 매핑
+
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportedNews> reportedNews = new ArrayList<>();; // 뉴스 신고 내역 매핑
 
     @Builder
     public News(String shortformUrl, String youtubeUrl, String instagramUrl, String relatedUrl, String thumbnail, String title, String summary, ECategory category) {
