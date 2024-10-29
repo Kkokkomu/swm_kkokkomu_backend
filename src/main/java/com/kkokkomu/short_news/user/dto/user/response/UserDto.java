@@ -34,7 +34,7 @@ public record UserDto(
                 .nightAlarmYn(user.getNightAlarmYn())
                 .alarmNewContentYn(user.getAlarmNewContentYn())
                 .alarmReplyYn(user.getAlarmReplyYn())
-                .alarmBannedYn(user.getAlarmBannedYn())
+                .alarmBannedYn(user.getAlarmInformYn())
                 .build();
     }
 }
