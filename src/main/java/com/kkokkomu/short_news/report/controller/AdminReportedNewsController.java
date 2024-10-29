@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "뉴스 신고(관리자)")
+//@Tag(name = "뉴스 신고(관리자)")
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ import java.util.List;
 public class AdminReportedNewsController {
     private final ReportedNewsService reportedNewsService;
 
-    @Operation(summary = "관리자 뉴스 신고 리스트 조회")
+//    @Operation(summary = "관리자 뉴스 신고 리스트 조회")
     @GetMapping("/unexecuted")
     public ResponseDto<CursorResponseDto<List<AdminReportedNewsDto>>> readUnexecutedReportedNews(@RequestParam int size,
                                                                                           @RequestParam(required = false) Long cursorId
@@ -32,7 +32,7 @@ public class AdminReportedNewsController {
         return ResponseDto.ok(reportedNewsService.findUnexecutedAdminReportedNews(cursorId, size));
     }
 
-    @Operation(summary = "관리자 뉴스 신고 처리완료 리스트 조회")
+//    @Operation(summary = "관리자 뉴스 신고 처리완료 리스트 조회")
     @GetMapping("/executed")
     public ResponseDto<CursorResponseDto<List<AdminReportedNewsDto>>> readExecuedReportedNews(@RequestParam int size,
                                                                                        @RequestParam(required = false) Long cursorId
@@ -41,7 +41,7 @@ public class AdminReportedNewsController {
         return ResponseDto.ok(reportedNewsService.findExecutedAdminReportedNews(cursorId, size));
     }
 
-    @Operation(summary = "관리자 뉴스 신고 처리")
+//    @Operation(summary = "관리자 뉴스 신고 처리")
     @PostMapping("/execute")
     public ResponseDto<AdminReportedNewsDto> executeReportedNews(@RequestBody ExecuteReportedNews executeReportedNews,
                                                                  @UserId Long adminId
@@ -50,7 +50,7 @@ public class AdminReportedNewsController {
         return ResponseDto.ok(reportedNewsService.executeReportedNews(executeReportedNews, adminId));
     }
 
-    @Operation(summary = "관리자 뉴스 신고 기각 처리")
+//    @Operation(summary = "관리자 뉴스 신고 기각 처리")
     @PostMapping("/dismiss")
     public ResponseDto<AdminReportedNewsDto> dismissReportedNews(@RequestBody ExecuteReportedNews executeReportedNews,
                                                                  @UserId Long adminId
