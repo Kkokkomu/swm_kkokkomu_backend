@@ -142,10 +142,10 @@ public class User {
                 .privacyPolicyYn(true)
                 .serviceTermsYn(true)
                 .nightAlarmYn(false)
-                .alarmNewContentYn(false)
-                .alarmReplyYn(false)
-                .alarmInformYn(false)
-                .isDeleted(false)
+                .alarmNewContentYn(true)
+                .alarmReplyYn(true)
+                .alarmInformYn(true)
+                .isDeleted(true)
                 .build();
     }
 
