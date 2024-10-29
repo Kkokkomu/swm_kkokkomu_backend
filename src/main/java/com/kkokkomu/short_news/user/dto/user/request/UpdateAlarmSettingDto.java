@@ -6,6 +6,6 @@ public record UpdateAlarmSettingDto(
         @NotNull Boolean nightAlarmYn,
         @NotNull Boolean alarmNewContentYn,
         @NotNull Boolean alarmReplyYn,
-        @NotNull Boolean alarmBannedYn
+        @NotNull Boolean alarmInformYn
 ) {
 }
