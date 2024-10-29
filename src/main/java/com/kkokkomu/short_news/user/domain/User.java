@@ -86,8 +86,8 @@ public class User {
     @Column(name = "alarm_reply_yn")
     private Boolean alarmReplyYn; // 대댓글 알림 여부
 
-    @Column(name = "alarm_banned_yn")
-    private Boolean alarmBannedYn; // 제재 대상 알림 on off
+    @Column(name = "alarm_inform_yn")
+    private Boolean alarmInformYn; // 공지 알림 on off
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt; // 생성 일자, 객체 생성 시 자동 설정
@@ -99,7 +99,7 @@ public class User {
     private List<ProfileImg> profileImgs;
 
     @Builder
-    public User(String email, String password, String nickname, LocalDate birthday, ESex sex, EUserRole role, ELoginProvider loginProvider, Boolean isLogin, String refreshToken, LocalDateTime bannedStartAt, LocalDateTime bannedEndAt, LocalDateTime deletedAt, Boolean isDeleted, Boolean privacyPolicyYn, Boolean serviceTermsYn, Boolean nightAlarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn,Boolean alarmBannedYn) {
+    public User(String email, String password, String nickname, LocalDate birthday, ESex sex, EUserRole role, ELoginProvider loginProvider, Boolean isLogin, String refreshToken, LocalDateTime bannedStartAt, LocalDateTime bannedEndAt, LocalDateTime deletedAt, Boolean isDeleted, Boolean privacyPolicyYn, Boolean serviceTermsYn, Boolean nightAlarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn,Boolean alarmInformYn) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
@@ -119,7 +119,7 @@ public class User {
         this.nightAlarmYn = nightAlarmYn;
         this.alarmNewContentYn = alarmNewContentYn;
         this.alarmReplyYn = alarmReplyYn;
-        this.alarmBannedYn = alarmBannedYn;
+        this.alarmInformYn = alarmInformYn;
         this.createdAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 설정
         this.editedAt = LocalDateTime.now(); // 초기값을 현재 시간으로 설정
     }
@@ -144,7 +144,7 @@ public class User {
                 .nightAlarmYn(false)
                 .alarmNewContentYn(false)
                 .alarmReplyYn(false)
-                .alarmBannedYn(false)
+                .alarmInformYn(false)
                 .isDeleted(false)
                 .build();
     }
@@ -217,10 +217,10 @@ public class User {
     }
 
     // 알람 세팅
-    public void updateAlarmSetting(Boolean nightAlarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn, Boolean alarmBannedYn) {
+    public void updateAlarmSetting(Boolean nightAlarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn, Boolean alarmInformYn) {
         this.nightAlarmYn = nightAlarmYn;
         this.alarmNewContentYn = alarmNewContentYn;
         this.alarmReplyYn = alarmReplyYn;
-        this.alarmBannedYn = alarmBannedYn;
+        this.alarmInformYn = alarmInformYn;
     }
 }

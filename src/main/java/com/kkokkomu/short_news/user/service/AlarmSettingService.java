@@ -23,7 +23,7 @@ public class AlarmSettingService {
                 updateAlarmSettingDto.nightAlarmYn(),
                 user.getAlarmNewContentYn(),
                 updateAlarmSettingDto.alarmReplyYn(),
-                updateAlarmSettingDto.alarmBannedYn());
+                updateAlarmSettingDto.alarmInformYn());
 
         userRepository.save(user);
 
