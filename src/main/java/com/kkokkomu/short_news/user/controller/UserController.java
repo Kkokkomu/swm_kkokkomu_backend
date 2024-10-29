@@ -2,6 +2,7 @@ package com.kkokkomu.short_news.user.controller;
 
 import com.kkokkomu.short_news.core.annotation.UserId;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
+import com.kkokkomu.short_news.user.dto.user.request.UpdateAlarmSettingDto;
 import com.kkokkomu.short_news.user.dto.user.request.UpdateUserDto;
 import com.kkokkomu.short_news.user.dto.user.response.MyPageDto;
 import com.kkokkomu.short_news.user.dto.user.response.UserDto;
