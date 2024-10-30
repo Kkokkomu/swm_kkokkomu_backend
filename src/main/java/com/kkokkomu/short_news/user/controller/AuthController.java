@@ -47,10 +47,9 @@ public class AuthController {
     })
     @PostMapping("/login/{provider}")
     public ResponseDto<?> authSocialLogin(@PathVariable String provider,
-                                          @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String accessToken,
-                                          @RequestBody @Valid CreateTokenDto createTokenDto) {
+                                          @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String accessToken) {
         log.info("accessToken : " + accessToken);
-        return ResponseDto.ok(authService.authSocialLogin(accessToken, provider, createTokenDto));
+        return ResponseDto.ok(authService.authSocialLogin(accessToken, provider));
     }
 
 //    @Operation(summary = "관리자 로그인", description = "회원가입 필요시 access token만 반환, 로그인 완료시 access, refresh 둘 다 반환")
@@ -73,13 +72,12 @@ public class AuthController {
     @Operation(summary = "토큰 재발급")
     @PostMapping("/refresh")
     public ResponseDto<JwtTokenDto> refresh(
-            @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String refreshToken,
-            @RequestBody CreateTokenDto createTokenDto){
-        return ResponseDto.ok(authService.refresh(refreshToken, createTokenDto));
+            @NotNull @RequestHeader(Constant.AUTHORIZATION_HEADER) String refreshToken){
+        return ResponseDto.ok(authService.refresh(refreshToken));
     }
 
     // swagger 표기용
-    @Operation(summary = "로그아웃", description = "토큰 삭제 및 deviceId 전송 필요")
+    @Operation(summary = "로그아웃")
     @PostMapping("/logout")
     public ResponseDto<String> logout() {
 

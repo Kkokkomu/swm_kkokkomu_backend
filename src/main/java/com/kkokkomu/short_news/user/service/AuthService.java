@@ -125,7 +125,7 @@ public class AuthService {
     }
 
     @Transactional
-    public JwtTokenDto refresh(String refreshToken, CreateTokenDto createTokenDto) {
+    public JwtTokenDto refresh(String refreshToken) {
         String token = refineToken(refreshToken);
         Long userId = jwtUtil.getUserIdFromToken(token);
         User user = userRepository.findById(userId)
@@ -136,18 +136,15 @@ public class AuthService {
         JwtTokenDto jwtToken = jwtUtil.generateToken(userId, user.getRole());
         user.updateRefreshToken(jwtToken.refreshToken());
 
-        // fcm 토큰 업데이트
-        fcmTokenService.verifyFCMToken(userId, createTokenDto.deviceId(), createTokenDto.fcmToken());
-
         return jwtToken;
     }
 
-    public Object authSocialLogin(String token, String provider, CreateTokenDto createTokenDto) {
+    public Object authSocialLogin(String token, String provider) {
         String accessToken = refineToken(token);
         String loginProvider = provider.toUpperCase();
         log.info("loginProvider : " + loginProvider);
         OAuth2UserInfo oAuth2UserInfoDto = getOAuth2UserInfo(loginProvider, accessToken);
-        return processUserLogin(oAuth2UserInfoDto, ELoginProvider.valueOf(loginProvider), createTokenDto);
+        return processUserLogin(oAuth2UserInfoDto, ELoginProvider.valueOf(loginProvider));
     }
 
 //    public Object adminSocialLogin(String accessToken, String provider) {
@@ -177,7 +174,7 @@ public class AuthService {
 //        return jwtToken;
 //    }
 
-    private Object processUserLogin(OAuth2UserInfo oAuth2UserInfo, ELoginProvider provider, CreateTokenDto createTokenDto) {
+    private Object processUserLogin(OAuth2UserInfo oAuth2UserInfo, ELoginProvider provider) {
         Optional<User> user = userRepository.findByEmailAndRole(oAuth2UserInfo.email(), EUserRole.USER);
         // 회원 탈퇴 여부 확인
         if (user.isPresent() && user.get().getIsDeleted()) {
@@ -193,9 +190,6 @@ public class AuthService {
 
             JwtTokenDto jwtTokenDto = jwtUtil.generateToken(userId, EUserRole.USER);
             userRepository.updateRefreshTokenAndLoginStatus(userId, jwtTokenDto.refreshToken(), true);
-
-            //fcm 토큰 검증
-            fcmTokenService.verifyFCMToken(userId, createTokenDto.deviceId(), createTokenDto.fcmToken());
 
             return jwtTokenDto;
         } else {
