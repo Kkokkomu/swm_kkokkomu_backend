@@ -18,7 +18,7 @@ public record UserDto(
         Boolean nightAlarmYn,
         Boolean alarmNewContentYn,
         Boolean alarmReplyYn,
-        Boolean alarmBannedYn
+        Boolean alarmInformYn
 ) {
     public static UserDto of(User user) {
         return UserDto.builder()
@@ -34,7 +34,7 @@ public record UserDto(
                 .nightAlarmYn(user.getNightAlarmYn())
                 .alarmNewContentYn(user.getAlarmNewContentYn())
                 .alarmReplyYn(user.getAlarmReplyYn())
-                .alarmBannedYn(user.getAlarmInformYn())
+                .alarmInformYn(user.getAlarmInformYn())
                 .build();
     }
 }
