@@ -386,6 +386,9 @@ public class AdminNewsService {
 
         newsRepository.delete(news);
 
+        // 레디스에서 뉴스 삭제
+        redisService.deleteAllNewsData(newsId);
+
         return "success";
     } // 뉴스 수정
 

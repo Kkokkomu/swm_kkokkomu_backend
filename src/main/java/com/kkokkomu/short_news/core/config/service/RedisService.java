@@ -334,5 +334,28 @@ public class RedisService {
         return null;
     }
 
+    /****** 레디스 기록 삭제 ******/
+    public void deleteAllNewsData(Long newsId) {
+        // 뉴스 관련 Redis 키 생성
+        String viewCountKey = NEWS_VIEW_COUNT_PREFIX + newsId; // 조회수 키
+        String newsIdStr = String.valueOf(newsId); // 랭킹 업데이트 시 필요한 문자열 형태
+
+        // 1. 조회수 삭제
+        redisTemplate.delete(viewCountKey);
+
+        // 2. 글로벌 랭킹 및 각 카테고리 랭킹에서 해당 뉴스 제거
+        redisTemplate.opsForZSet().remove(GLOBAL_RANKING_KEY, newsIdStr);
+
+        // 3. 사용자별 시청 기록에서 해당 뉴스 제거
+        Set<String> keysWithViewHistory = redisTemplate.keys(VIEW_HISTORY_PREFIX + "*");
+        if (keysWithViewHistory != null) {
+            keysWithViewHistory.forEach(userKey ->
+                    redisTemplate.opsForSet().remove(userKey, newsIdStr)
+            );
+        }
+
+        log.info("Deleted all Redis data for newsId: {}", newsId);
+    }
+
 }
 
