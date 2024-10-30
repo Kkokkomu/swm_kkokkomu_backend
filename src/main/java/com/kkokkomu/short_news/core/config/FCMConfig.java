@@ -16,25 +16,29 @@ import java.util.List;
 public class FCMConfig {
 
     @Bean
-    FirebaseMessaging firebaseMessaging() throws IOException {
+    public FirebaseMessaging firebaseMessaging() throws IOException {
+        // 1. firebase_key.json을 ClassPath에서 로드
         ClassPathResource resource = new ClassPathResource("firebase/firebase_key.json");
-        InputStream refreshToken = resource.getInputStream();
-        FirebaseApp firebaseApp = null;
-        List<FirebaseApp> firebaseAppList = FirebaseApp.getApps();
-        if (firebaseAppList != null && !firebaseAppList.isEmpty()) {
-            for (FirebaseApp app : firebaseAppList) {
-                if (app.getName().equals(FirebaseApp.DEFAULT_APP_NAME)) {
-                    firebaseApp = app;
-                }
+
+        try (InputStream refreshToken = resource.getInputStream()) {
+            // 2. Firebase 앱 인스턴스가 이미 있는지 확인
+            List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
+            FirebaseApp firebaseApp;
+
+            if (firebaseApps != null && !firebaseApps.isEmpty()) {
+                // 기존 인스턴스가 있으면 재사용
+                firebaseApp = FirebaseApp.getInstance();
+            } else {
+                // 3. 새 Firebase 앱 인스턴스 초기화
+                FirebaseOptions options = FirebaseOptions.builder()
+                        .setCredentials(GoogleCredentials.fromStream(refreshToken))
+                        .build();
+
+                firebaseApp = FirebaseApp.initializeApp(options);
             }
-        } else {
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(refreshToken))
-                    .build();
 
-            firebaseApp = FirebaseApp.initializeApp(options);
-
+            // 4. FirebaseMessaging 인스턴스 반환
+            return FirebaseMessaging.getInstance(firebaseApp);
         }
-        return FirebaseMessaging.getInstance(firebaseApp);
     }
 }
