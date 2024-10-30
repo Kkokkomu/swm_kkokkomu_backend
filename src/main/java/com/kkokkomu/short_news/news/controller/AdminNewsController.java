@@ -33,8 +33,8 @@ public class AdminNewsController {
         return ResponseDto.ok(adminNewsService.updateNews(updateNewsDto));
     } // 뉴스 수정
 
-    @DeleteMapping("")
-    public ResponseDto<String> deleteNews(@RequestParam(value = "newsId") Long newsId) {
+    @DeleteMapping("/{newsId}")
+    public ResponseDto<String> deleteNews(@PathVariable Long newsId) {
         log.info("updateNews controller");
         return ResponseDto.ok(adminNewsService.deleteNews(newsId));
     } // 뉴스 삭제
