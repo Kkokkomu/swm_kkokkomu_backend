@@ -32,13 +32,6 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > ./src/main/resources/application.yml
         shell: bash
 
-      # Firebase 키 생성 및 복원
-      - name: Create Firebase Key
-        run: |
-          mkdir -p ./src/main/resources/firebase
-          echo "${{ secrets.FIREBASE_KEY_JSON }}" > ./src/main/resources/firebase/firebase_key.json
-        shell: bash
-
       # gradlew 실행 권한 부여
       - name: Grant permission for gradlew
         run: chmod +x gradlew
