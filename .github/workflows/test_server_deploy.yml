@@ -32,6 +32,13 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > ./src/main/resources/application.yml
         shell: bash
 
+      # Firebase 키 생성 및 복원
+      - name: Create Firebase Key
+        run: |
+          mkdir -p ./src/main/resources/firebase
+          echo "${{ secrets.FIREBASE_KEY_JSON }}" > ./src/main/resources/firebase/firebase_key.json
+        shell: bash
+
       # gradlew 실행 권한 부여
       - name: Grant permission for gradlew
         run: chmod +x gradlew
@@ -40,20 +47,20 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew build -x test
 
-      # docker hub 로그인
+      # Docker Hub 로그인
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 스프링 부트 어플리케이션 docker 이미지 빌드 및 푸시
+      # Docker 이미지 빌드 및 푸시
       - name: Build and push Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/kkm-test .
           docker push ${{ secrets.DOCKER_USERNAME }}/kkm-test
 
-      # EC2 인스턴스에 배포
+      # EC2 인스턴스에 배포 및 Docker 컨테이너 실행
       - name: Deploy to AWS EC2
         uses: appleboy/ssh-action@master
         with:
@@ -61,12 +68,22 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Firebase 키 복사
+            mkdir -p /home/ec2-user/firebase
+            echo "${{ secrets.FIREBASE_KEY_JSON }}" > /home/ec2-user/firebase/firebase_key.json
+
+            # Docker 컨테이너 중지 및 정리
             docker stop web || true
             docker rm web || true
-            docker rmi ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest || true # 이전 이미지를 삭제
-            docker volume prune -f # 사용되지 않는 볼륨 삭제
+            docker rmi ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest || true
+            docker volume prune -f
+
+            # Docker Hub 로그인 및 이미지 풀
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker pull ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest
+
+            # Docker 컨테이너 실행 (Firebase 키 마운트)
             docker run -d --name web --network my_network -p 80:8080 \
               -e TZ=Asia/Seoul \
+              -v /home/ec2-user/firebase/firebase_key.json:/app/firebase/firebase_key.json \
               ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest
