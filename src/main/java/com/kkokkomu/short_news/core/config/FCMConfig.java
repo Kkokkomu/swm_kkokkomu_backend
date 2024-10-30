@@ -17,6 +17,7 @@ import java.util.List;
 @Configuration
 public class FCMConfig {
 
+    @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
         // 1. /tmp 경로에서 firebase_service_key.json 파일 로드
         File firebaseKeyFile = new File("/tmp/firebase_service_key.json");
