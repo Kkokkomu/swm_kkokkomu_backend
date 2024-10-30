@@ -18,7 +18,7 @@ public class FCMConfig {
     @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
         // 1. firebase_key.json을 ClassPath에서 로드
-        ClassPathResource resource = new ClassPathResource("firebase/firebase_key.json");
+        ClassPathResource resource = new ClassPathResource("firebase/firebase_service_key.json");
 
         try (InputStream refreshToken = resource.getInputStream()) {
             // 2. Firebase 앱 인스턴스가 이미 있는지 확인

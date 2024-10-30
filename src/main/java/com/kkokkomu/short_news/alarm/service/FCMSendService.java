@@ -42,7 +42,7 @@ public class FCMSendService {
         FCMToken fcmToken = fcmTokenRepository.findByDeviceIdAndUserId(pushAlarmDto.deviceId(), userId);
 
         int badge = 0;
-//
+
         log.info("token : " + fcmToken.getToken());
         Message message = Message.builder()
                 .setNotification(Notification.builder()
