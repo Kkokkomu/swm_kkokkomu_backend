@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -15,17 +17,20 @@ import java.util.List;
 @Configuration
 public class FCMConfig {
 
-    @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
-        // 1. firebase_key.json을 ClassPath에서 로드
-        ClassPathResource resource = new ClassPathResource("firebase/firebase_service_key.json");
+        // 1. /tmp 경로에서 firebase_service_key.json 파일 로드
+        File firebaseKeyFile = new File("/tmp/firebase_service_key.json");
 
-        try (InputStream refreshToken = resource.getInputStream()) {
+        if (!firebaseKeyFile.exists()) {
+            throw new IllegalStateException("Firebase key file not found at /tmp/firebase_service_key.json");
+        }
+
+        try (FileInputStream refreshToken = new FileInputStream(firebaseKeyFile)) {
             // 2. Firebase 앱 인스턴스가 이미 있는지 확인
             List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
             FirebaseApp firebaseApp;
 
-            if (firebaseApps != null && !firebaseApps.isEmpty()) {
+            if (!firebaseApps.isEmpty()) {
                 // 기존 인스턴스가 있으면 재사용
                 firebaseApp = FirebaseApp.getInstance();
             } else {
