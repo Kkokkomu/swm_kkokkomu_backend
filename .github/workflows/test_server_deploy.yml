@@ -78,5 +78,4 @@ jobs:
             # Docker 컨테이너 실행 (Firebase 키 마운트)
             docker run -d --name web --network my_network -p 80:8080 \
               -e TZ=Asia/Seoul \
-              -v /home/ec2-user/firebase/firebase_key.json:/app/firebase/firebase_key.json \
               ${{ secrets.DOCKER_USERNAME }}/kkm-test:latest
