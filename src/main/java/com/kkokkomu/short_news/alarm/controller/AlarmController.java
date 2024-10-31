@@ -41,16 +41,16 @@ public class AlarmController {
             @Parameter(hidden = true) @UserId Long userId,
             @RequestBody CreateTokenDto createTokenDto
             ) {
-        return ResponseDto.ok(fcmTokenService.applyFCMToken(createTokenDto, userId));
+        return ResponseDto.ok(fcmTokenService.verifyFCMToken(userId, createTokenDto.fcmToken()));
     }
 
     @Operation(summary = "토큰 삭제")
     @DeleteMapping("/token")
     public ResponseDto<String> deleteToken(
             @Parameter(hidden = true) @UserId Long userId,
-            @RequestParam(value = "deviceId") String deviceId
+            @RequestParam(value = "fcmToken") String fcmToken
             ) {
-        return ResponseDto.ok(fcmTokenService.deleteUserToken(deviceId, userId));
+        return ResponseDto.ok(fcmTokenService.deleteUserToken(fcmToken, userId));
     }
 
 

@@ -20,12 +20,6 @@ public record SocialRegisterRequestDto(
 
         @NotNull LocalDate birthday,
 
-        String recommendCode,
-
-        @NotNull
-        String fcmToken,
-
-        @NotNull
-        String deviceId
+        String recommendCode
 ) {
 }

@@ -30,16 +30,12 @@ public class FCMToken {
     @Column(name = "expired_at", nullable = false)
     private LocalDateTime expiredAt; // 토큰 만료일
 
-    @Column(name = "device_id", nullable = false, unique = true)
-    private String deviceId;
-
     @Builder
-    public FCMToken(User user, String token, String deviceId ){
+    public FCMToken(User user, String token){
         this.user = user;
         this.token      = token;
         this.editedAt    = LocalDateTime.now();
         this.expiredAt    = LocalDateTime.now().plusMonths(1);
-        this.deviceId   = deviceId;
     }
 
     // 토큰 갱신

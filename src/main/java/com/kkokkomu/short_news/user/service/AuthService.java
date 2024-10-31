@@ -118,9 +118,6 @@ public class AuthService {
         final JwtTokenDto jwtTokenDto = jwtUtil.generateToken(user.getId(), user.getRole());
         user.updateRefreshToken(jwtTokenDto.refreshToken());
 
-        // fcm 토큰 생성
-        fcmTokenService.verifyFCMToken(userId, socialRegisterRequestDto.deviceId(), socialRegisterRequestDto.fcmToken());
-
         return jwtTokenDto;
     }
 

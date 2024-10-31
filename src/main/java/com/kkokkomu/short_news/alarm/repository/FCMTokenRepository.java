@@ -19,11 +19,13 @@ public interface FCMTokenRepository extends JpaRepository<FCMToken, Long> {
 
     List<FCMToken> findAllByDeviceId(String deviceId);
 
-    FCMToken findByToken(String token);
+    Optional<FCMToken> findByToken(String token);
 
     Optional<FCMToken> findByDeviceIdAndToken(String deviceId, String token);
 
     FCMToken findByDeviceIdAndUserId(String deviceId, Long userId);
 
     void deleteByDeviceIdAndUser(String deviceId, User user);
+
+    void deleteByToken(String token);
 }
