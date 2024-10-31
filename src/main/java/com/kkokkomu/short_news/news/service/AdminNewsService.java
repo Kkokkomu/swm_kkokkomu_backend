@@ -50,7 +50,7 @@ public class AdminNewsService {
     /* 관리자 */
     @jakarta.transaction.Transactional
     public List<GenerateNewsDto> generateNewsList(CreateGenerateNewsDto createGenerateNewsDto) {
-        int repeat = createGenerateNewsDto.count_news() + createGenerateNewsDto.count_entertain() + createGenerateNewsDto.count_sports();
+        int repeat = createGenerateNewsDto.headline() + createGenerateNewsDto.politic() + createGenerateNewsDto.economy() + createGenerateNewsDto.society() + createGenerateNewsDto.world() + createGenerateNewsDto.sports() + createGenerateNewsDto.culture() + createGenerateNewsDto.entertain() + createGenerateNewsDto.IT();
 
         // 임시 뉴스 객체 생성 및 id 추출
         List<News> newsList = new ArrayList<>();
@@ -72,9 +72,15 @@ public class AdminNewsService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         RequestGenerateNewsDto requestGenerateNewsDto = RequestGenerateNewsDto.builder()
-                .count_news(createGenerateNewsDto.count_news())
-                .count_entertain(createGenerateNewsDto.count_entertain())
-                .count_sports(createGenerateNewsDto.count_sports())
+                .headline(createGenerateNewsDto.headline())
+                .politic(createGenerateNewsDto.politic())
+                .economy(createGenerateNewsDto.economy())
+                .society(createGenerateNewsDto.society())
+                .world(createGenerateNewsDto.world())
+                .sports(createGenerateNewsDto.sports())
+                .culture(createGenerateNewsDto.culture())
+                .entertain(createGenerateNewsDto.entertain())
+                .IT(createGenerateNewsDto.IT())
                 .id_list(idList)
                 .build();
 
@@ -192,7 +198,7 @@ public class AdminNewsService {
 
     @jakarta.transaction.Transactional
     public List<GenerateNewsDto> generateNews(CreateGenerateNewsDto createGenerateNewsDto) {
-        int repeat = createGenerateNewsDto.count_news() + createGenerateNewsDto.count_entertain() + createGenerateNewsDto.count_sports();
+        int repeat = createGenerateNewsDto.headline() + createGenerateNewsDto.politic() + createGenerateNewsDto.economy() + createGenerateNewsDto.society() + createGenerateNewsDto.world() + createGenerateNewsDto.sports() + createGenerateNewsDto.culture() + createGenerateNewsDto.entertain() + createGenerateNewsDto.IT();
 
         // 임시 뉴스 객체 생성 및 id 추출
         List<News> newsList = new ArrayList<>();
@@ -214,9 +220,15 @@ public class AdminNewsService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         RequestGenerateNewsDto requestGenerateNewsDto = RequestGenerateNewsDto.builder()
-                .count_news(createGenerateNewsDto.count_news())
-                .count_entertain(createGenerateNewsDto.count_entertain())
-                .count_sports(createGenerateNewsDto.count_sports())
+                .headline(createGenerateNewsDto.headline())
+                .politic(createGenerateNewsDto.politic())
+                .economy(createGenerateNewsDto.economy())
+                .society(createGenerateNewsDto.society())
+                .world(createGenerateNewsDto.world())
+                .sports(createGenerateNewsDto.sports())
+                .culture(createGenerateNewsDto.culture())
+                .entertain(createGenerateNewsDto.entertain())
+                .IT(createGenerateNewsDto.IT())
                 .id_list(idList)
                 .build();
 
