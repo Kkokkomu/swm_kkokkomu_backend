@@ -126,7 +126,7 @@ public class ReportedNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(adminReportedNewsDtos, cursorInfoDto);
     } // 관리자 뉴스 신고 처리완료 내역 조회
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AdminReportedNewsDto executeReportedNews(Long reportedNewsId, Long adminId) {
         log.info("executeReportedNews");
         ReportedNews reportedNews = reportedNewsRepository.findById(reportedNewsId)
@@ -153,7 +153,7 @@ public class ReportedNewsService {
         return AdminReportedNewsDto.of(reportedNews);
     } // 관리자 뉴스 처리 완료
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AdminReportedNewsDto dismissReport(Long reportedNewsId, Long adminId) {
         ReportedNews reportedNews = reportedNewsRepository.findById(reportedNewsId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_NEWS));
