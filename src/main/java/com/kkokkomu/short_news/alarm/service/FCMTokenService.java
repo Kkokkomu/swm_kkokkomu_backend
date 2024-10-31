@@ -60,7 +60,10 @@ public class FCMTokenService {
 
     // 토큰 삭제
     // 로그아웃 시 요청
+    @Transactional
     public String deleteUserToken(String fcmToken, Long userId) {
+        log.info("Deleting user token: {}", fcmToken);
+
         if (!userLookupService.existsUser(userId)) {
             throw new CommonException(ErrorCode.NOT_FOUND_USER);
         }
