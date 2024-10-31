@@ -1,5 +1,7 @@
 package com.kkokkomu.short_news.user.service;
 
+import com.kkokkomu.short_news.alarm.dto.request.CreateTokenDto;
+import com.kkokkomu.short_news.alarm.service.FCMTokenService;
 import com.kkokkomu.short_news.core.constant.Constant;
 import com.kkokkomu.short_news.core.oauth2.apple.AppleOAuthService;
 import com.kkokkomu.short_news.event.domain.ShareEvent;
@@ -51,6 +53,7 @@ public class AuthService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private final AppleOAuthService appleOAuthService;
+    private final FCMTokenService fcmTokenService;
 
     @Transactional
     public JwtTokenDto socialRegister(String accessToken, SocialRegisterRequestDto socialRegisterRequestDto) {  // 소셜 로그인 후 회원 등록 및 토큰 발급
@@ -129,6 +132,7 @@ public class AuthService {
         }
         JwtTokenDto jwtToken = jwtUtil.generateToken(userId, user.getRole());
         user.updateRefreshToken(jwtToken.refreshToken());
+
         return jwtToken;
     }
 
@@ -179,8 +183,11 @@ public class AuthService {
         }
         // USER 권한 + 이메일 정보가 DB에 존재 -> 팝핀 토큰 발급 및 로그인 상태 변경
         if (user.isPresent() && user.get().getLoginProvider().equals(provider)) {
-            JwtTokenDto jwtTokenDto = jwtUtil.generateToken(user.get().getId(), EUserRole.USER);
-            userRepository.updateRefreshTokenAndLoginStatus(user.get().getId(), jwtTokenDto.refreshToken(), true);
+            Long userId = user.get().getId();
+
+            JwtTokenDto jwtTokenDto = jwtUtil.generateToken(userId, EUserRole.USER);
+            userRepository.updateRefreshTokenAndLoginStatus(userId, jwtTokenDto.refreshToken(), true);
+
             return jwtTokenDto;
         } else {
             // 비밀번호 랜덤 생성 후 암호화해서 DB에 저장

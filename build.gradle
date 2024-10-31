@@ -65,6 +65,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.data:spring-data-redis:3.0.1'
 
+	// Firebase sdk
+	implementation 'com.google.firebase:firebase-admin:7.1.0'
 }
 
 tasks.named('test') {

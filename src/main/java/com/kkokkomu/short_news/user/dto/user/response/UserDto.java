@@ -1,6 +1,7 @@
 package com.kkokkomu.short_news.user.dto.user.response;
 
 import com.kkokkomu.short_news.user.domain.User;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
@@ -13,7 +14,11 @@ public record UserDto(
         String birthday,
         String createdAt,
         String editedAt,
-        String profileEditedAt
+        String profileEditedAt,
+        Boolean nightAlarmYn,
+        Boolean alarmNewContentYn,
+        Boolean alarmReplyYn,
+        Boolean alarmInformYn
 ) {
     public static UserDto of(User user) {
         return UserDto.builder()
@@ -26,6 +31,10 @@ public record UserDto(
                 .createdAt(user.getCreatedAt().toString())
                 .editedAt(user.getEditedAt().toString())
                 .profileEditedAt(user.getProfileImgs().get(0).getEditedAt().toString())
+                .nightAlarmYn(user.getNightAlarmYn())
+                .alarmNewContentYn(user.getAlarmNewContentYn())
+                .alarmReplyYn(user.getAlarmReplyYn())
+                .alarmInformYn(user.getAlarmInformYn())
                 .build();
     }
 }

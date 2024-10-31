@@ -14,20 +14,22 @@ import java.util.stream.Collectors;
 public class CategoryUtil {
     public ECategory getCategoryByName(String categoryName) {
         ECategory category = null;
-        if (Objects.equals(categoryName, "정치") || Objects.equals(categoryName, "총선")) {
+        if (Objects.equals(categoryName, "정치") || Objects.equals(categoryName, "종합")) {
             category = ECategory.POLITICS;
         } else if (Objects.equals(categoryName, "사회")) {
             category = ECategory.SOCIAL;
         } else if (Objects.equals(categoryName, "경제")) {
             category = ECategory.ECONOMY;
-        } else if (Objects.equals(categoryName, "생활")) {
+        } else if (Objects.equals(categoryName, "문화")) {
             category = ECategory.LIVING;
-        } else if (Objects.equals(categoryName, "세계")) {
+        } else if (Objects.equals(categoryName, "국제")) {
             category = ECategory.WORLD;
         } else if (Objects.equals(categoryName, "연예")) {
             category = ECategory.ENTERTAIN;
         } else if (Objects.equals(categoryName, "스포츠")) {
             category = ECategory.SPORTS;
+        } else if (Objects.equals(categoryName, "IT·바이오")) {
+            category = ECategory.IT;
         }
 
         return category;
