@@ -32,6 +32,7 @@ public class NewsLookupServiceImpl implements NewsLookupService{
 
     @Override
     public String deleteNewsById(Long newsId) {
+        log.info("deleteNewsById newsId={}", newsId);
         News news = findNewsById(newsId);
 
         newsRepository.delete(news);

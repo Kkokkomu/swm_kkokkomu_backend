@@ -128,6 +128,7 @@ public class ReportedNewsService {
 
     @Transactional(readOnly = true)
     public AdminReportedNewsDto executeReportedNews(Long reportedNewsId, Long adminId) {
+        log.info("executeReportedNews");
         ReportedNews reportedNews = reportedNewsRepository.findById(reportedNewsId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_NEWS));
 
@@ -144,6 +145,7 @@ public class ReportedNewsService {
         Long newsId = reportedNews.getNews().getId();
         reportedNews.updateNewsNull();
         reportedNewsRepository.save(reportedNews);
+        log.info(reportedNews.getProgress().toString());
 
         // 뉴스 삭제
         newsLookupService.deleteNewsById(newsId);
