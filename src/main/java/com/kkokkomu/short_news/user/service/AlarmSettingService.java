@@ -23,7 +23,7 @@ public class AlarmSettingService {
 
         user.updateAlarmSetting(
                 updateAlarmSettingDto.nightAlarmYn(),
-                user.getAlarmNewContentYn(),
+                updateAlarmSettingDto.alarmNewContentYn(),
                 updateAlarmSettingDto.alarmReplyYn(),
                 updateAlarmSettingDto.alarmInformYn());
 
