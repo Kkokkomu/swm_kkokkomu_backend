@@ -9,5 +9,5 @@ public interface NewsLookupService {
 
     Boolean existNewsById(Long newsId);
 
-    void deleteNewsById(Long newsId);
+    String deleteNewsById(Long newsId);
 }

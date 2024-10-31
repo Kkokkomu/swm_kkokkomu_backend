@@ -121,8 +121,8 @@ public class ReportedCommentService {
     } // 신고 처리 완료 리스트 조회 (오래된순)
 
     @Transactional
-    public ReportedCommentDto executeReport(ExecuteReportedComment executeReportedComment, Long adminId) {
-        ReportedComment reportedComment = reportedCommentRepository.findById(executeReportedComment.reportedCommentId())
+    public ReportedCommentDto executeReport(Long reportedCommentId, Long adminId) {
+        ReportedComment reportedComment = reportedCommentRepository.findById(reportedCommentId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_COMMENT));
 
         if (!reportedComment.getProgress().equals(ECommentProgress.UNEXECUTED)) {
@@ -150,8 +150,8 @@ public class ReportedCommentService {
         return ReportedCommentDto.of(reportedComment);
     } // 댓글 신고 처리
 
-    public ReportedCommentDto dismissReport(ExecuteReportedComment executeReportedComment, Long adminId) {
-        ReportedComment reportedComment = reportedCommentRepository.findById(executeReportedComment.reportedCommentId())
+    public ReportedCommentDto dismissReport(Long reportedCommentId, Long adminId) {
+        ReportedComment reportedComment = reportedCommentRepository.findById(reportedCommentId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_COMMENT));
 
         if (!reportedComment.getProgress().equals(ECommentProgress.UNEXECUTED)) {

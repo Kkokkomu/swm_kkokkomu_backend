@@ -394,14 +394,7 @@ public class AdminNewsService {
     } // 뉴스 수정
 
     public String deleteNews(Long newsId) {
-        News news = newsLookupService.findNewsById(newsId);
-
-        newsRepository.delete(news);
-
-        // 레디스에서 뉴스 삭제
-        redisService.deleteAllNewsData(newsId);
-
-        return "success";
+        return newsLookupService.deleteNewsById(newsId);
     } // 뉴스 수정
 
     public void syncRanking() {

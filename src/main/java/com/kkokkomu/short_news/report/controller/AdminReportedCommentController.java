@@ -47,20 +47,20 @@ public class AdminReportedCommentController {
     }
 
     @Operation(summary = "관리자 신고 처리 및 유저 경고 부여")
-    @PostMapping("/execute")
-    public ResponseDto<ReportedCommentDto> executeReportedComment(@RequestBody ExecuteReportedComment executeReportedComment,
+    @PostMapping("/execute/{reportedCommentId}")
+    public ResponseDto<ReportedCommentDto> executeReportedComment(@PathVariable String reportedCommentId,
                                                                   @UserId Long adminId
     ) {
         log.info("executeReportedComment controller");
-        return ResponseDto.ok(reportedCommentService.executeReport(executeReportedComment, adminId));
+        return ResponseDto.ok(reportedCommentService.executeReport(Long.parseLong(reportedCommentId), adminId));
     }
 
     @Operation(summary = "관리자 신고 기각")
-    @PostMapping("/dismiss")
-    public ResponseDto<ReportedCommentDto> dismissReportedComment(@RequestBody ExecuteReportedComment executeReportedComment,
+    @PostMapping("/dismiss/{reportedCommentId}")
+    public ResponseDto<ReportedCommentDto> dismissReportedComment(@PathVariable String reportedCommentId,
                                                                   @UserId Long adminId
     ) {
         log.info("dismissReportedComment controller");
-        return ResponseDto.ok(reportedCommentService.dismissReport(executeReportedComment, adminId));
+        return ResponseDto.ok(reportedCommentService.dismissReport(Long.parseLong(reportedCommentId), adminId));
     }
 }

@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.news.service;
 
+import com.kkokkomu.short_news.core.config.service.RedisService;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
@@ -15,6 +16,8 @@ public class NewsLookupServiceImpl implements NewsLookupService{
     private static final Logger log = LoggerFactory.getLogger(NewsLookupServiceImpl.class);
     private final NewsRepository newsRepository;
 
+    private final RedisService redisService;
+
     @Override
     public News findNewsById(Long newsId) {
         log.info("newsId={}", newsId);
@@ -28,7 +31,14 @@ public class NewsLookupServiceImpl implements NewsLookupService{
     }
 
     @Override
-    public void deleteNewsById(Long newsId) {
-        newsRepository.deleteById(newsId);
+    public String deleteNewsById(Long newsId) {
+        News news = findNewsById(newsId);
+
+        newsRepository.delete(news);
+
+        // 레디스에서 뉴스 삭제
+        redisService.deleteAllNewsData(newsId);
+
+        return "success";
     }
 }
