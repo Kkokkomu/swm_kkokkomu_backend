@@ -31,7 +31,7 @@ public class AlarmController {
     public ResponseDto<String> test(
             @Parameter(hidden = true) @UserId Long userId,
             @RequestBody PushAlarmDto pushAlarmDto
-            ) throws IOException {
+            ) {
         return ResponseDto.ok(fcmSendService.test(pushAlarmDto, userId));
     }
 

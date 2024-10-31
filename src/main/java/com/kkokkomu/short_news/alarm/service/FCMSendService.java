@@ -7,6 +7,8 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.kkokkomu.short_news.alarm.domain.FCMToken;
 import com.kkokkomu.short_news.alarm.dto.request.*;
 import com.kkokkomu.short_news.alarm.repository.FCMTokenRepository;
+import com.kkokkomu.short_news.core.exception.CommonException;
+import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.EAndroidChannelId;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.service.UserLookupService;
@@ -39,7 +41,8 @@ public class FCMSendService {
     private final UserLookupService userLookupService;
 
     public String test(PushAlarmDto pushAlarmDto, Long userId) {
-        FCMToken fcmToken = fcmTokenRepository.findByDeviceIdAndUserId(pushAlarmDto.deviceId(), userId);
+        FCMToken fcmToken = fcmTokenRepository.findByToken(pushAlarmDto.fcmToken())
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_FCMTOKEN));
 
         int badge = 0;
 
