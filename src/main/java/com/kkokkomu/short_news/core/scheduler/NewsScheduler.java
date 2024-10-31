@@ -30,9 +30,15 @@ public class NewsScheduler {
     public void generateNewsAt8AM() {
         // 필요 시 CreateGenerateNewsDto 객체를 만들어서 요청 본문에 넣을 수 있습니다.
         CreateGenerateNewsDto createGenerateNewsDto = CreateGenerateNewsDto.builder()
-                .count_news(3)
-                .count_entertain(2)
-                .count_sports(2)
+                .politic(1)
+                .economy(1)
+                .society(1)
+                .culture(1)
+                .IT(1)
+                .world(1)
+                .entertain(1)
+                .sports(1)
+                .headline(1)
                 .build();
 
         List<GenerateNewsDto> generateNewsDtos = adminNewsService.generateNewsList(createGenerateNewsDto);

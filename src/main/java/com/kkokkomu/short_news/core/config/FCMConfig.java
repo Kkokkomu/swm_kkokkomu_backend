@@ -19,15 +19,16 @@ public class FCMConfig {
 
     @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
-        // 1. /tmp 경로에서 firebase_service_key.json 파일 로드
-        File firebaseKeyFile = new File("/tmp/firebase_service_key.json");
+        // ClassPathResource를 사용하여 클래스패스에서 firebase_key.json 파일을 로드
+        ClassPathResource resource = new ClassPathResource("firebase/firebase_service_key.json");
 
-        if (!firebaseKeyFile.exists()) {
-            throw new IllegalStateException("Firebase key file not found at /tmp/firebase_service_key.json");
+        // 리소스가 존재하는지 확인
+        if (!resource.exists()) {
+            throw new IllegalStateException("Firebase key file not found in classpath: firebase/firebase_key.json");
         }
 
-        try (FileInputStream refreshToken = new FileInputStream(firebaseKeyFile)) {
-            // 2. Firebase 앱 인스턴스가 이미 있는지 확인
+        try (InputStream refreshToken = resource.getInputStream()) {
+            // Firebase 앱 인스턴스가 이미 있는지 확인
             List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
             FirebaseApp firebaseApp;
 
@@ -35,7 +36,7 @@ public class FCMConfig {
                 // 기존 인스턴스가 있으면 재사용
                 firebaseApp = FirebaseApp.getInstance();
             } else {
-                // 3. 새 Firebase 앱 인스턴스 초기화
+                // 새 Firebase 앱 인스턴스 초기화
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(refreshToken))
                         .build();
@@ -43,7 +44,7 @@ public class FCMConfig {
                 firebaseApp = FirebaseApp.initializeApp(options);
             }
 
-            // 4. FirebaseMessaging 인스턴스 반환
+            // FirebaseMessaging 인스턴스 반환
             return FirebaseMessaging.getInstance(firebaseApp);
         }
     }
