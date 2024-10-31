@@ -7,7 +7,6 @@ import lombok.Builder;
 public record FCMTokenDto(
         Long id,
         String token,
-        String deviceId,
         String editedAt,
         String expiredAt
 ) {
@@ -15,7 +14,6 @@ public record FCMTokenDto(
         return FCMTokenDto.builder()
                 .id(fcmToken.getId())
                 .token(fcmToken.getToken())
-                .deviceId(fcmToken.getDeviceId())
                 .editedAt(fcmToken.getEditedAt().toString())
                 .expiredAt(fcmToken.getExpiredAt().toString())
                 .build();
