@@ -42,20 +42,20 @@ public class AdminReportedNewsController {
     }
 
 //    @Operation(summary = "관리자 뉴스 신고 처리")
-    @PostMapping("/execute")
-    public ResponseDto<AdminReportedNewsDto> executeReportedNews(@RequestBody ExecuteReportedNews executeReportedNews,
+    @PostMapping("/execute/{reportedNewsId}")
+    public ResponseDto<AdminReportedNewsDto> executeReportedNews(@PathVariable String reportedNewsId,
                                                                  @UserId Long adminId
     ) {
         log.info("executeReportedNews controller");
-        return ResponseDto.ok(reportedNewsService.executeReportedNews(executeReportedNews, adminId));
+        return ResponseDto.ok(reportedNewsService.executeReportedNews(Long.parseLong(reportedNewsId), adminId));
     }
 
 //    @Operation(summary = "관리자 뉴스 신고 기각 처리")
-    @PostMapping("/dismiss")
-    public ResponseDto<AdminReportedNewsDto> dismissReportedNews(@RequestBody ExecuteReportedNews executeReportedNews,
+    @PostMapping("/dismiss/{reportedNewsId}")
+    public ResponseDto<AdminReportedNewsDto> dismissReportedNews(@PathVariable String reportedNewsId,
                                                                  @UserId Long adminId
     ) {
         log.info("dismissReportedNews controller");
-        return ResponseDto.ok(reportedNewsService.dismissReport(executeReportedNews, adminId));
+        return ResponseDto.ok(reportedNewsService.dismissReport(Long.parseLong(reportedNewsId), adminId));
     }
 }

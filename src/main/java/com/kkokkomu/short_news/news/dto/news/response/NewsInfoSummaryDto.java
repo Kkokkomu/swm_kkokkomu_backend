@@ -18,3 +18,4 @@ public record NewsInfoSummaryDto(
         String sentence_total
 ) {
 }
+

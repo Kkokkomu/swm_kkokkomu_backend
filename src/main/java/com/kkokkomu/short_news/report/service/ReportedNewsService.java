@@ -126,9 +126,10 @@ public class ReportedNewsService {
         return CursorResponseDto.fromEntityAndPageInfo(adminReportedNewsDtos, cursorInfoDto);
     } // 관리자 뉴스 신고 처리완료 내역 조회
 
-    @Transactional(readOnly = true)
-    public AdminReportedNewsDto executeReportedNews(ExecuteReportedNews executeReportedNews, Long adminId) {
-        ReportedNews reportedNews = reportedNewsRepository.findById(executeReportedNews.reportedNewsId())
+    @Transactional
+    public AdminReportedNewsDto executeReportedNews(Long reportedNewsId, Long adminId) {
+        log.info("executeReportedNews");
+        ReportedNews reportedNews = reportedNewsRepository.findById(reportedNewsId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_NEWS));
 
         if (!reportedNews.getProgress().equals(ENewsProgress.UNEXECUTED)) {
@@ -138,12 +139,14 @@ public class ReportedNewsService {
         User adminUser = userLookupService.findUserById(adminId);
 
         // 신고 내역 처리 완료
+        log.info("executeReportedNews news: {}", reportedNews.getId());
         reportedNews.execute(adminUser);
 
         // 뉴스 삭제전 외래키 null처리
         Long newsId = reportedNews.getNews().getId();
         reportedNews.updateNewsNull();
         reportedNewsRepository.save(reportedNews);
+        log.info(reportedNews.getProgress().toString());
 
         // 뉴스 삭제
         newsLookupService.deleteNewsById(newsId);
@@ -151,9 +154,9 @@ public class ReportedNewsService {
         return AdminReportedNewsDto.of(reportedNews);
     } // 관리자 뉴스 처리 완료
 
-    @Transactional(readOnly = true)
-    public AdminReportedNewsDto dismissReport(ExecuteReportedNews executeReportedNews, Long adminId) {
-        ReportedNews reportedNews = reportedNewsRepository.findById(executeReportedNews.reportedNewsId())
+    @Transactional
+    public AdminReportedNewsDto dismissReport(Long reportedNewsId, Long adminId) {
+        ReportedNews reportedNews = reportedNewsRepository.findById(reportedNewsId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_REPORTED_NEWS));
         log.info(reportedNews.getProgress().toString());
 
