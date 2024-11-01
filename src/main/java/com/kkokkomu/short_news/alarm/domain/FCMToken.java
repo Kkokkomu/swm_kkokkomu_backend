@@ -18,7 +18,7 @@ public class FCMToken {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(name = "token", nullable = false, columnDefinition = "TINYTEXT")
