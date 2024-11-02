@@ -33,8 +33,8 @@ public class AlarmLog {
     private EAlarmType alarmType;
 
     @OneToOne
-    @JoinColumn(name = "comment")
-    private Comment comment;
+    @JoinColumn(name = "reply")
+    private Comment reply;
 
     @OneToOne
     @JoinColumn(name = "notification")
@@ -47,10 +47,10 @@ public class AlarmLog {
     private LocalDateTime createdAt;
 
     @Builder
-    public AlarmLog(User receiver, EAlarmType alarmType, Comment comment, Notification notification) {
+    public AlarmLog(User receiver, EAlarmType alarmType, Comment reply, Notification notification) {
         this.receiver = receiver;
         this.alarmType = alarmType;
-        this.comment = comment;
+        this.reply = reply;
         this.notification = notification;
         this.isRead = false;
         this.editedAt = LocalDateTime.now();

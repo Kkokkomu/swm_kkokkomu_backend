@@ -21,4 +21,6 @@ public interface FCMTokenRepository extends JpaRepository<FCMToken, Long> {
     Optional<FCMToken> findByToken(String token);
 
     void deleteByToken(String token);
+
+    List<FCMToken> findByUser(User user);
 }
