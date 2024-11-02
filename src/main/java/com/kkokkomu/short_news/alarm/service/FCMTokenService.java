@@ -47,11 +47,14 @@ public class FCMTokenService {
 
         FCMToken token;
         if (fcmTokenOptional.isEmpty()) { // 토큰이 비어있으면 새로 생성
+            log.info("FCM token not found: {}", fcmToken);
             token = createFCMToken(userId, fcmToken);
         } else if (!fcmToken.equals(fcmTokenOptional.get().getToken())) { // 토큰이 있지만, 다르다면 재설정
+            log.info("FCM token not match: {}", fcmToken);
             token = fcmTokenOptional.get();
             token.regenerateToken(fcmToken);
         } else { // 토큰이 있고, 기존과 같음
+            log.info("FCM token match: {}", fcmToken);
             token = fcmTokenOptional.get();
         }
 
@@ -74,6 +77,7 @@ public class FCMTokenService {
     }
 
     private FCMToken createFCMToken(Long userId, String token) {
+        log.info("Creating FCM token: {}", token);
         // 유저 조회
         User user = userLookupService.findUserById(userId);
 

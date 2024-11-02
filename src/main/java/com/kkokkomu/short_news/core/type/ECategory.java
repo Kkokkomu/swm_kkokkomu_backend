@@ -11,7 +11,8 @@ public enum ECategory {
     SPORTS("SPORTS"),
     LIVING("LIVING"),
     WORLD("WORLD"),
-    IT("IT");
+    IT("IT"),
+    HEADLINE("HEADLINE");
 
     private final String category;
 }

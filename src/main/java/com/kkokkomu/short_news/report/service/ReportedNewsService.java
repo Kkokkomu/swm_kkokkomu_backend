@@ -139,6 +139,7 @@ public class ReportedNewsService {
         User adminUser = userLookupService.findUserById(adminId);
 
         // 신고 내역 처리 완료
+        log.info("executeReportedNews news: {}", reportedNews.getId());
         reportedNews.execute(adminUser);
 
         // 뉴스 삭제전 외래키 null처리
