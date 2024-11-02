@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class CategoryUtil {
     public ECategory getCategoryByName(String categoryName) {
         ECategory category = null;
-        if (Objects.equals(categoryName, "정치") || Objects.equals(categoryName, "종합")) {
+        if (Objects.equals(categoryName, "정치")) {
             category = ECategory.POLITICS;
         } else if (Objects.equals(categoryName, "사회")) {
             category = ECategory.SOCIAL;
@@ -30,6 +30,8 @@ public class CategoryUtil {
             category = ECategory.SPORTS;
         } else if (Objects.equals(categoryName, "IT·바이오")) {
             category = ECategory.IT;
+        } else if (Objects.equals(categoryName, "종합")) {
+            category = ECategory.HEADLINE;
         }
 
         return category;
