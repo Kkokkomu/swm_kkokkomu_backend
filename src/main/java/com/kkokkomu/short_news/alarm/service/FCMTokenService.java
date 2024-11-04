@@ -88,6 +88,7 @@ public class FCMTokenService {
         return fcmTokenRepository.save(fcmToken);
     }
 
+    @Transactional
     public void deleteToken(String fcmToken) {
         log.info("Deleting FCM token: {}", fcmToken);
         fcmTokenRepository.deleteByToken(fcmToken);
