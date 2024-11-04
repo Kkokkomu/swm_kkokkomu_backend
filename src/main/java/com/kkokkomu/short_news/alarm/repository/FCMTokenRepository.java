@@ -40,4 +40,4 @@ public interface FCMTokenRepository extends JpaRepository<FCMToken, Long> {
     @Query("SELECT f FROM FCMToken f WHERE f.user.alarmInformYn = true")
     List<FCMToken> findAllByNotificationYnTrue();
 }
-}
+

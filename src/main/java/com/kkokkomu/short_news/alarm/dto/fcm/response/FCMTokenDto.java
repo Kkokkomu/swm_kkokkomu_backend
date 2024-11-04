@@ -1,4 +1,4 @@
-package com.kkokkomu.short_news.alarm.dto.response;
+package com.kkokkomu.short_news.alarm.dto.fcm.response;
 
 import com.kkokkomu.short_news.alarm.domain.FCMToken;
 import lombok.Builder;

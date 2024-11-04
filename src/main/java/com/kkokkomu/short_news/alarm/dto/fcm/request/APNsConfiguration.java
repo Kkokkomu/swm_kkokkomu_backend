@@ -1,4 +1,4 @@
-package com.kkokkomu.short_news.alarm.dto.request;
+package com.kkokkomu.short_news.alarm.dto.fcm.request;
 
 import com.google.firebase.messaging.ApnsConfig;
 import com.google.firebase.messaging.Aps;

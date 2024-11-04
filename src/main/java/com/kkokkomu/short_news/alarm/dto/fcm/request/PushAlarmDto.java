@@ -1,4 +1,4 @@
-package com.kkokkomu.short_news.alarm.dto.request;
+package com.kkokkomu.short_news.alarm.dto.fcm.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

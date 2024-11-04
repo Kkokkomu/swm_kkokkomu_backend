@@ -1,4 +1,4 @@
-package com.kkokkomu.short_news.alarm.dto.request;
+package com.kkokkomu.short_news.alarm.dto.fcm.request;
 
 import com.kkokkomu.short_news.alarm.domain.Notification;
 import com.kkokkomu.short_news.comment.domain.Comment;

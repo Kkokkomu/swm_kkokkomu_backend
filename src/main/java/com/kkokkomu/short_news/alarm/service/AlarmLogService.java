@@ -1,7 +1,7 @@
 package com.kkokkomu.short_news.alarm.service;
 
 import com.kkokkomu.short_news.alarm.domain.AlarmLog;
-import com.kkokkomu.short_news.alarm.dto.request.CreateAlarmLogDto;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.CreateAlarmLogDto;
 import com.kkokkomu.short_news.alarm.repository.AlarmLogRepository;
 import com.kkokkomu.short_news.user.domain.User;
 import lombok.RequiredArgsConstructor;

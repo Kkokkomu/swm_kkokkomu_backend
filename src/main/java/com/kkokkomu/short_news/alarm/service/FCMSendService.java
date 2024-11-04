@@ -2,6 +2,10 @@ package com.kkokkomu.short_news.alarm.service;
 
 import com.google.firebase.messaging.*;
 import com.kkokkomu.short_news.alarm.domain.FCMToken;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.APNsConfiguration;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.AndroidConfiguration;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.CreateAlarmLogDto;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.PushAlarmDto;
 import com.kkokkomu.short_news.alarm.dto.request.*;
 import com.kkokkomu.short_news.alarm.repository.FCMTokenRepository;
 import com.kkokkomu.short_news.comment.domain.Comment;
@@ -17,15 +21,9 @@ import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.*;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
