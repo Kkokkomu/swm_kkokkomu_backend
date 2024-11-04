@@ -28,7 +28,7 @@ public class CategoryUtil {
             category = ECategory.ENTERTAIN;
         } else if (Objects.equals(categoryName, "스포츠")) {
             category = ECategory.SPORTS;
-        } else if (Objects.equals(categoryName, "IT·바이오")) {
+        } else if (Objects.equals(categoryName, "IT")) {
             category = ECategory.IT;
         } else if (Objects.equals(categoryName, "종합")) {
             category = ECategory.HEADLINE;
