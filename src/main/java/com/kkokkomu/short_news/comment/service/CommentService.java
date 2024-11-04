@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.comment.service;
 
+import com.kkokkomu.short_news.alarm.service.FCMSendService;
 import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.comment.dto.comment.response.*;
 import com.kkokkomu.short_news.core.config.service.RedisService;
@@ -43,6 +44,7 @@ public class CommentService {
     private final CommentLikeService commentLikeService;
     private final NewsLookupService newsLookupService;
     private final RedisService redisService;
+    private final FCMSendService fcmSendService;
 
     /* 댓글 */
 
@@ -340,6 +342,9 @@ public class CommentService {
                         .parent(parent)
                         .build()
         );
+
+        // 알람 전송
+        fcmSendService.sendReplyAlarm(reply);
 
         return ReplyDto.builder()
                 .id(reply.getId())
