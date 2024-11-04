@@ -3,6 +3,7 @@ package com.kkokkomu.short_news.user.service;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.EUserRole;
+import com.kkokkomu.short_news.core.util.TimeUtil;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,8 @@ import java.util.List;
 @Slf4j
 public class UserLookupServiceImpl implements UserLookupService {
     private final UserRepository userRepository;
+
+    private final TimeUtil timeUtil;
 
     // 유저가 존재하는지 검사
     public User findUserById(Long userId) {
@@ -39,5 +42,14 @@ public class UserLookupServiceImpl implements UserLookupService {
     @Override
     public Boolean existsUser(Long userId) {
         return userRepository.existsById(userId);
+    }
+
+    @Override
+    public List<User> findUserByInformYnTrue() {
+        if (timeUtil.isNight()) {
+            return userRepository.findByAlarmInformYnTrueAndNightAlarmYnTrue();
+        } else {
+            return userRepository.findByAlarmInformYnTrue();
+        }
     }
 }

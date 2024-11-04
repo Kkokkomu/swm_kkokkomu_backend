@@ -1,8 +1,7 @@
 package com.kkokkomu.short_news.alarm.service;
 
 import com.kkokkomu.short_news.alarm.domain.FCMToken;
-import com.kkokkomu.short_news.alarm.dto.request.CreateTokenDto;
-import com.kkokkomu.short_news.alarm.dto.response.FCMTokenDto;
+import com.kkokkomu.short_news.alarm.dto.fcm.response.FCMTokenDto;
 import com.kkokkomu.short_news.alarm.repository.FCMTokenRepository;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
@@ -88,6 +87,7 @@ public class FCMTokenService {
         return fcmTokenRepository.save(fcmToken);
     }
 
+    @Transactional
     public void deleteToken(String fcmToken) {
         log.info("Deleting FCM token: {}", fcmToken);
         fcmTokenRepository.deleteByToken(fcmToken);

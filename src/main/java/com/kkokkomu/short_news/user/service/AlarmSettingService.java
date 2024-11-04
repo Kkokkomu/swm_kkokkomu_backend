@@ -1,6 +1,7 @@
 package com.kkokkomu.short_news.user.service;
 
 import com.kkokkomu.short_news.core.type.EAlarmType;
+import com.kkokkomu.short_news.core.util.TimeUtil;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.dto.user.request.UpdateAlarmSettingDto;
 import com.kkokkomu.short_news.user.dto.user.response.UserDto;
@@ -21,6 +22,8 @@ public class AlarmSettingService {
 
     private final UserLookupService userLookupService;
 
+    private final TimeUtil timeUtil;
+
     @Transactional
     public UserDto updateAlarmSetting(UpdateAlarmSettingDto updateAlarmSettingDto, Long userId) {
         User user = userLookupService.findUserById(userId);
@@ -37,7 +40,7 @@ public class AlarmSettingService {
     }
 
     public Boolean getReplySettingValid(User user) {
-        if (!user.getNightAlarmYn() && isNight()) {
+        if (!user.getNightAlarmYn() && timeUtil.isNight()) {
             log.info("night alarm Yn is false");
             return false;
         } else if (!user.getAlarmReplyYn()) {
@@ -49,13 +52,4 @@ public class AlarmSettingService {
         }
     }
 
-    private Boolean isNight() {
-        LocalTime currentTime = LocalDateTime.now().toLocalTime();
-        LocalTime startNightTime = LocalTime.of(21, 0); // 21:00 (밤 9시)
-        LocalTime endNightTime = LocalTime.of(8, 0); // 08:00 (아침 8시)
-
-        // 밤 시간은 저녁 9시부터 다음 날 아침 8시까지이므로 시간대 비교를 두 부분으로 나눕니다.
-        return (currentTime.isAfter(startNightTime) || currentTime.equals(startNightTime))
-                || currentTime.isBefore(endNightTime);
-    }
 }

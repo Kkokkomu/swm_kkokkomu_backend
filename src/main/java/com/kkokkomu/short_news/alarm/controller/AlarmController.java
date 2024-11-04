@@ -1,9 +1,8 @@
 package com.kkokkomu.short_news.alarm.controller;
 
-import com.kkokkomu.short_news.alarm.dto.request.CreateTokenDto;
-import com.kkokkomu.short_news.alarm.dto.request.FcmSendDto;
-import com.kkokkomu.short_news.alarm.dto.request.PushAlarmDto;
-import com.kkokkomu.short_news.alarm.dto.response.FCMTokenDto;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.CreateTokenDto;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.PushAlarmDto;
+import com.kkokkomu.short_news.alarm.dto.fcm.response.FCMTokenDto;
 import com.kkokkomu.short_news.alarm.service.FCMSendService;
 import com.kkokkomu.short_news.alarm.service.FCMTokenService;
 import com.kkokkomu.short_news.core.annotation.UserId;
@@ -14,8 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 @Tag(name = "알람")
 @RestController

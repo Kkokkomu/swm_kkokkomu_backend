@@ -44,4 +44,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.id = :id AND u.isLogin = :isLogin AND u.refreshToken IS NOT NULL")
     Optional<User> findByIdAndIsLoginAndRefreshTokenNotNull(Long id, boolean isLogin);
+
+    // 야간알림 ture, 공지알람 true 유저
+    List<User> findByAlarmInformYnTrueAndNightAlarmYnTrue();
+
+    // 공지알람 true 유저
+    List<User> findByAlarmInformYnTrue();
 }

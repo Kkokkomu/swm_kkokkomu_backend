@@ -1,6 +1,5 @@
 package com.kkokkomu.short_news.user.service;
 
-import com.kkokkomu.short_news.alarm.dto.request.CreateTokenDto;
 import com.kkokkomu.short_news.alarm.service.FCMTokenService;
 import com.kkokkomu.short_news.core.constant.Constant;
 import com.kkokkomu.short_news.core.oauth2.apple.AppleOAuthService;

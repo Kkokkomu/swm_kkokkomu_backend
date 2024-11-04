@@ -1,10 +1,11 @@
 package com.kkokkomu.short_news.alarm.service;
 
 import com.google.firebase.messaging.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.kkokkomu.short_news.alarm.domain.FCMToken;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.APNsConfiguration;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.AndroidConfiguration;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.CreateAlarmLogDto;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.PushAlarmDto;
 import com.kkokkomu.short_news.alarm.dto.request.*;
 import com.kkokkomu.short_news.alarm.repository.FCMTokenRepository;
 import com.kkokkomu.short_news.comment.domain.Comment;
@@ -12,21 +13,18 @@ import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.EAlarmType;
 import com.kkokkomu.short_news.core.type.EAndroidChannelId;
+import com.kkokkomu.short_news.core.util.TimeUtil;
+import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.service.AlarmSettingService;
 import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.*;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -47,6 +45,8 @@ public class FCMSendService {
     private final AlarmLogService alarmLogService;
     private final FCMTokenService fcmTokenService;
 
+    private final TimeUtil timeUtil;
+
     public String test(PushAlarmDto pushAlarmDto, Long userId) {
         User user = userLookupService.findUserById(userId);
 
@@ -55,19 +55,80 @@ public class FCMSendService {
         return "success";
     }
 
+    // 새 뉴스 알림 전손
+    @Transactional
+    public Boolean sendNewsAlarm(News news) {
+        String title = "지금 확인하세요: 새로운 핫 이슈!";
+        String body = news.getTitle();
+
+        List<FCMToken> targetToken;
+        if (timeUtil.isNight()) { // 밤이면 야간 알림이 동의되어있고 뉴스 알림 동의 토큰만 불러옴
+            targetToken = fcmTokenRepository.findAllByNightYnTrueAndNewContentYnTrue();
+        } else { // 밤이 아니면 뉴스 알림 동의 토큰들 불러옴
+            targetToken = fcmTokenRepository.findAllByNewContentYnTrue();
+        }
+        for (FCMToken token : targetToken) {
+            PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
+                    .title(title)
+                    .body(body)
+                    .fcmToken(token.getToken())
+                    .build();
+            try{
+                sendMessage(pushAlarmDto, token.getUser(), EAndroidChannelId.NEWS_ARTICLE);
+            } catch (CommonException e) {
+                log.info(e.getMessage());
+            }
+        }
+        return true;
+    }
+
+    // 공지 알림 전손
+    @Transactional
+    public Boolean sendNotification(com.kkokkomu.short_news.alarm.domain.Notification notification) {
+        String title = "!! 새 공지사항 !!";
+        String body = notification.getTitle();
+
+        List<User> targetUser = userLookupService.findUserByInformYnTrue(); // 설정 유효한 유저들 가지고 오기
+        List<CreateAlarmLogDto> createAlarmLogDtos = new ArrayList<>();
+        for (User user : targetUser) {
+            for (FCMToken fcmToken : user.getFcmTokens()) { // 유효한 유저들의 토큰을 타겟 토큰으로 설정
+                PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
+                        .title(title)
+                        .body(body)
+                        .fcmToken(fcmToken.getToken())
+                        .build();
+                try{
+                    sendMessage(pushAlarmDto, fcmToken.getUser(), EAndroidChannelId.NOTICE); // 전송
+                } catch (CommonException e) {
+                    log.info(e.getMessage());
+                }
+            }
+            // 유저 당 로그는 하나씩
+            createAlarmLogDtos.add(
+                    CreateAlarmLogDto.builder()
+                            .receiver(user)
+                            .notification(notification)
+                            .alarmType(EAlarmType.NOTICE)
+                            .build()
+            );
+        }
+
+        return true;
+    }
+
     // 대댓글 알림 전송
     @Transactional
-    public void sendReplyAlarm(Comment reply) {
+    public Boolean sendReplyAlarm(Comment reply) {
         // 부모 댓글의 작성자를 알림 수신자로 설정
         User receiver = reply.getParent().getUser();
 
         // 유저 세팅이 맞지 않다면 전송안함
         if (!alarmSettingService.getReplySettingValid(receiver)) {
-            return;
+            return false;
         }
         // 대댓 작성자가 댓글 작성자와 같으면 전송안함
         if (reply.getUser() == reply.getParent().getUser()) {
-            return;
+            return false;
         }
 
         // 제목 및 본문 세팅
@@ -82,7 +143,12 @@ public class FCMSendService {
                     .body(body)
                     .fcmToken(token.getToken())
                     .build();
-            sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
+            try{
+                sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
+            } catch (CommonException e) {
+                log.info(e.getMessage());
+                return false;
+            }
         }
 
         // 알람 로그 저장
@@ -93,6 +159,8 @@ public class FCMSendService {
                         .receiver(receiver)
                         .build()
         );
+
+        return true;
     }
 
     // 메세지 전송
@@ -118,6 +186,8 @@ public class FCMSendService {
         } catch (FirebaseMessagingException e) {
             log.error("Failed to send message: " + e.getMessage());
             fcmTokenService.deleteToken(pushAlarmDto.fcmToken());
+
+            throw new CommonException(ErrorCode.INVALID_FCM_TOKEN);
         }
     }
 
