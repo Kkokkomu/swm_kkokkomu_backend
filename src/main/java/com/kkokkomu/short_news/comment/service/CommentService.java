@@ -344,10 +344,7 @@ public class CommentService {
                         .build()
         );
 
-        // 알람 전송
-        fcmSendService.sendReplyAlarm(reply);
-
-        return ReplyDto.builder()
+        ReplyDto response = ReplyDto.builder()
                 .id(reply.getId())
                 .userId(userId)
                 .newsId(createReplyDto.newsId())
@@ -355,6 +352,11 @@ public class CommentService {
                 .content(reply.getContent())
                 .editedAt(reply.getEditedAt().toString())
                 .build();
+
+        // 비동기적으로 알림 전송
+        fcmSendService.sendReplyAlarm(reply);
+
+        return response;
     } // 대댓글 생성
 
     @Transactional

@@ -6,7 +6,6 @@ import com.kkokkomu.short_news.alarm.dto.fcm.request.APNsConfiguration;
 import com.kkokkomu.short_news.alarm.dto.fcm.request.AndroidConfiguration;
 import com.kkokkomu.short_news.alarm.dto.fcm.request.CreateAlarmLogDto;
 import com.kkokkomu.short_news.alarm.dto.fcm.request.PushAlarmDto;
-import com.kkokkomu.short_news.alarm.dto.request.*;
 import com.kkokkomu.short_news.alarm.repository.FCMTokenRepository;
 import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.core.exception.CommonException;
@@ -21,6 +20,7 @@ import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -118,6 +118,7 @@ public class FCMSendService {
 
     // 대댓글 알림 전송
     @Transactional
+    @Async
     public Boolean sendReplyAlarm(Comment reply) {
         // 부모 댓글의 작성자를 알림 수신자로 설정
         User receiver = reply.getParent().getUser();
@@ -147,7 +148,6 @@ public class FCMSendService {
                 sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
             } catch (CommonException e) {
                 log.info(e.getMessage());
-                return false;
             }
         }
 
