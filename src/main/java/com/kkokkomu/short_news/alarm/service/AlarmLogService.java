@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -27,5 +29,11 @@ public class AlarmLogService {
                     .receiver(alarmLogDto.receiver())
                     .build()
         );
+    }
+
+    public void createAlarmLog(List<CreateAlarmLogDto> alarmLogDtos) {
+        for (CreateAlarmLogDto alarmLogDto : alarmLogDtos) {
+            createAlarmLog(alarmLogDto);
+        }
     }
 }

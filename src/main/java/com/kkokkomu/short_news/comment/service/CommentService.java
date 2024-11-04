@@ -320,6 +320,7 @@ public class CommentService {
 
     /* 대댓글 */
 
+    @Transactional
     public ReplyDto createReply(Long userId, CreateReplyDto createReplyDto) {
         log.info("createReply service");
         User user = userLookupService.findUserById(userId);
