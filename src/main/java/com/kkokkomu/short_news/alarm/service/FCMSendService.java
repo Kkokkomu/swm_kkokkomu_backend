@@ -45,6 +45,7 @@ public class FCMSendService {
     private final UserLookupService userLookupService;
     private final AlarmSettingService alarmSettingService;
     private final AlarmLogService alarmLogService;
+    private final FCMTokenService fcmTokenService;
 
     public String test(PushAlarmDto pushAlarmDto, Long userId) {
         User user = userLookupService.findUserById(userId);
@@ -116,6 +117,7 @@ public class FCMSendService {
             log.info("Successfully sent message: " + result);
         } catch (FirebaseMessagingException e) {
             log.error("Failed to send message: " + e.getMessage());
+            fcmTokenService.deleteToken(pushAlarmDto.fcmToken());
         }
     }
 

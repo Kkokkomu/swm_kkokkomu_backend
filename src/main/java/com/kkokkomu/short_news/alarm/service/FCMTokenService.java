@@ -88,7 +88,12 @@ public class FCMTokenService {
         return fcmTokenRepository.save(fcmToken);
     }
 
-    private void deleteToken(FCMToken token) {
+    public void deleteToken(String fcmToken) {
+        log.info("Deleting FCM token: {}", fcmToken);
+        fcmTokenRepository.deleteByToken(fcmToken);
+    }
+
+    private void deleteFCMToken(FCMToken token) {
         fcmTokenRepository.delete(token);
     }
 
