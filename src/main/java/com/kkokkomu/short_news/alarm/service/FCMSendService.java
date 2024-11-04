@@ -119,17 +119,17 @@ public class FCMSendService {
     // 대댓글 알림 전송
     @Transactional
     @Async
-    public Boolean sendReplyAlarm(Comment reply) {
+    public void sendReplyAlarm(Comment reply) {
         // 부모 댓글의 작성자를 알림 수신자로 설정
         User receiver = reply.getParent().getUser();
 
         // 유저 세팅이 맞지 않다면 전송안함
         if (!alarmSettingService.getReplySettingValid(receiver)) {
-            return false;
+            return;
         }
         // 대댓 작성자가 댓글 작성자와 같으면 전송안함
         if (reply.getUser() == reply.getParent().getUser()) {
-            return false;
+            return;
         }
 
         // 제목 및 본문 세팅
@@ -159,8 +159,6 @@ public class FCMSendService {
                         .receiver(receiver)
                         .build()
         );
-
-        return true;
     }
 
     // 메세지 전송
