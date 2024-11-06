@@ -10,7 +10,7 @@ import lombok.Builder;
 public record CreateAlarmLogDto(
         User receiver,
         EAlarmType alarmType,
-        Comment comment,
-        Notification notification
+        Long commentId,
+        Long notificationId
 ) {
 }

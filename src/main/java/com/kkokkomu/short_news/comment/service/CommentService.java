@@ -324,14 +324,7 @@ public class CommentService {
     public ReplyDto createReply(Long userId, CreateReplyDto createReplyDto) {
         log.info("createReply service");
         User user = userLookupService.findUserById(userId);
-
-        // 차단된 유저인지 검사
-        if (user.getBannedEndAt() != null && user.getBannedEndAt().isAfter(LocalDateTime.now())) {
-            throw new CommonException(ErrorCode.BANNED_USER_COMMENT);
-        }
-
         News news = newsLookupService.findNewsById(createReplyDto.newsId());
-
         Comment parent = commentRepository.findById(createReplyDto.commentId())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_PARENT_COMMENT));
 
@@ -353,11 +346,11 @@ public class CommentService {
                 .editedAt(reply.getEditedAt().toString())
                 .build();
 
-        // 비동기적으로 알림 전송
-        fcmSendService.sendReplyAlarm(reply);
+        log.info("reply Id : {} ",String.valueOf(reply.getId()));
+        fcmSendService.sendReplyAlarm(reply.getId(), parent.getUser().getId(), reply.getContent());
 
         return response;
-    } // 대댓글 생성
+    }
 
     @Transactional
     public String deleteReply(Long replyId) {
