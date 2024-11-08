@@ -3,6 +3,8 @@ package com.kkokkomu.short_news.core.util;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.ECategory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -12,6 +14,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class CategoryUtil {
+    private static final Logger log = LoggerFactory.getLogger(CategoryUtil.class);
+
     public ECategory getCategoryByName(String categoryName) {
         ECategory category = null;
         if (Objects.equals(categoryName, "정치")) {
@@ -22,7 +26,7 @@ public class CategoryUtil {
             category = ECategory.ECONOMY;
         } else if (Objects.equals(categoryName, "문화")) {
             category = ECategory.LIVING;
-        } else if (Objects.equals(categoryName, "국제")) {
+        } else if (Objects.equals(categoryName, "세계")) {
             category = ECategory.WORLD;
         } else if (Objects.equals(categoryName, "연예")) {
             category = ECategory.ENTERTAIN;
@@ -32,6 +36,8 @@ public class CategoryUtil {
             category = ECategory.IT;
         } else if (Objects.equals(categoryName, "종합")) {
             category = ECategory.HEADLINE;
+        } else {
+            log.info("카테고리를 찾을 수 없습니다 {}", categoryName);
         }
 
         return category;
