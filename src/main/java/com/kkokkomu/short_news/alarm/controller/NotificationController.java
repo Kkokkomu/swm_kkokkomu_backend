@@ -27,4 +27,11 @@ public class NotificationController {
         log.info("createNotificationController");
         return ResponseDto.ok(notificationService.applyNotification(createNotificationDto));
     }
+
+    @Operation(summary = "공지사항 조회")
+    @GetMapping("")
+    public ResponseDto<NotificationDto> getNotificationController(@RequestParam(value = "notificationId") Long notificationId) {
+        log.info("createNotificationController");
+        return ResponseDto.ok(notificationService.getNotification(notificationId));
+    }
 }
