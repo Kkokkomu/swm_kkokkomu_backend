@@ -50,7 +50,10 @@ public class FCMSendService {
     public String test(PushAlarmDto pushAlarmDto, Long userId) {
         User user = userLookupService.findUserById(userId);
 
-        sendMessage(pushAlarmDto, user, EAndroidChannelId.GENERAL);
+        // 안읽은 알림 개수
+        int badge = alarmLogService.getAlarmBadge(user).intValue();
+
+        sendMessage(pushAlarmDto, user, EAndroidChannelId.GENERAL, badge);
 
         return "success";
     }
@@ -68,13 +71,16 @@ public class FCMSendService {
             targetToken = fcmTokenRepository.findAllByNewContentYnTrue();
         }
         for (FCMToken token : targetToken) {
+            // 안읽은 알림 개수
+            int badge = alarmLogService.getAlarmBadge(token.getUser()).intValue();
+
             PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
                     .title(title)
                     .body(body)
                     .fcmToken(token.getToken())
                     .build();
             try{
-                sendMessage(pushAlarmDto, token.getUser(), EAndroidChannelId.NEWS_ARTICLE);
+                sendMessage(pushAlarmDto, token.getUser(), EAndroidChannelId.NEWS_ARTICLE, badge);
             } catch (CommonException e) {
                 log.info(e.getMessage());
             }
@@ -91,6 +97,9 @@ public class FCMSendService {
         List<User> targetUser = userLookupService.findUserByInformYnTrue(); // 설정 유효한 유저들 가지고 오기
         List<CreateAlarmLogDto> createAlarmLogDtos = new ArrayList<>();
         for (User user : targetUser) {
+            // 안읽은 알림 개수
+            int badge = alarmLogService.getAlarmBadge(user).intValue();
+
             for (FCMToken fcmToken : user.getFcmTokens()) { // 유효한 유저들의 토큰을 타겟 토큰으로 설정
                 PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
                         .title(title)
@@ -98,7 +107,7 @@ public class FCMSendService {
                         .fcmToken(fcmToken.getToken())
                         .build();
                 try{
-                    sendMessage(pushAlarmDto, fcmToken.getUser(), EAndroidChannelId.NOTICE); // 전송
+                    sendMessage(pushAlarmDto, fcmToken.getUser(), EAndroidChannelId.NOTICE, badge); // 전송
                 } catch (CommonException e) {
                     log.info(e.getMessage());
                 }
@@ -118,7 +127,6 @@ public class FCMSendService {
 
     // 대댓글 알림 전송
     @Transactional
-    @Async
     public void sendReplyAlarm(Comment reply) {
         // 부모 댓글의 작성자를 알림 수신자로 설정
         User receiver = reply.getParent().getUser();
@@ -136,6 +144,19 @@ public class FCMSendService {
         String title = "새로운 대댓글 : " + reply.getUser().getNickname();
         String body = reply.getContent();
 
+        // 알람 로그 저장
+        // 알람 전송 여부에 상관 없이 로그는 저장됌
+        alarmLogService.createAlarmLog(
+                CreateAlarmLogDto.builder()
+                        .alarmType(EAlarmType.REPLY)
+                        .comment(reply)
+                        .receiver(receiver)
+                        .build()
+        );
+
+        // 안읽은 알림 개수
+        int badge = alarmLogService.getAlarmBadge(receiver).intValue();
+
         // 부모 댓글 글쓴이에게 알람
         List<FCMToken> tokenList = fcmTokenRepository.findByUser(receiver);
         for (FCMToken token : tokenList) {
@@ -145,27 +166,16 @@ public class FCMSendService {
                     .fcmToken(token.getToken())
                     .build();
             try{
-                sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
+                sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY, badge);
             } catch (CommonException e) {
                 log.info(e.getMessage());
             }
         }
-
-        // 알람 로그 저장
-        alarmLogService.createAlarmLog(
-                CreateAlarmLogDto.builder()
-                        .alarmType(EAlarmType.REPLY)
-                        .comment(reply)
-                        .receiver(receiver)
-                        .build()
-        );
     }
 
     // 메세지 전송
-    public void sendMessage(PushAlarmDto pushAlarmDto, User user, EAndroidChannelId androidChannelId) {
-        // 안읽은 알림 개수
-        int badge = alarmLogService.getAlarmBadge(user).intValue();
-
+    @Async
+    public void sendMessage(PushAlarmDto pushAlarmDto, User user, EAndroidChannelId androidChannelId, int badge) {
         log.info("token : " + pushAlarmDto.fcmToken());
         Message message = Message.builder()
                 .setNotification(Notification.builder()

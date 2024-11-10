@@ -19,4 +19,5 @@ public interface UserLookupService {
     Boolean existsUser(Long userId);
 
     List<User> findUserByInformYnTrue();
+
 }
