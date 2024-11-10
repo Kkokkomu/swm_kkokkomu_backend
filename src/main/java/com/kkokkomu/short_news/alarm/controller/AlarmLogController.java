@@ -29,7 +29,7 @@ public class AlarmLogController {
     @GetMapping("/list")
     public ResponseDto<CursorResponseDto<List<AlarmLogDto>>> getAlarmLogList(
             @Parameter(hidden = true) @UserId Long userId,
-            @RequestParam(value = "cursorId") Long cursorId,
+            @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam(value = "size") int size
     ) {
         return ResponseDto.ok(alarmLogService.getAlarmLogList(userId, cursorId, size));
