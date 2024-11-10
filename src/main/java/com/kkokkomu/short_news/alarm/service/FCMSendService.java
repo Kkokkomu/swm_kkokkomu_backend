@@ -32,9 +32,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class FCMSendService {
-    @Autowired
-    private FCMSendService fcmSendService;
-
     @Value("${fcm.firebase-key}")
     private String firebaseConfigPath;
 
@@ -161,7 +158,4 @@ public class FCMSendService {
         }
         log.info("sendReplyAlarm 종료");
     }
-
-
-
 }
