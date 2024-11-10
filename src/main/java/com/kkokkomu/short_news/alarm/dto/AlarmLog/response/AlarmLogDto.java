@@ -25,6 +25,7 @@ public record AlarmLogDto(
                 .alarmType(alarmLog.getAlarmType().toString())
                 .reply(alarmLog.getReply() != null ? CommentDto.of(alarmLog.getReply()) : null)
                 .notification(alarmLog.getNotification() != null ? NotificationDto.of(alarmLog.getNotification()) : null)
+                .build();
     }
 
     public static List<AlarmLogDto> of(List<AlarmLog> alarmLogs) {
