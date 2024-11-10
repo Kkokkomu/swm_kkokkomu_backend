@@ -19,6 +19,7 @@ import com.kkokkomu.short_news.user.service.AlarmSettingService;
 import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class FCMSendService {
+    @Autowired
+    private FCMSendService fcmSendService;
+
     @Value("${fcm.firebase-key}")
     private String firebaseConfigPath;
 
@@ -117,8 +121,6 @@ public class FCMSendService {
     }
 
     // 대댓글 알림 전송
-    @Transactional
-    @Async
     public void sendReplyAlarm(Comment reply) {
         // 부모 댓글의 작성자를 알림 수신자로 설정
         User receiver = reply.getParent().getUser();
@@ -129,6 +131,7 @@ public class FCMSendService {
         }
         // 대댓 작성자가 댓글 작성자와 같으면 전송안함
         if (reply.getUser() == reply.getParent().getUser()) {
+            log.info("writer is same as reply");
             return;
         }
 
@@ -154,15 +157,20 @@ public class FCMSendService {
                     .fcmToken(token.getToken())
                     .build();
             try{
-                sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
+                log.info("sendMessage 호출");
+                fcmSendService.sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
             } catch (CommonException e) {
                 log.info(e.getMessage());
             }
         }
+        log.info("sendReplyAlarm 종료");
     }
 
     // 메세지 전송
+    @Async
     public void sendMessage(PushAlarmDto pushAlarmDto, User user, EAndroidChannelId androidChannelId) {
+        log.info("sendMessage");
+
         // 안읽은 알림 개수
         int badge = alarmLogService.getAlarmBadge(user).intValue();
 
