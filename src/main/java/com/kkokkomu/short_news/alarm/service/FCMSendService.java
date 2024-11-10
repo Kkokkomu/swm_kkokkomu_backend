@@ -107,62 +107,61 @@ public class FCMSendService {
             createAlarmLogDtos.add(
                     CreateAlarmLogDto.builder()
                             .receiver(user)
-                            .notificationId(notification.getId())
+                            .notification(notification)
                             .alarmType(EAlarmType.NOTICE)
                             .build()
             );
         }
 
-
-
         return true;
     }
 
     // 대댓글 알림 전송
+    @Transactional
     @Async
-    public void sendReplyAlarm(Long replyId, Long receiverId, String content) {
-        log.info("Starting sendReplyAlarm with replyId: {}, receiverId: {}", replyId, receiverId);
+    public void sendReplyAlarm(Comment reply) {
+        // 부모 댓글의 작성자를 알림 수신자로 설정
+        User receiver = reply.getParent().getUser();
 
-        User receiver = userLookupService.findUserById(receiverId);
-        log.info("Receiver loaded: {}", receiver != null ? receiver.getId() : "null");
-
+        // 유저 세팅이 맞지 않다면 전송안함
         if (!alarmSettingService.getReplySettingValid(receiver)) {
-            log.info("Receiver has disabled reply notifications.");
+            return;
+        }
+        // 대댓 작성자가 댓글 작성자와 같으면 전송안함
+        if (reply.getUser() == reply.getParent().getUser()) {
             return;
         }
 
-        log.info("Fetching FCM tokens for user: {}", receiver.getId());
-        List<FCMToken> tokenList = fcmTokenRepository.findByUser(receiver);
-        log.info("Number of FCM tokens found: {}", tokenList.size());
+        // 제목 및 본문 세팅
+        String title = "새로운 대댓글 : " + reply.getUser().getNickname();
+        String body = reply.getContent();
 
-        for (FCMToken token : tokenList) {
-            log.info("Sending message to token: {}", token.getToken());
-            PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
-                    .title("새로운 대댓글 : " + replyId)
-                    .body(content)
-                    .fcmToken(token.getToken())
-                    .build();
-            try {
-                sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
-            } catch (CommonException e) {
-                log.info("FCM 전송 실패: " + e.getMessage());
-            }
-        }
-
-        log.info("Creating alarm log for replyId: {}", replyId);
+        // 알람 로그 저장
         alarmLogService.createAlarmLog(
                 CreateAlarmLogDto.builder()
                         .alarmType(EAlarmType.REPLY)
-                        .commentId(replyId)
+                        .comment(reply)
                         .receiver(receiver)
                         .build()
         );
+
+        // 부모 댓글 글쓴이에게 알람
+        List<FCMToken> tokenList = fcmTokenRepository.findByUser(receiver);
+        for (FCMToken token : tokenList) {
+            PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
+                    .title(title)
+                    .body(body)
+                    .fcmToken(token.getToken())
+                    .build();
+            try{
+                sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
+            } catch (CommonException e) {
+                log.info(e.getMessage());
+            }
+        }
     }
 
-
-
     // 메세지 전송
-    @Transactional
     public void sendMessage(PushAlarmDto pushAlarmDto, User user, EAndroidChannelId androidChannelId) {
         // 안읽은 알림 개수
         int badge = alarmLogService.getAlarmBadge(user).intValue();

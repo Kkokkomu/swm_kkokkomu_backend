@@ -283,17 +283,13 @@ public class AdminNewsService {
         }
         newsRepository.saveAll(newsListAll);
 
-        for (int i = 0; i < idList.size(); i++) {
+        for (int i = 0; i < generateResponseDtos.length; i++) {
             // 인덱스에 맞는 임시 뉴스 객체
             News news = newsList.get(i);
 
             // 인덱스에 맞는 비디오 서버 반환값
             GenerateResponseDto generateResponseDto;
-            if (generateResponseDtos != null) {
-                generateResponseDto = generateResponseDtos[i];
-            } else {
-                throw new CommonException(ErrorCode.VIDEO_SERVER_ERROR);
-            }
+            generateResponseDto = generateResponseDtos[i];
 
             Map<String, Object> dataMap = generateResponseDto.data();
             NewsInfoDataDto dataDto = objectMapper.convertValue(dataMap, NewsInfoDataDto.class);

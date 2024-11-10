@@ -39,6 +39,7 @@ public class AlarmSettingService {
         return UserDto.of(user);
     }
 
+    // 야간 알림 유효한지, 대댓글 알림 동의 했는지
     public Boolean getReplySettingValid(User user) {
         if (!user.getNightAlarmYn() && timeUtil.isNight()) {
             log.info("night alarm Yn is false");

@@ -319,7 +319,6 @@ public class CommentService {
     } // 비로그인 인기순 댓글 조회
 
     /* 대댓글 */
-
     @Transactional
     public ReplyDto createReply(Long userId, CreateReplyDto createReplyDto) {
         log.info("createReply service");
@@ -347,7 +346,7 @@ public class CommentService {
                 .build();
 
         log.info("reply Id : {} ",String.valueOf(reply.getId()));
-        fcmSendService.sendReplyAlarm(reply.getId(), parent.getUser().getId(), reply.getContent());
+        fcmSendService.sendReplyAlarm(reply);
 
         return response;
     }
