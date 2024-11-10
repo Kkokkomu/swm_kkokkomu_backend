@@ -38,23 +38,19 @@ public class FCMSendService {
     @Value("${fcm.firebase-key}")
     private String firebaseConfigPath;
 
-    private final APNsConfiguration apnsConfiguration;
-    private final AndroidConfiguration androidConfiguration;
-    private final FirebaseMessaging firebaseMessaging;
-
     private final FCMTokenRepository fcmTokenRepository;
 
     private final UserLookupService userLookupService;
     private final AlarmSettingService alarmSettingService;
     private final AlarmLogService alarmLogService;
-    private final FCMTokenService fcmTokenService;
+    private final MessageSendService messageSendService;
 
     private final TimeUtil timeUtil;
 
     public String test(PushAlarmDto pushAlarmDto, Long userId) {
         User user = userLookupService.findUserById(userId);
 
-        sendMessage(pushAlarmDto, user, EAndroidChannelId.GENERAL);
+        messageSendService.sendMessage(pushAlarmDto, user, EAndroidChannelId.GENERAL);
 
         return "success";
     }
@@ -78,7 +74,7 @@ public class FCMSendService {
                     .fcmToken(token.getToken())
                     .build();
             try{
-                sendMessage(pushAlarmDto, token.getUser(), EAndroidChannelId.NEWS_ARTICLE);
+                messageSendService.sendMessage(pushAlarmDto, token.getUser(), EAndroidChannelId.NEWS_ARTICLE);
             } catch (CommonException e) {
                 log.info(e.getMessage());
             }
@@ -102,7 +98,7 @@ public class FCMSendService {
                         .fcmToken(fcmToken.getToken())
                         .build();
                 try{
-                    sendMessage(pushAlarmDto, fcmToken.getUser(), EAndroidChannelId.NOTICE); // 전송
+                    messageSendService.sendMessage(pushAlarmDto, fcmToken.getUser(), EAndroidChannelId.NOTICE); // 전송
                 } catch (CommonException e) {
                     log.info(e.getMessage());
                 }
@@ -158,43 +154,11 @@ public class FCMSendService {
                     .build();
             try{
                 log.info("sendMessage 호출");
-                fcmSendService.sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
+                messageSendService.sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
             } catch (CommonException e) {
                 log.info(e.getMessage());
             }
         }
         log.info("sendReplyAlarm 종료");
     }
-
-    // 메세지 전송
-    @Async
-    public void sendMessage(PushAlarmDto pushAlarmDto, User user, EAndroidChannelId androidChannelId) {
-        log.info("sendMessage");
-
-        // 안읽은 알림 개수
-        int badge = alarmLogService.getAlarmBadge(user).intValue();
-
-        log.info("token : " + pushAlarmDto.fcmToken());
-        Message message = Message.builder()
-                .setNotification(Notification.builder()
-                        .setTitle(pushAlarmDto.title())
-                        .setBody(pushAlarmDto.body())
-                        .build())
-                .setApnsConfig(apnsConfiguration.apnsConfig(badge))
-                .setAndroidConfig(androidConfiguration.androidConfig(androidChannelId))
-                .setToken(pushAlarmDto.fcmToken())
-                .putData("testData", "testtest")
-                .putData("type", "inform")
-                .build();
-        try {
-            String result = firebaseMessaging.send(message);
-            log.info("Successfully sent message: " + result);
-        } catch (FirebaseMessagingException e) {
-            log.error("Failed to send message: " + e.getMessage());
-            fcmTokenService.deleteToken(pushAlarmDto.fcmToken());
-
-            throw new CommonException(ErrorCode.INVALID_FCM_TOKEN);
-        }
-    }
-
 }
