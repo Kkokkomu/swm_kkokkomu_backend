@@ -27,9 +27,11 @@ public class AlarmLogService {
     private final AlarmLogRepository alarmLogRepository;
 
     private final UserLookupService userLookupService;
+    private final MessageSendService messageSendService;
 
     @Transactional(readOnly = true)
     public CursorResponseDto<List<AlarmLogDto>> getAlarmLogList(Long userId, Long cursorId, int size) {
+        log.info("getAlarmLogList");
         User receiver = userLookupService.findUserById(userId);
 
         PageRequest pageRequest = PageRequest.of(0, size);
@@ -50,6 +52,12 @@ public class AlarmLogService {
         List<AlarmLogDto> logList = AlarmLogDto.of(results.getContent());
         CursorInfoDto pageInfo = CursorInfoDto.fromPageInfo(results);
 
+        // 조회한 유저의 알람 로그 모두 읽음처리
+        updateAlarmLogTrueByReceiver(receiver);
+
+        // 유저 기기의 Badge 설정
+        messageSendService.updateBadge(receiver);
+
         return CursorResponseDto.fromEntityAndPageInfo(logList, pageInfo);
     }
 
@@ -62,6 +70,15 @@ public class AlarmLogService {
         alarmLogRepository.saveAll(alarmLogList);
 
         return AlarmLogDto.of(alarmLogList);
+    }
+
+    // 특정 유저의 알람 로그 모두 읽음처리
+    public void updateAlarmLogTrueByReceiver(User receiver) {
+        List<AlarmLog> isReadFalse = alarmLogRepository.findByReceiverAndIsReadFalse(receiver);
+
+        isReadFalse.forEach(AlarmLog::updateIsRead);
+
+        alarmLogRepository.saveAll(isReadFalse);
     }
 
     public Long getAlarmBadge(User user) {

@@ -32,6 +32,7 @@ public class AlarmLogController {
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam(value = "size") int size
     ) {
+        log.info("getAlarmLogList");
         return ResponseDto.ok(alarmLogService.getAlarmLogList(userId, cursorId, size));
     }
 
