@@ -38,4 +38,6 @@ public interface AlarmLogRepository extends JpaRepository<AlarmLog, Long> {
             @Param("receiver") User receiver,
             Pageable pageable
     );
+
+    List<AlarmLog> findByReceiverAndIsReadFalse(User receiver);
 }

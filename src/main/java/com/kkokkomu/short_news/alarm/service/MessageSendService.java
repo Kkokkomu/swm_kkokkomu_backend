@@ -4,6 +4,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
+import com.kkokkomu.short_news.alarm.domain.FCMToken;
 import com.kkokkomu.short_news.alarm.dto.fcm.request.APNsConfiguration;
 import com.kkokkomu.short_news.alarm.dto.fcm.request.AndroidConfiguration;
 import com.kkokkomu.short_news.alarm.dto.fcm.request.PushAlarmDto;
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +54,6 @@ public class MessageSendService {
                 .setAndroidConfig(androidConfiguration.androidConfig(androidChannelId))
                 .setToken(pushAlarmDto.fcmToken())
                 .putData("testData", "testtest")
-                .putData("type", "inform")
                 .build();
         try {
             String result = firebaseMessaging.send(message);
@@ -61,6 +63,35 @@ public class MessageSendService {
             fcmTokenService.deleteToken(pushAlarmDto.fcmToken());
 
             throw new CommonException(ErrorCode.INVALID_FCM_TOKEN);
+        }
+    }
+
+    // 메세지 전송
+    @Async
+    public void updateBadge(User user) {
+        log.info("updateBadge");
+
+        // 안읽은 알림 개수
+        int badge = alarmLogService.getAlarmBadge(user).intValue();
+
+        List<FCMToken> fcmTokens = user.getFcmTokens();
+        for (FCMToken token : fcmTokens) {
+            log.info("token : " + token.getToken());
+            Message message = Message.builder()
+                    .setApnsConfig(apnsConfiguration.apnsConfig(badge))
+                    .setAndroidConfig(androidConfiguration.androidConfig(EAndroidChannelId.GENERAL))
+                    .setToken(token.getToken())
+                    .putData("testData", "testtest")
+                    .build();
+            try {
+                String result = firebaseMessaging.send(message);
+                log.info("Successfully sent message: " + result);
+            } catch (FirebaseMessagingException e) {
+                log.error("Failed to send message: " + e.getMessage());
+                fcmTokenService.deleteToken(token.getToken());
+
+                throw new CommonException(ErrorCode.INVALID_FCM_TOKEN);
+            }
         }
     }
 }
