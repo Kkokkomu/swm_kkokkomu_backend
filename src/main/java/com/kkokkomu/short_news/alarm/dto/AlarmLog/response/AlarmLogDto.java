@@ -15,6 +15,7 @@ public record AlarmLogDto(
         String createdAt,
         String alarmType,
         CommentDto reply,
+        String shortFormUrl,
         NotificationDto notification
 ) {
     public static AlarmLogDto of(AlarmLog alarmLog) {
@@ -24,6 +25,7 @@ public record AlarmLogDto(
                 .createdAt(alarmLog.getCreatedAt().toString())
                 .alarmType(alarmLog.getAlarmType().toString())
                 .reply(alarmLog.getReply() != null ? CommentDto.of(alarmLog.getReply()) : null)
+                .shortFormUrl(alarmLog.getReply() != null ? alarmLog.getReply().getNews().getShortformUrl() : null)
                 .notification(alarmLog.getNotification() != null ? NotificationDto.of(alarmLog.getNotification()) : null)
                 .build();
     }

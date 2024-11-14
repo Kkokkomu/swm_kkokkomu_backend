@@ -34,7 +34,7 @@ public class AlarmLogService {
     private final UserLookupService userLookupService;
     private final MessageSendService messageSendService;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CursorResponseDto<List<AlarmLogDto>> getAlarmLogList(Long userId, Long cursorId, int size) {
         log.info("getAlarmLogList");
         User receiver = userLookupService.findUserById(userId);
@@ -82,6 +82,7 @@ public class AlarmLogService {
 
     // 특정 유저의 알람 로그 모두 읽음처리
     public void updateAlarmLogTrueByReceiver(User receiver) {
+        log.info("updateAlarmLogTrueByReceiver");
         List<AlarmLog> isReadFalse = alarmLogRepository.findByReceiverAndIsReadFalse(receiver);
 
         isReadFalse.forEach(AlarmLog::updateIsRead);

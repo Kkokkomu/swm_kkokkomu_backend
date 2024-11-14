@@ -16,5 +16,16 @@ public class APNsConfiguration {
                         .build())
                 .build();
     }
+
+    public ApnsConfig apnsConfigContentAvailableFalse(int badge) {
+        return ApnsConfig.builder()
+                .putHeader("apns-priority", "10")
+                .setAps(Aps.builder()
+                        .setBadge(badge)
+                        .setSound("default")
+                        .setContentAvailable(false)
+                        .build())
+                .build();
+    }
 }
 

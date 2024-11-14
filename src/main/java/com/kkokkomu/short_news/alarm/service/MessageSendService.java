@@ -69,7 +69,7 @@ public class MessageSendService {
 
         log.info("token : " + token);
         Message message = Message.builder()
-                .setApnsConfig(apnsConfiguration.apnsConfig(badge))
+                .setApnsConfig(apnsConfiguration.apnsConfigContentAvailableFalse(badge))
                 .setAndroidConfig(androidConfiguration.androidConfig(EAndroidChannelId.GENERAL))
                 .setToken(token)
                 .putData("testData", "testtest")
