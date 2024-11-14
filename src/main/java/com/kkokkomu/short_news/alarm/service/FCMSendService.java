@@ -47,7 +47,8 @@ public class FCMSendService {
     public String test(PushAlarmDto pushAlarmDto, Long userId) {
         User user = userLookupService.findUserById(userId);
 
-        messageSendService.sendMessage(pushAlarmDto, user, EAndroidChannelId.GENERAL);
+        int alarmBadge = alarmLogService.getAlarmBadge(user).intValue();
+        messageSendService.sendMessage(pushAlarmDto, alarmBadge, EAndroidChannelId.GENERAL);
 
         return "success";
     }
@@ -65,13 +66,15 @@ public class FCMSendService {
             targetToken = fcmTokenRepository.findAllByNewContentYnTrue();
         }
         for (FCMToken token : targetToken) {
+            int alarmBadge = alarmLogService.getAlarmBadge(token.getUser()).intValue();
+
             PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
                     .title(title)
                     .body(body)
                     .fcmToken(token.getToken())
                     .build();
             try{
-                messageSendService.sendMessage(pushAlarmDto, token.getUser(), EAndroidChannelId.NEWS_ARTICLE);
+                messageSendService.sendMessage(pushAlarmDto, alarmBadge, EAndroidChannelId.NEWS_ARTICLE);
             } catch (CommonException e) {
                 log.info(e.getMessage());
             }
@@ -89,13 +92,15 @@ public class FCMSendService {
         List<CreateAlarmLogDto> createAlarmLogDtos = new ArrayList<>();
         for (User user : targetUser) {
             for (FCMToken fcmToken : user.getFcmTokens()) { // 유효한 유저들의 토큰을 타겟 토큰으로 설정
+                int alarmBadge = alarmLogService.getAlarmBadge(fcmToken.getUser()).intValue();
+
                 PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
                         .title(title)
                         .body(body)
                         .fcmToken(fcmToken.getToken())
                         .build();
                 try{
-                    messageSendService.sendMessage(pushAlarmDto, fcmToken.getUser(), EAndroidChannelId.NOTICE); // 전송
+                    messageSendService.sendMessage(pushAlarmDto, alarmBadge, EAndroidChannelId.NOTICE); // 전송
                 } catch (CommonException e) {
                     log.info(e.getMessage());
                 }
@@ -144,6 +149,8 @@ public class FCMSendService {
         // 부모 댓글 글쓴이에게 알람
         List<FCMToken> tokenList = fcmTokenRepository.findByUser(receiver);
         for (FCMToken token : tokenList) {
+            int alarmBadge = alarmLogService.getAlarmBadge(receiver).intValue();
+
             PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
                     .title(title)
                     .body(body)
@@ -151,7 +158,7 @@ public class FCMSendService {
                     .build();
             try{
                 log.info("sendMessage 호출");
-                messageSendService.sendMessage(pushAlarmDto, receiver, EAndroidChannelId.REPLY);
+                messageSendService.sendMessage(pushAlarmDto, alarmBadge, EAndroidChannelId.REPLY);
             } catch (CommonException e) {
                 log.info(e.getMessage());
             }

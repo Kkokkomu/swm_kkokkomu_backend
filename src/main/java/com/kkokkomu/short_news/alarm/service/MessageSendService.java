@@ -31,18 +31,14 @@ public class MessageSendService {
     private final AndroidConfiguration androidConfiguration;
     private final FirebaseMessaging firebaseMessaging;
 
-    private final AlarmLogService alarmLogService;
     private final FCMTokenService fcmTokenService;
 
     private final TimeUtil timeUtil;
 
     // 메세지 전송
     @Async
-    public void sendMessage(PushAlarmDto pushAlarmDto, User user, EAndroidChannelId androidChannelId) {
+    public void sendMessage(PushAlarmDto pushAlarmDto, int badge, EAndroidChannelId androidChannelId) {
         log.info("sendMessage");
-
-        // 안읽은 알림 개수
-        int badge = alarmLogService.getAlarmBadge(user).intValue();
 
         log.info("token : " + pushAlarmDto.fcmToken());
         Message message = Message.builder()
@@ -68,30 +64,24 @@ public class MessageSendService {
 
     // 메세지 전송
     @Async
-    public void updateBadge(User user) {
+    public void updateBadge(String token, int badge) {
         log.info("updateBadge");
 
-        // 안읽은 알림 개수
-        int badge = alarmLogService.getAlarmBadge(user).intValue();
+        log.info("token : " + token);
+        Message message = Message.builder()
+                .setApnsConfig(apnsConfiguration.apnsConfig(badge))
+                .setAndroidConfig(androidConfiguration.androidConfig(EAndroidChannelId.GENERAL))
+                .setToken(token)
+                .putData("testData", "testtest")
+                .build();
+        try {
+            String result = firebaseMessaging.send(message);
+            log.info("Successfully sent message: " + result);
+        } catch (FirebaseMessagingException e) {
+            log.error("Failed to send message: " + e.getMessage());
+            fcmTokenService.deleteToken(token);
 
-        List<FCMToken> fcmTokens = user.getFcmTokens();
-        for (FCMToken token : fcmTokens) {
-            log.info("token : " + token.getToken());
-            Message message = Message.builder()
-                    .setApnsConfig(apnsConfiguration.apnsConfig(badge))
-                    .setAndroidConfig(androidConfiguration.androidConfig(EAndroidChannelId.GENERAL))
-                    .setToken(token.getToken())
-                    .putData("testData", "testtest")
-                    .build();
-            try {
-                String result = firebaseMessaging.send(message);
-                log.info("Successfully sent message: " + result);
-            } catch (FirebaseMessagingException e) {
-                log.error("Failed to send message: " + e.getMessage());
-                fcmTokenService.deleteToken(token.getToken());
-
-                throw new CommonException(ErrorCode.INVALID_FCM_TOKEN);
-            }
+            throw new CommonException(ErrorCode.INVALID_FCM_TOKEN);
         }
     }
 }

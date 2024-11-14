@@ -1,6 +1,9 @@
 package com.kkokkomu.short_news.alarm.service;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
 import com.kkokkomu.short_news.alarm.domain.AlarmLog;
+import com.kkokkomu.short_news.alarm.domain.FCMToken;
 import com.kkokkomu.short_news.alarm.dto.AlarmLog.require.UpdateAlarmLogDto;
 import com.kkokkomu.short_news.alarm.dto.AlarmLog.response.AlarmLogDto;
 import com.kkokkomu.short_news.alarm.dto.fcm.request.CreateAlarmLogDto;
@@ -9,12 +12,14 @@ import com.kkokkomu.short_news.core.dto.CursorInfoDto;
 import com.kkokkomu.short_news.core.dto.CursorResponseDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
+import com.kkokkomu.short_news.core.type.EAndroidChannelId;
 import com.kkokkomu.short_news.user.domain.User;
 import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +61,10 @@ public class AlarmLogService {
         updateAlarmLogTrueByReceiver(receiver);
 
         // 유저 기기의 Badge 설정
-        messageSendService.updateBadge(receiver);
+        List<FCMToken> fcmTokens = receiver.getFcmTokens();
+        for (FCMToken fcmToken : fcmTokens) {
+            messageSendService.updateBadge(fcmToken.getToken(), getAlarmBadge(receiver).intValue());
+        }
 
         return CursorResponseDto.fromEntityAndPageInfo(logList, pageInfo);
     }
@@ -101,4 +109,6 @@ public class AlarmLogService {
             createAlarmLog(alarmLogDto);
         }
     }
+
+
 }
