@@ -41,6 +41,8 @@ public class FCMTokenService {
     public FCMTokenDto verifyFCMToken(Long userId, String fcmToken) {
         log.info("verify token : {}", fcmToken);
 
+        User user = userLookupService.findUserById(userId);
+
         // 토큰이 없거나 다르면 생성
         Optional<FCMToken> fcmTokenOptional = fcmTokenRepository.findByToken(fcmToken);
 
@@ -48,10 +50,14 @@ public class FCMTokenService {
         if (fcmTokenOptional.isEmpty()) { // 토큰이 비어있으면 새로 생성
             log.info("FCM token not found: {}", fcmToken);
             token = createFCMToken(userId, fcmToken);
-        } else if (!fcmToken.equals(fcmTokenOptional.get().getToken())) { // 토큰이 있지만, 다르다면 재설정
+        } else if (user != fcmTokenOptional.get().getUser()) { // 토큰이 있지만 유저는 다르다면
             log.info("FCM token not match: {}", fcmToken);
+            // 기존 토큰(다른 유저의) 삭제
             token = fcmTokenOptional.get();
-            token.regenerateToken(fcmToken);
+            fcmTokenRepository.delete(token);
+
+            // 그리고 새 유저에 대한 토큰 생성
+            token = createFCMToken(userId, fcmToken);
         } else { // 토큰이 있고, 기존과 같음
             log.info("FCM token match: {}", fcmToken);
             token = fcmTokenOptional.get();
