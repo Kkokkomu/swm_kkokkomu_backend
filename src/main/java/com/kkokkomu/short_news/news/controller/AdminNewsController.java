@@ -2,6 +2,7 @@ package com.kkokkomu.short_news.news.controller;
 
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.news.dto.news.request.CreateGenerateNewsDto;
+import com.kkokkomu.short_news.news.dto.news.request.CreatePromptNewsDto;
 import com.kkokkomu.short_news.news.dto.news.request.UpdateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.response.GenerateNewsDto;
 import com.kkokkomu.short_news.news.dto.news.response.NewsDto;
@@ -25,6 +26,12 @@ public class AdminNewsController {
     public ResponseDto<List<GenerateNewsDto>> generateNews(@RequestBody CreateGenerateNewsDto createGenerateNewsDto) {
         log.info("generateNews controller");
         return ResponseDto.ok(adminNewsService.generateNews(createGenerateNewsDto));
+    }
+
+    @PostMapping("/prompt")
+    public ResponseDto<List<GenerateNewsDto>> generatePromptNews(@RequestBody CreatePromptNewsDto createPromptNewsDto) {
+        log.info("generatePromptNews controller");
+        return ResponseDto.ok(adminNewsService.generatePromptNews(createPromptNewsDto));
     }
 
     @PostMapping("")

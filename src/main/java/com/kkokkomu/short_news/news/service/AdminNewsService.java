@@ -11,9 +11,7 @@ import com.kkokkomu.short_news.core.util.CategoryUtil;
 import com.kkokkomu.short_news.keyword.domain.NewsKeyword;
 import com.kkokkomu.short_news.keyword.service.NewsKeywordService;
 import com.kkokkomu.short_news.news.domain.News;
-import com.kkokkomu.short_news.news.dto.news.request.CreateGenerateNewsDto;
-import com.kkokkomu.short_news.news.dto.news.request.RequestGenerateNewsDto;
-import com.kkokkomu.short_news.news.dto.news.request.UpdateNewsDto;
+import com.kkokkomu.short_news.news.dto.news.request.*;
 import com.kkokkomu.short_news.news.dto.news.response.*;
 import com.kkokkomu.short_news.news.repository.NewsRepository;
 import lombok.RequiredArgsConstructor;
@@ -370,6 +368,139 @@ public class AdminNewsService {
         mailService.sendNewsMail("gouyeonch@naver.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
         log.info("send leesk9663@gmail.com");
         mailService.sendNewsMail("leesk9663@gmail.com", LocalDate.now().toString() + " kkm 뉴스", content.toString());
+
+        return generateNewsDtos;
+    } // 영상 리스트 생성 api
+    @jakarta.transaction.Transactional
+    public List<GenerateNewsDto> generatePromptNews(CreatePromptNewsDto createPromptNewsDto) {
+        News initNews = News.builder().build();
+
+        newsRepository.save(initNews);
+
+        // 임시 생성 객체 id를 기반으로 한 요청 생성
+        String url = VIDEO_SERVER_GENERATE_HOST;
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        RequestPromptNewsDto requestPromptNewsDto = RequestPromptNewsDto.builder()
+                .id(initNews.getId().intValue())
+                .section(createPromptNewsDto.section())
+                .content(createPromptNewsDto.content())
+                .url(createPromptNewsDto.url())
+                .build();
+
+        HttpEntity<RequestPromptNewsDto> entity = new HttpEntity<>(requestPromptNewsDto, headers);
+
+        log.info("request video");
+        log.info("Sending POST request to URL: {}", url);
+        log.info("Request Headers: {}", headers);  // 헤더 로그 추가
+        ResponseEntity<GenerateResponseDto[]> response;
+        try {
+            // 요청 본문을 JSON으로 변환해 기록
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonPayload = mapper.writeValueAsString(requestPromptNewsDto);
+            log.info("Request payload as JSON: {}", jsonPayload);
+
+            response = restTemplate.postForEntity(url, entity, GenerateResponseDto[].class);
+            log.info("Received response with status code: {}", response.getStatusCode());
+            log.info("Response data length: {}", Objects.requireNonNull(response.getBody()).length);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("HTTP error occurred: Status code: {}, Response body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw e;
+        } catch (RestClientException e) {
+            log.error("Rest client error occurred: {}", e.getMessage());
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw e;
+        } catch (JsonProcessingException e) {
+            log.error("Error serializing request payload to JSON: {}", e.getMessage());
+            log.error("Stack trace: ", e);  // 스택 트레이스 전체 기록
+            throw new RuntimeException("Error processing JSON", e);
+        }
+
+        log.info("response data length: {}", Objects.requireNonNull(response.getBody()).length);
+        log.info("response data : {}", (Object) Objects.requireNonNull(response.getBody()));
+        GenerateResponseDto[] generateResponseDtos = response.getBody();
+
+        // 영상 생성 서버에서 영상 url 및 정보 받아옴
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<GenerateNewsDto> generateNewsDtos = new ArrayList<>();
+
+        // 랭킹 초기화
+        log.info("news ranking rese");
+        News topNews = newsRepository.findTopByOrderByScoreDesc();
+        log.info("top news {}", topNews.getId());
+        Double topScore = topNews.getScore() * -1;
+        Double reseScore = topScore - 100;
+
+        List<News> newsListAll = newsRepository.findAll();
+        for (News news : newsListAll) {
+            news.addScore(reseScore);
+        }
+        newsRepository.saveAll(newsListAll);
+
+        // 인덱스에 맞는 임시 뉴스 객체
+        News news = initNews;
+
+        // 인덱스에 맞는 비디오 서버 반환값
+        GenerateResponseDto generateResponseDto;
+        if (generateResponseDtos != null) {
+            generateResponseDto = generateResponseDtos[0];
+        } else {
+            throw new CommonException(ErrorCode.VIDEO_SERVER_ERROR);
+        }
+
+        Map<String, Object> dataMap = generateResponseDto.data();
+        NewsInfoDataDto dataDto = objectMapper.convertValue(dataMap, NewsInfoDataDto.class);
+
+        NewsInfoSummaryDto summaryDto = dataDto.summary();
+        Map<String, String> keywordMap = dataDto.keywords();
+
+        String summary = summaryDto.sentence_total();
+        List<String> keywords = new ArrayList<>(Arrays.asList(keywordMap.get("keyword_0"), keywordMap.get("keyword_1"), keywordMap.get("keyword_2")));
+        String s3Url = generateResponseDto.s3();
+        String thumbnailUrl = generateResponseDto.thumbnail();
+        log.info("thumbnailUrl : {}", generateResponseDto.thumbnail());
+        String title = dataDto.title();
+        log.info("data : {}", dataDto);
+        log.info("section : {}", dataDto.section());
+        ECategory category = categoryUtil.getCategoryByName(dataDto.section());
+        String relatedUrl = dataDto.url();
+        log.info("relatedUrl : {}", dataDto.url());
+
+        // 뉴스 키워드 생성
+        List<NewsKeyword> newsKeywords = newsKeywordService.registerNewsKeyword(news, keywords);
+
+        news.update(
+                s3Url,
+                "",
+                "",
+                relatedUrl,
+                thumbnailUrl,
+                title,
+                summary,
+                category
+        );
+
+        news = newsRepository.save(news);
+
+        // 랭키보드 등록
+        log.info("apply redis {}", news.getId());
+        redisService.applyRankingByGenerate(news);
+
+        generateNewsDtos.add(
+                GenerateNewsDto.builder()
+                        .newsDto(NewsDto.of(news))
+                        .keywords(newsKeywords.stream()
+                                .map(newsKeyword -> newsKeyword.getKeyword().getKeyword())
+                                .toList())
+                        .build()
+        );
+
+        log.info("generateNewsDtos: {}", generateNewsDtos);
 
         return generateNewsDtos;
     } // 영상 리스트 생성 api
