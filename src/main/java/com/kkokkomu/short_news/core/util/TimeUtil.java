@@ -16,4 +16,11 @@ public class TimeUtil {
         return (currentTime.isAfter(startNightTime) || currentTime.equals(startNightTime))
                 || currentTime.isBefore(endNightTime);
     }
+
+    public Boolean isBetween8and10() {
+        LocalTime now = LocalTime.now();
+        LocalTime start = LocalTime.of(8, 0);
+        LocalTime end = LocalTime.of(10, 0);
+        return now.isAfter(start) && now.isBefore(end);
+    }
 }

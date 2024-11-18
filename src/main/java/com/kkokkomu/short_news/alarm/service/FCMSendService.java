@@ -12,6 +12,7 @@ import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.EAlarmType;
 import com.kkokkomu.short_news.core.type.EAndroidChannelId;
+import com.kkokkomu.short_news.core.util.RSSUtil;
 import com.kkokkomu.short_news.core.util.TimeUtil;
 import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.user.domain.User;
@@ -56,7 +57,7 @@ public class FCMSendService {
     // 새 뉴스 알림 전손
     @Transactional
     public Boolean sendNewsAlarm(News news) {
-        String title = "지금 확인하세요: 새로운 핫 이슈!";
+        String title = "지금 확인하세요: 방금 생성된 핫 이슈!";
         String body = news.getTitle();
 
         List<FCMToken> targetToken;

@@ -9,6 +9,8 @@ import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
 import com.kkokkomu.short_news.core.type.ECategory;
 import com.kkokkomu.short_news.core.util.CategoryUtil;
+import com.kkokkomu.short_news.core.util.RSSUtil;
+import com.kkokkomu.short_news.core.util.TimeUtil;
 import com.kkokkomu.short_news.keyword.domain.NewsKeyword;
 import com.kkokkomu.short_news.keyword.service.NewsKeywordService;
 import com.kkokkomu.short_news.news.domain.News;
@@ -31,6 +33,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 
 import static com.kkokkomu.short_news.core.constant.Constant.VIDEO_SERVER_GENERATE_HOST;
@@ -40,13 +43,16 @@ import static com.kkokkomu.short_news.core.constant.Constant.VIDEO_SERVER_GENERA
 @Slf4j
 public class AdminNewsService {
     private final NewsRepository newsRepository;
+
     private final CategoryUtil categoryUtil;
+    private final RSSUtil rssUtil;
 
     private final NewsKeywordService newsKeywordService;
     private final NewsLookupService newsLookupService;
     private final RedisService redisService;
     private final MailService mailService;
     private final FCMSendService fcmSendService;
+    private final TimeUtil timeUtil;
 
     /* 관리자 */
 //    @jakarta.transaction.Transactional
@@ -283,6 +289,10 @@ public class AdminNewsService {
         }
         newsRepository.saveAll(newsListAll);
 
+        //헤드라인 뉴스 조회
+        String newsisHotNewsUrl = rssUtil.getNewsisHotNewsUrl();
+
+        // 응답 dto별 뉴스 저장
         for (int i = 0; i < generateResponseDtos.length; i++) {
             // 인덱스에 맞는 임시 뉴스 객체
             News news = newsList.get(i);
@@ -325,7 +335,8 @@ public class AdminNewsService {
 
             news = newsRepository.save(news);
 
-            if (news.getCategory() == ECategory.HEADLINE) {
+            if (Objects.equals(news.getRelatedUrl(), newsisHotNewsUrl)
+                    && timeUtil.isBetween8and10()) {
                 fcmSendService.sendNewsAlarm(news);
             }
 
