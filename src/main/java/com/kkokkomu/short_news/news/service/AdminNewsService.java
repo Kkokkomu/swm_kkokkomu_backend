@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static com.kkokkomu.short_news.core.constant.Constant.VIDEO_SERVER_GENERATE_HOST;
+import static com.kkokkomu.short_news.core.constant.Constant.VIDEO_SERVER_PROMPT_HOST;
 
 @Service
 @RequiredArgsConstructor
@@ -378,7 +379,7 @@ public class AdminNewsService {
         newsRepository.save(initNews);
 
         // 임시 생성 객체 id를 기반으로 한 요청 생성
-        String url = VIDEO_SERVER_GENERATE_HOST;
+        String url = VIDEO_SERVER_PROMPT_HOST;
 
         RestTemplate restTemplate = new RestTemplate();
 
