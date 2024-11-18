@@ -23,7 +23,7 @@ public class APNsConfiguration {
                 .setAps(Aps.builder()
                         .setBadge(badge)
                         .setSound("default")
-                        .setContentAvailable(false)
+                        .setContentAvailable(true)
                         .build())
                 .build();
     }
