@@ -515,6 +515,9 @@ public class AdminNewsService {
 
         log.info("generateNewsDtos: {}", generateNewsDtos);
 
+        //알람 전송
+        fcmSendService.sendNewsAlarm(news);
+
         return generateNewsDtos;
     } // 영상 리스트 생성 api
 
