@@ -1,4 +1,4 @@
-package com.kkokkomu.short_news.alarm.dto.request;
+package com.kkokkomu.short_news.alarm.dto.fcm.request;
 
 import com.google.firebase.messaging.ApnsConfig;
 import com.google.firebase.messaging.Aps;
@@ -13,6 +13,17 @@ public class APNsConfiguration {
                 .setAps(Aps.builder()
                         .setBadge(badge)
                         .setSound("default")
+                        .build())
+                .build();
+    }
+
+    public ApnsConfig apnsConfigContentAvailableFalse(int badge) {
+        return ApnsConfig.builder()
+                .putHeader("apns-priority", "10")
+                .setAps(Aps.builder()
+                        .setBadge(badge)
+                        .setSound("default")
+                        .setContentAvailable(true)
                         .build())
                 .build();
     }

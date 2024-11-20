@@ -3,6 +3,7 @@ package com.kkokkomu.short_news.test.controller;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
+import com.kkokkomu.short_news.core.util.RSSUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,12 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/test")
 public class TestController {
+    private final RSSUtil rssUtil;
 
     @Operation(summary = "테스트 hello world")
     @GetMapping("")
     public ResponseDto<String> helloController(){
-        return ResponseDto.ok("success");
+        return ResponseDto.ok(rssUtil.getNewsisHotNewsUrl());
     }
 
     @Operation(summary = "테스트 error")

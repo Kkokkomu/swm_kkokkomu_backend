@@ -41,6 +41,7 @@ public enum ErrorCode {
     ALREADY_EXECUTED_COMMENT("40030", HttpStatus.BAD_REQUEST, "이미 처리된 댓글 신고입니다."),
     ALREADY_EXECUTED_NEWS("40031", HttpStatus.BAD_REQUEST, "이미 처리된 뉴스 신고입니다."),
     DUPLICATED_REPORTED_NEWS("40032", HttpStatus.BAD_REQUEST, "이미 신고한 뉴스입니다."),
+    INVALID_FCM_TOKEN("40033", HttpStatus.BAD_REQUEST, "유효하지 않은 FCM 토큰입니다."),
 
     // Unauthorized Error
     FAILURE_LOGIN("40100", HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
@@ -80,6 +81,7 @@ public enum ErrorCode {
     NOT_FOUND_REPORTED_NEWS("40418", HttpStatus.NOT_FOUND, "신고 뉴스 내역이 존재하지 않습니다."),
     NOT_FOUND_NEWS_HIST("40419", HttpStatus.NOT_FOUND, "해당 뉴스 시청 기록이 존재하지 않습니다."),
     NOT_FOUND_FCMTOKEN("40420", HttpStatus.NOT_FOUND, "해당 fcm token이 존재하지 않습니다."),
+    NOT_FOUND_NOTIFICATION("40421", HttpStatus.NOT_FOUND, "해당 공지사항이 존재하지 않습니다."),
 
     // UnsupportedMediaType Error
     UNSUPPORTED_MEDIA_TYPE("41500", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "허용되지 않은 파일 형식입니다."),

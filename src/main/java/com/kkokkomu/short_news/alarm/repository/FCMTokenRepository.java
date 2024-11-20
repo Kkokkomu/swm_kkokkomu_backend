@@ -21,4 +21,23 @@ public interface FCMTokenRepository extends JpaRepository<FCMToken, Long> {
     Optional<FCMToken> findByToken(String token);
 
     void deleteByToken(String token);
+
+    List<FCMToken> findByUser(User user);
+
+    // 야간알림, 새 뉴스 알림 동의 토큰 조회
+    @Query("SELECT f FROM FCMToken f WHERE f.user.nightAlarmYn = true and f.user.alarmNewContentYn = true")
+    List<FCMToken> findAllByNightYnTrueAndNewContentYnTrue();
+
+    // 새 뉴스 알림 동의 토큰 조회
+    @Query("SELECT f FROM FCMToken f WHERE f.user.alarmNewContentYn = true")
+    List<FCMToken> findAllByNewContentYnTrue();
+
+    // 야간 알림, 공지 알람 동의 토큰 조회
+    @Query("SELECT f FROM FCMToken f WHERE f.user.nightAlarmYn = true and f.user.alarmInformYn = true")
+    List<FCMToken> findAllByNightYnTrueAndNotificationYnTrue();
+
+    // 공지 알람 동의 토큰 조회
+    @Query("SELECT f FROM FCMToken f WHERE f.user.alarmInformYn = true")
+    List<FCMToken> findAllByNotificationYnTrue();
 }
+

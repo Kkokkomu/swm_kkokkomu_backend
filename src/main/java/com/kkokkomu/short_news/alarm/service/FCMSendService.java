@@ -1,28 +1,32 @@
 package com.kkokkomu.short_news.alarm.service;
 
 import com.google.firebase.messaging.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.kkokkomu.short_news.alarm.domain.FCMToken;
-import com.kkokkomu.short_news.alarm.dto.request.*;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.APNsConfiguration;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.AndroidConfiguration;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.CreateAlarmLogDto;
+import com.kkokkomu.short_news.alarm.dto.fcm.request.PushAlarmDto;
 import com.kkokkomu.short_news.alarm.repository.FCMTokenRepository;
+import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.core.exception.CommonException;
 import com.kkokkomu.short_news.core.exception.ErrorCode;
+import com.kkokkomu.short_news.core.type.EAlarmType;
 import com.kkokkomu.short_news.core.type.EAndroidChannelId;
+import com.kkokkomu.short_news.core.util.RSSUtil;
+import com.kkokkomu.short_news.core.util.TimeUtil;
+import com.kkokkomu.short_news.news.domain.News;
 import com.kkokkomu.short_news.user.domain.User;
+import com.kkokkomu.short_news.user.service.AlarmSettingService;
 import com.kkokkomu.short_news.user.service.UserLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.*;
-import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,111 +36,134 @@ public class FCMSendService {
     @Value("${fcm.firebase-key}")
     private String firebaseConfigPath;
 
-    private final APNsConfiguration apnsConfiguration;
-    private final AndroidConfiguration androidConfiguration;
-    private final FirebaseMessaging firebaseMessaging;
-
     private final FCMTokenRepository fcmTokenRepository;
 
     private final UserLookupService userLookupService;
+    private final AlarmSettingService alarmSettingService;
+    private final AlarmLogService alarmLogService;
+    private final MessageSendService messageSendService;
+
+    private final TimeUtil timeUtil;
 
     public String test(PushAlarmDto pushAlarmDto, Long userId) {
-        FCMToken fcmToken = fcmTokenRepository.findByToken(pushAlarmDto.fcmToken())
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_FCMTOKEN));
+        User user = userLookupService.findUserById(userId);
 
-        int badge = 0;
-
-        log.info("token : " + fcmToken.getToken());
-        Message message = Message.builder()
-                .setNotification(Notification.builder()
-                        .setTitle(pushAlarmDto.title())
-                        .setBody(pushAlarmDto.body())
-                        .build())
-                .setApnsConfig(apnsConfiguration.apnsConfig(badge))
-                .setAndroidConfig(androidConfiguration.androidConfig(EAndroidChannelId.GENERAL))
-                .setToken(fcmToken.getToken())
-                .putData("testData", "testtest")
-                .putData("type", "inform")
-                .build();
-        try {
-            String result = firebaseMessaging.send(message);
-            log.info("Successfully sent message: " + result);
-            fcmToken.refreshToken(); // 토큰일자 갱신
-        } catch (FirebaseMessagingException e) {
-            log.error("Failed to send message: " + e.getMessage());
-        }
+        int alarmBadge = alarmLogService.getAlarmBadge(user).intValue();
+        messageSendService.sendMessage(pushAlarmDto, alarmBadge, EAndroidChannelId.GENERAL);
 
         return "success";
     }
 
-//    /**
-//     * 푸시 메시지 처리를 수행하는 비즈니스 로직
-//     *
-//     * @param fcmSendDto 모바일에서 전달받은 Object
-//     * @return 성공(1), 실패(0)
-//     */
-//    public int sendMessageTo(FcmSendDto fcmSendDto) {
-//        try {
-//            String message = makeMessage(fcmSendDto);
-//            RestTemplate restTemplate = new RestTemplate();
-//            /**
-//             * 추가된 사항 : RestTemplate 이용중 클라이언트의 한글 깨짐 증상에 대한 수정
-//             * @refernece : https://stackoverflow.com/questions/29392422/how-can-i-tell-resttemplate-to-post-with-utf-8-encoding
-//             */
-//            restTemplate.getMessageConverters()
-//                    .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-//
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//            headers.set("Authorization", "Bearer " + getAccessToken());
-//
-//            HttpEntity entity = new HttpEntity<>(message, headers);
-//
-//            String API_URL = "<https://fcm.googleapis.com/v1/projects/adjh54-a0189/messages:send>";
-//            ResponseEntity response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, String.class);
-//
-//            log.info(String.valueOf(response.getStatusCode()));
-//
-//            return response.getStatusCode() == HttpStatus.OK ? 1 : 0;
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return 0;
-//        }
-//    }
+    // 새 뉴스 알림 전손
+    @Transactional
+    public Boolean sendNewsAlarm(News news) {
+        String title = "지금 확인하세요: 방금 생성된 핫 이슈!";
+        String body = news.getTitle();
 
-//    /**
-//     * Firebase Admin SDK의 비공개 키를 참조하여 Bearer 토큰을 발급 받습니다.
-//     *
-//     * @return Bearer token
-//     */
-//    private String getAccessToken() throws IOException {
-//        GoogleCredentials googleCredentials = GoogleCredentials
-//                .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
-//                .createScoped(List.of("<https://www.googleapis.com/auth/cloud-platform>"));
-//
-//        googleCredentials.refreshIfExpired();
-//        return googleCredentials.getAccessToken().getTokenValue();
-//    }
-//
-//    /**
-//     * FCM 전송 정보를 기반으로 메시지를 구성합니다. (Object -> String)
-//     *
-//     * @param fcmSendDto FcmSendDto
-//     * @return String
-//     */
-//    private String makeMessage(FcmSendDto fcmSendDto) throws JsonProcessingException {
-//
-//        ObjectMapper om = new ObjectMapper();
-//        FcmMessageDto fcmMessageDto = FcmMessageDto.builder()
-//                .message(FcmMessageDto.Message.builder()
-//                        .token(fcmSendDto.getToken())
-//                        .notification(FcmMessageDto.Notification.builder()
-//                                .title(fcmSendDto.getTitle())
-//                                .body(fcmSendDto.getBody())
-//                                .image(null)
-//                                .build()
-//                        ).build()).validateOnly(false).build();
-//
-//        return om.writeValueAsString(fcmMessageDto);
-//    }
+        List<FCMToken> targetToken;
+        if (timeUtil.isNight()) { // 밤이면 야간 알림이 동의되어있고 뉴스 알림 동의 토큰만 불러옴
+            targetToken = fcmTokenRepository.findAllByNightYnTrueAndNewContentYnTrue();
+        } else { // 밤이 아니면 뉴스 알림 동의 토큰들 불러옴
+            targetToken = fcmTokenRepository.findAllByNewContentYnTrue();
+        }
+        for (FCMToken token : targetToken) {
+            int alarmBadge = alarmLogService.getAlarmBadge(token.getUser()).intValue();
+
+            PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
+                    .title(title)
+                    .body(body)
+                    .fcmToken(token.getToken())
+                    .build();
+            try{
+                messageSendService.sendMessage(pushAlarmDto, alarmBadge, EAndroidChannelId.NEWS_ARTICLE);
+            } catch (CommonException e) {
+                log.info(e.getMessage());
+            }
+        }
+        return true;
+    }
+
+    // 공지 알림 전손
+    @Transactional
+    public Boolean sendNotification(com.kkokkomu.short_news.alarm.domain.Notification notification) {
+        String title = "!! 새 공지사항 !!";
+        String body = notification.getTitle();
+
+        List<User> targetUser = userLookupService.findUserByInformYnTrue(); // 설정 유효한 유저들 가지고 오기
+        List<CreateAlarmLogDto> createAlarmLogDtos = new ArrayList<>();
+        for (User user : targetUser) {
+            for (FCMToken fcmToken : user.getFcmTokens()) { // 유효한 유저들의 토큰을 타겟 토큰으로 설정
+                int alarmBadge = alarmLogService.getAlarmBadge(fcmToken.getUser()).intValue();
+
+                PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
+                        .title(title)
+                        .body(body)
+                        .fcmToken(fcmToken.getToken())
+                        .build();
+                try{
+                    messageSendService.sendMessage(pushAlarmDto, alarmBadge, EAndroidChannelId.NOTICE); // 전송
+                } catch (CommonException e) {
+                    log.info(e.getMessage());
+                }
+            }
+            // 유저 당 로그는 하나씩
+            createAlarmLogDtos.add(
+                    CreateAlarmLogDto.builder()
+                            .receiver(user)
+                            .notification(notification)
+                            .alarmType(EAlarmType.NOTICE)
+                            .build()
+            );
+        }
+
+        return true;
+    }
+
+    // 대댓글 알림 전송
+    public void sendReplyAlarm(Comment reply) {
+        // 부모 댓글의 작성자를 알림 수신자로 설정
+        User receiver = reply.getParent().getUser();
+
+        // 유저 세팅이 맞지 않다면 전송안함
+        if (!alarmSettingService.getReplySettingValid(receiver)) {
+            return;
+        }
+        // 대댓 작성자가 댓글 작성자와 같으면 전송안함
+        if (reply.getUser() == reply.getParent().getUser()) {
+            log.info("writer is same as reply");
+            return;
+        }
+
+        // 제목 및 본문 세팅
+        String title = "새로운 대댓글 : " + reply.getUser().getNickname();
+        String body = reply.getContent();
+
+        // 알람 로그 저장
+        alarmLogService.createAlarmLog(
+                CreateAlarmLogDto.builder()
+                        .alarmType(EAlarmType.REPLY)
+                        .comment(reply)
+                        .receiver(receiver)
+                        .build()
+        );
+
+        // 부모 댓글 글쓴이에게 알람
+        List<FCMToken> tokenList = fcmTokenRepository.findByUser(receiver);
+        for (FCMToken token : tokenList) {
+            int alarmBadge = alarmLogService.getAlarmBadge(receiver).intValue();
+
+            PushAlarmDto pushAlarmDto = PushAlarmDto.builder()
+                    .title(title)
+                    .body(body)
+                    .fcmToken(token.getToken())
+                    .build();
+            try{
+                log.info("sendMessage 호출");
+                messageSendService.sendMessage(pushAlarmDto, alarmBadge, EAndroidChannelId.REPLY);
+            } catch (CommonException e) {
+                log.info(e.getMessage());
+            }
+        }
+        log.info("sendReplyAlarm 종료");
+    }
 }

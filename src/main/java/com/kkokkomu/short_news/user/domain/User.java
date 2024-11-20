@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.user.domain;
 
+import com.kkokkomu.short_news.alarm.domain.FCMToken;
 import com.kkokkomu.short_news.core.constant.Constant;
 import com.kkokkomu.short_news.core.oauth2.OAuth2UserInfo;
 import com.kkokkomu.short_news.core.type.ELoginProvider;
@@ -97,6 +98,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProfileImg> profileImgs;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FCMToken> fcmTokens;
 
     @Builder
     public User(String email, String password, String nickname, LocalDate birthday, ESex sex, EUserRole role, ELoginProvider loginProvider, Boolean isLogin, String refreshToken, LocalDateTime bannedStartAt, LocalDateTime bannedEndAt, LocalDateTime deletedAt, Boolean isDeleted, Boolean privacyPolicyYn, Boolean serviceTermsYn, Boolean nightAlarmYn, Boolean alarmNewContentYn, Boolean alarmReplyYn,Boolean alarmInformYn) {

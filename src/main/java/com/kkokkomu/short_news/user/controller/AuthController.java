@@ -1,14 +1,11 @@
 package com.kkokkomu.short_news.user.controller;
 
-import com.kkokkomu.short_news.alarm.dto.request.CreateTokenDto;
-import com.kkokkomu.short_news.core.annotation.UserId;
 import com.kkokkomu.short_news.core.constant.Constant;
 import com.kkokkomu.short_news.user.dto.auth.request.SocialRegisterRequestDto;
 import com.kkokkomu.short_news.user.dto.auth.response.JwtTokenDto;
 import com.kkokkomu.short_news.core.dto.ResponseDto;
 import com.kkokkomu.short_news.user.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

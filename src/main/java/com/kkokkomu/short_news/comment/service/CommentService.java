@@ -1,5 +1,6 @@
 package com.kkokkomu.short_news.comment.service;
 
+import com.kkokkomu.short_news.alarm.service.FCMSendService;
 import com.kkokkomu.short_news.comment.domain.Comment;
 import com.kkokkomu.short_news.comment.dto.comment.response.*;
 import com.kkokkomu.short_news.core.config.service.RedisService;
@@ -43,6 +44,7 @@ public class CommentService {
     private final CommentLikeService commentLikeService;
     private final NewsLookupService newsLookupService;
     private final RedisService redisService;
+    private final FCMSendService fcmSendService;
 
     /* 댓글 */
 
@@ -317,18 +319,11 @@ public class CommentService {
     } // 비로그인 인기순 댓글 조회
 
     /* 대댓글 */
-
+    @Transactional
     public ReplyDto createReply(Long userId, CreateReplyDto createReplyDto) {
         log.info("createReply service");
         User user = userLookupService.findUserById(userId);
-
-        // 차단된 유저인지 검사
-        if (user.getBannedEndAt() != null && user.getBannedEndAt().isAfter(LocalDateTime.now())) {
-            throw new CommonException(ErrorCode.BANNED_USER_COMMENT);
-        }
-
         News news = newsLookupService.findNewsById(createReplyDto.newsId());
-
         Comment parent = commentRepository.findById(createReplyDto.commentId())
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_PARENT_COMMENT));
 
@@ -341,7 +336,7 @@ public class CommentService {
                         .build()
         );
 
-        return ReplyDto.builder()
+        ReplyDto response = ReplyDto.builder()
                 .id(reply.getId())
                 .userId(userId)
                 .newsId(createReplyDto.newsId())
@@ -349,7 +344,12 @@ public class CommentService {
                 .content(reply.getContent())
                 .editedAt(reply.getEditedAt().toString())
                 .build();
-    } // 대댓글 생성
+
+        log.info("reply Id : {} ",String.valueOf(reply.getId()));
+        fcmSendService.sendReplyAlarm(reply);
+
+        return response;
+    }
 
     @Transactional
     public String deleteReply(Long replyId) {
