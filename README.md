@@ -24,7 +24,7 @@
 ### BackEnd
 |이름|역할|이메일|기술
 |----|---|---|---|
-|[정구연](https://github.com/gouyeonch)|Server|gouyeonch@naver.com|Spring-Boot
+|[정구연](https://github.com/gouyeonch)|Lead/Server|gouyeonch@naver.com|Spring-Boot
 
 ### AI
 |이름|역할|이메일|기술
